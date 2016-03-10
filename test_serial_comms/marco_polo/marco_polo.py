@@ -4,13 +4,14 @@ Minimal script for sending test string to Arduino and reading back echo.
 # -*- coding: utf-8 -*-
 import serial
 import time
+import sys
 
 print('marco.py start')
 testStr = 'marco' #Define test string here
 
 #Initialize serial port connection
 connected = False
-ser = serial.Serial('COM13',9600,timeout=2)
+ser = serial.Serial('COM3',9600,timeout=2)
 
 #Wait to receive signal that handshake is complete
 while not connected:
@@ -18,9 +19,11 @@ while not connected:
 	connected = True
 	print('Serial port open')
 	
-#Write a test string; Python 3.4 requires strings to be converted to bytes
-#ser.write(bytes(data,'UTF-8'))
-ser.write( testStr + '\n' )
+#Write a test string; Python 3.4 and greater requires strings to be converted to bytes
+if sys.version_info >= (3, 4):
+    ser.write(bytes(testStr+'\n','UTF-8'))
+else:
+    ser.write( testStr + '\n' )
 
 #Read echo back from Arduino
 print(ser.readline())
