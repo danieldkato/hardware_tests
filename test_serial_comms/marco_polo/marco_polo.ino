@@ -1,4 +1,4 @@
-/*Minimal sketch for reading serial input, prepending "ACK" 
+/*Minimal sketch for reading serial input, appending "ACK" 
 (for "acknowledge"), then echoing back to computer.*/
 //#include <Tone.h>
 
