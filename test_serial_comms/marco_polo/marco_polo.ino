@@ -1,6 +1,6 @@
 /*Minimal sketch for reading serial input, appending "ACK" 
 (for "acknowledge"), then echoing back to computer.*/
-String acknowledgeString = "ACK";
+String acknowledgeString = " ACK";
 
 void setup() {
   // put your setup code here, to run once:

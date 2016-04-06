@@ -1,5 +1,9 @@
 """
-Minimal script for sending test string to Arduino and reading back echo.
+Minimal script for sending test string to Arduino and reading back an echo. Use in conjunction with marco_polo.ino running on an Arduino. Execute this script as function from the command line using:
+
+python marco_polo.py <string>
+
+where  <string> is a test string to send to the Arduino. The string should be echoed back with an acknowledgement message appended to it. 
 """
 # -*- coding: utf-8 -*-
 import serial
@@ -24,7 +28,7 @@ def marco(inputStr):
 	if sys.version_info >= (3, 4):
 	    ser.write(bytes(inputStr+'\n','UTF-8'))
 	else:
-	    ser.write( testStr + '\n' )
+	    ser.write( inputStr + '\n' )
 
 	#Read echo back from Arduino
 	print(ser.readline())
