@@ -1,7 +1,7 @@
 """
 Minimal script for sending test string to Arduino and reading back an echo. Use in conjunction with marco_polo.ino running on an Arduino. Execute this script as function from the command line using:
 
-python marco_polo.py <string>
+python marco_polo.py '<string>'
 
 where  <string> is a test string to send to the Arduino. The string should be echoed back with an acknowledgement message appended to it. 
 """
