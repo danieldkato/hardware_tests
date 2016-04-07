@@ -1,7 +1,7 @@
 """
-Minimal script for uploading a sketch to the Arudino using Python's os.system() method to open a shell and issue the command arduino.exe --upload. 
+Minimal script for uploading a sketch to an Arudino from Python. 
 
-This script uploads test_upload_cmd.ino to an Arduino. This script then confirms that the upload was successful by opening a serial connection with the Arduino and listening for a simple test message defined in the Arduino sketch. 
+This script uploads test_upload_cmd.ino by using os.system() to open a shell and issue the command 'arduino.exe --upload'. It then confirms that the upload was successful by opening a serial connection with the Arduino and listening for a simple test message defined in the Arduino sketch. 
 
 One of the things that this made clear is that arduino.exe's upload command takes a REALLY LONG TIME (5-10 sec depending on the length of the sketch) to complete, and that if you open a serial connection from Python using serial.Serial() before arduino.exe completes the upload, then the Arduino will run the last sketch that was successfully uploaded to the board, resulting in the wrong sketch being run. 
 """
