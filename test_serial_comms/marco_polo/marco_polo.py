@@ -9,14 +9,30 @@ where  <string> is a test string to send to the Arduino. The string should be ec
 import serial
 import time
 import sys
+import os
+
+#Parameters that might need to changed between computers:
+port = 'COM3'
+ArduinoPath = 'C:\\Program Files (x86)\\Arduino' #the directory from which arduino.exe will be called in the shell in order to upload the sketch
+sketchbookPath = 'C:\\Users\\Dank\\Documents\\Arduino_sketches' #the path to my Arduino sketchbook; this will vary substantially between computers
+filePath = '\\hardware_tests\\test_serial_comms\\marco_polo\\marco_polo.ino' #the path to the Arduino sketch within my notebook; this should be the same on all computers
+uploadPath =  sketchbookPath + filePath
 
 def marco(inputStr):
-	print('marco.py start')
-	#testStr = 'marco' #Define test string here
+	
+	#Upload sketch to Arduino
+	os.chdir(ArduinoPath)
+	os.system('arduino.exe --board arduino:avr:uno --port %s \
+	--pref sketchbook.path=%s\
+	--upload %s'
+	%(port , sketchbookPath, uploadPath))
+	print('Compiling and uploading sketch...')
+	time.sleep(7) #Compiling and uploading takes a long time!
+	print('Upload complete.')
 
 	#Initialize serial port connection
 	connected = False
-	ser = serial.Serial('COM3',9600,timeout=2)
+	ser = serial.Serial('COM3', 9600, timeout=2)
 
 	#Wait to receive signal that handshake is complete
 	while not connected:
@@ -35,7 +51,7 @@ def marco(inputStr):
 
 	#Clean up
 	ser.close()
-	print('Done')
+	print('Serial port closed')
 
 if __name__ == "__main__":
 	import sys
