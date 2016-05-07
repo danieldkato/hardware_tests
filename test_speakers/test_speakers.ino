@@ -1,7 +1,24 @@
 /*
 Generate a single white noise stimulus. Use to confirm 
-that speaker, associated digital out pin and connections 
-are working.
+that a speaker, the associated digital out pin and 
+the connections in between are working.
+
+Verified working on Build3 and hs05bruno8 as of 160507.
+
+Important note: as of 160507, if running this sketch on 
+hs05bruno8 (the Dell T3400 in the room 504), additional 
+steps must be taken in order to compile. The computer 
+uses a deprecated version of the Tones library that is 
+critical for other programs run from that computer. In 
+order to make it compatible with this script, open 
+Arduino/libraries/Tone/Tone.cpp and change the 
+preprocessor directive:
+
+#include <wiring.h>
+
+to
+
+#include <Arduino.h>
 */
 
 #include <Tone.h>
