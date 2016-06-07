@@ -12,9 +12,9 @@ import sys
 import os
 
 #Parameters that might need to changed between computers:
-port = 'COM3'
+port = 'COM9'
 ArduinoPath = 'C:\\Program Files (x86)\\Arduino' #the directory from which arduino.exe will be called in the shell in order to upload the sketch
-sketchbookPath = 'C:\\Users\\Dank\\Documents\\Arduino_sketches' #the path to my Arduino sketchbook; this will vary substantially between computers
+sketchbookPath = 'C:\\Users\\Dank\\Documents\\Arduino' #the path to my Arduino sketchbook; this will vary substantially between computers
 filePath = '\\hardware_tests\\test_serial_comms\\marco_polo\\marco_polo.ino' #the path to the Arduino sketch within my notebook; this should be the same on all computers
 uploadPath =  sketchbookPath + filePath
 
@@ -32,7 +32,7 @@ def marco(inputStr):
 
 	#Initialize serial port connection
 	connected = False
-	ser = serial.Serial('COM3', 9600, timeout=2)
+	ser = serial.Serial(port, 9600, timeout=2)
 
 	#Wait to receive signal that handshake is complete
 	while not connected:
