@@ -1,10 +1,51 @@
-/*
- * Use this sketch in conjunction with record_speakers.m to generate 
- * a white noise stimulus and analyze the spectral content of the signal 
- * put out by the speakers.
+/* Last updated DDK 6/7/16
+ *  
+ * OVERVIEW: 
+ * This sketch constitutes the Arduino-side code for  
+ * `get_speaker_spectrogram`, a program for generating a white
+ * noise stimulus from an Arduino-controlled speaker, 
+ * recording the output through a prepolarized mircrophone,
+ * then generating a spectrogram of the speaker output in
+ * MATLAB. 
  * 
- * The only things that need to be set by the user in this sketch are the 
- * HW pins; stimulus parameters will be provided by the MATLAB script.
+ * 
+ * REQUIREMENTS:
+ * This sketch is intended for use with the MATLAB script
+ * `get_speaker_spectrogram.m` running on a connected desktop
+ * computer. 
+ * 
+ * The baud rates specified in this sketch and in the desktop-
+ * side code must agree. 
+ * 
+ * As of 160507, if running this sketch on hs05bruno8 
+ * (the Dell T3400 in the room 504), additional steps must
+ * be taken in order to compile. The computer uses a 
+ * deprecated version of the Tones library that is critical
+ * for other programs run on that computer. In order to make
+ * it compatible with this script, open  
+ * 
+ * Arduino/libraries/Tone/Tone.cpp
+ * 
+ * and change the preprocessor directive:
+ * 
+ * #include <wiring.h>
+ * 
+ * to
+ * 
+ * #include <Arduino.h>
+ * 
+ * 
+ * INSTRUCTIONS:
+ * Upload this sketch to an Arduino then run `get_speaker_spectrogram.m`
+ * on a connected desktop computer. 
+ * 
+ * 
+ * DESCRIPTION:
+ * The parameters of the white noise stimulus - i.e., the 
+ * duration, the minimum frequency and the maxmimum frequency 
+ * - are decided by the MATLAB script and sent over the serial 
+ * connection to the Arduino. The Arduino thus waits to
+ * receive three trial parameters before playing the stimulus.
  */
 
 #include <Tone.h>
