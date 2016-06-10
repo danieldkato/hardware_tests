@@ -1,3 +1,33 @@
+/* Last updated DDK 6/7/16
+ *  
+ * OVERVIEW:
+ * Simple sketch to make a stepper motor repeatedly rotate 
+ * back and forth some number of steps. The number of steps 
+ * after which the stepper reverses direction is determined 
+ * by feedback from a hall effect sensor. Use this sketch to 
+ * test that the stepper, the hall effect sensor, the 
+ * corresponding input and output pins and the connections 
+ * between are working.
+ * 
+ * 
+ * REQUIREMENTS:
+ * 1) Stepper motor connected to Arduino microcontroller in 2-pin configuration. 
+ * 2) Hall effect sensor connected to Arduino microcontroller power, ground and analog in lines. 
+ *   
+ * In order for the hall effect sensor to work, the stepper
+ * motor should have a magnet mounted on it  
+ * 
+ * The Arduino MUST be powered by ~5V; the stepper will 
+ * otherwise draw too much current and the Arduino will
+ * not be detected. 
+ *  
+ * 
+ * INSTRUCTIONS:
+ * Ensure that the pins specified in this sketch match the
+ * pins connected to the stepper motor and hall effect sensor. 
+ * Upload the sketch to the Arduino microcontroller. 
+ */
+
 #include <Arduino.h>
 #include <Stepper.h>
 
