@@ -1,14 +1,28 @@
-/*
-*Make a stepper rotate some number of steps one time,
-independent of the hall effect sensors. Use this to test
-that the stepper, the corresponding digital output pins
-and the connections between are working.
-
-Verified to work on Build3 160506. NOTE THAT ARDUINO 
-MUST BE POWERED BY ~5V; stepper will otherwise draw 
-too much current and Arduino will not be detected 
-for some reason. 
-*/
+/* Last updated DDK 6/7/16
+ *  
+ * OVERVIEW:
+ * Simple sketch to make a stepper rotate some number of
+ * steps one time, independent of any hall effect sensors.
+ * Use this to test that the stepper, the corresponding 
+ * digital  output pins and the connections between are 
+ * working.
+ * 
+ * Verified to work on Build3 160506.
+ * 
+ * 
+ * REQUIREMENTS:
+ * * Stepper motor connected to Arduino microcontroller in 2-pin configuration. 
+ * 
+ * The Arduino MUST be powered by ~5V; the stepper will 
+ * otherwise draw too much current and the Arduino will
+ * not be detected. 
+ *  
+ * 
+ * INSTRUCTIONS:
+ * Ensure that the pins specified in this sketch match the
+ * pins connected to the stepper motor. Upload the sketch to
+ * the Arduino microcontroller. 
+ */
 
 #include <Arduino.h>
 #include <Stepper.h>
