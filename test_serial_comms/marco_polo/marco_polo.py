@@ -1,9 +1,18 @@
 """
-Minimal script for sending test string to Arduino and reading back an echo. Use in conjunction with marco_polo.ino running on an Arduino. Execute this script as function from the command line using:
+Last updated DDK 6/7/16
 
-python marco_polo.py '<string>'
+OVERVIEW: 
+This is the desktop-side Python script for a simple program that transmits an arbitrary, user-defined test string from Python to an Arduino microcontroller, then has the Arduino append an acknowledgement message to the received string and echo it back to the desktop. The test message is specified in a command line terminal window.
 
-where  <string> is a test string to send to the Arduino. The string should be echoed back with an acknowledgement message appended to it. 
+REQUIREMENTS:
+This file must be executed in conjunction with marco_polo.ino running on a connected Arduino microcontroller. 
+
+INSTRUCTIONS:
+Ensure that the serial port specified in this script matches the serial port connected to the Arduino. In a command line terminal, navigate to this directory and enter the command:
+
+python marco_polo.py "string\n"
+
+where string stands in for an arbitrary, user-defined test string. Note that the string must terminate in a newline ("\n") character. The echoed test message, along with an appended acknowledgement message, should then be displayed in the terminal window. The acknowledgement message can be specified in marco_polo.ino.
 """
 # -*- coding: utf-8 -*-
 import serial
