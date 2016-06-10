@@ -4,8 +4,12 @@ Last updated DDK 6/7/16
 OVERVIEW: 
 This is the desktop-side Python script for a simple program that transmits an arbitrary, user-defined test string from Python to an Arduino microcontroller, then has the Arduino append an acknowledgement message to the received string and echo it back to the desktop. The test message is specified in a command line terminal window.
 
+
 REQUIREMENTS:
 This file must be executed in conjunction with marco_polo.ino running on a connected Arduino microcontroller. 
+
+The baud rates specified by this script and marco_polo.ino must agree.
+
 
 INSTRUCTIONS:
 Ensure that the serial port specified in this script matches the serial port connected to the Arduino. In a command line terminal, navigate to this directory and enter the command:
