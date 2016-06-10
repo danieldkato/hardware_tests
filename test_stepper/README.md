@@ -10,7 +10,9 @@ All sketches in this directory require that the Arduino be powered by ~5V. If th
 
 
 ###DESCRIPTION:
-This directory includes two programs:
-* **test_stepper**: program for testing the basic function of a stepper, without any feedback from a hall effect sensor.
+This directory includes two Arduino sketches:
+* **test_stepper**: sketch for testing the basic function of a stepper, without any feedback from a hall effect sensor.
 
-* **test_stepper_HES**: program for testing a stepper with feedback from a hall effect sensor. 
+* **test_stepper_HES**: sketch for testing a stepper with feedback from a hall effect sensor. 
+
+For details, see comments in header of each sketch. 
