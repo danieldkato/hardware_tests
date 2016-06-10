@@ -1,25 +1,41 @@
-/*
-Generate a single white noise stimulus. Use to confirm 
-that a speaker, the associated digital out pin and 
-the connections in between are working.
-
-Verified working on Build3 and hs05bruno8 as of 160507.
-
-Important note: as of 160507, if running this sketch on 
-hs05bruno8 (the Dell T3400 in the room 504), additional 
-steps must be taken in order to compile. The computer 
-uses a deprecated version of the Tones library that is 
-critical for other programs run from that computer. In 
-order to make it compatible with this script, open 
-Arduino/libraries/Tone/Tone.cpp and change the 
-preprocessor directive:
-
-#include <wiring.h>
-
-to
-
-#include <Arduino.h>
-*/
+/* Last updated DDK 6/7/16
+ * 
+ * OVERVIEW:
+ * Generate a single white noise stimulus. Use to confirm 
+ * that a speaker, the associated digital out pin and 
+ * the connections in between are working.
+ * 
+ * Verified working on Build3 and hs05bruno8 as of 160507.
+ * 
+ * 
+ * REQUIREMENTS:
+ * A speaker connected to an Arduino output pin. There 
+ * must be a resistor in line between the Arduino output pin 
+ * and the speaker input terminal.
+ * 
+ * As of 160507, if running this sketch on hs05bruno8 
+ * (the Dell T3400 in the room 504), additional steps must
+ * be taken in order to compile. The computer uses a 
+ * deprecated version of the Tones library that is critical
+ * for other programs run on that computer. In order to make
+ * it compatible with this script, open  
+ * 
+ * Arduino/libraries/Tone/Tone.cpp
+ * 
+ * and change the preprocessor directive:
+ * 
+ * #include <wiring.h>
+ * 
+ * to
+ * 
+ * #include <Arduino.h>
+ * 
+ * 
+ * INSTRUCTIONS:
+ * Ensure that the speaker pin specified as spkrPin in this
+ * sketch matches the output pin connected to the speaker.
+ * Upload to the Arduino microcontroller. 
+ */
 
 #include <Tone.h>
 
