@@ -1,29 +1,51 @@
 %%
-%Use this script in conjunction with an Arduino running record_speakers.ino
-%to confirm that the speakers used for auditory stimulus presentation are
-%actually outputting signals with the desired spectral content. The script
-%will deliver trigger the Arduino to devlier a white noise stimulus,
-%acquire the analog data, then do an fft on the data.
+% Last updated DDK 6/7/16
 
-%This script is written for use on the electrophysiology computer, which
-%currently (160121) runs MATLAB 2010a with Data Acquisition Toolbox ver.
-%2.16.
+% OVERVIEW: 
+% This script constitutes the desktop-side code for
+% `get_speaker_spectrogram`, a program for generating a single white noise
+% stimulus from an Arduino-controlled speaker, recording the output through
+% a prepolarized microphone, then generating a spectrogram of the speaker
+% output in MATLAB. Use this program in conjunction with
+% `get_sepaker_spectrogram.in` to assess how much power a potential
+% stimulus speaker generates in the hearing range of mice.
 
-%Stimulus design considerations: Mice can hear frequencies ranging from
-%~2-80 kHz (see Koay, Heffner and Heffner 2002 for audiogram). 
 
-%Hardware considerations: 
-%Speaker: when selecting a speaker, take note of the nominal frequency
-%response - many typical commercially available speakers only go up to 20
-%kHz or so.
+% REQUIREMENTS:
+% This script is intended to be run in conjunction with
+% `get_speaker_spectrogram.ino` running on a connected Arduino
+% microcontroller. The baud rates specified in these two files must agree.
+% This script requires MATLAB's data acquisition toolbox ver 2.16 or above.
+% 
+% For detailed hardware requirements, see the README.md file for the
+% directory containing this script.
 
-%Microphone: when selecting a mic, take note of the response chart -
-%ideally it should be relatively flat [+/- 1-2 dB?] over the frequency
-%range of interest.
 
-%DAQ board: make sure that sampling rate is at least double the highest
-%frequency of interest (i.e. Nyquist rate); the National Instruments
-%PCI-6221 currently on the ephys computer can go up to 250 kS/s.
+% INSTRUCTIONS: 
+% Specify the desired stimulus duration, minimum frequency and maximum
+% frequency in this script. Specify the model numbers of speaker,
+% microphone, and signal conditioner to be used in the current recording
+% session. Ensure that the DAQ board and channel number specified by
+% `currDAQ` and `chanID`, respectively, match the DAQ board and channel
+% connected to the recording equipment. Ensure that the specified serial
+% port matches the serial port connected to the Arduino microcontroller.
+% Upload `get_speaker_spectrogram` to the Arduino microcontroller, then run
+% this script.
+
+
+% DESCRIPTION
+% This script specifies the duration, minimum frequency and maximum
+% frequency of a white noise stimulus to be emitted by an
+% Arduino-controlled speaker. It also includes a library of specifications
+% for different audio equipment, including speakers, microphones, and
+% signal conditioners, and issues warnings if any of the hardware is
+% incompatible with the desired stimulus parameters. 
+
+% After evaluating the hardware, the script sends the stimulus parameters
+% to the Arduino. Shortly before the speaker begins playing the stimulus, this
+% script begins recording from the microphone for the duration of the
+% stimulus. Once the stimulus duration elapses, the script ends the
+% recording and generates a spectrogram of the recorded signal. 
 
 %%
 %Define current test parameters:
