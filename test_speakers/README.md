@@ -12,5 +12,6 @@ This directory contains code for two programs:
 
 * **get_speaker_spectrogram**: A program for generating a white noise stimulus from an Arduino-controlled speaker, recording the output through a prepolarized microphone and generating a spectrogram of the output in MATLAB. 
 
-For details, see subdirectory README.md files and comments in header of each script. 
+
+For details, see each program's `README.md` files and header comments for each file.
 
