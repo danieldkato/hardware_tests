@@ -13,13 +13,13 @@
  * REQUIREMENTS:
  * 1) Stepper motor connected to Arduino microcontroller in 2-pin configuration. 
  * 2) Hall effect sensor connected to Arduino microcontroller power, ground and analog in lines. 
- *   
- * In order for the hall effect sensor to work, the stepper
- * motor should have a magnet mounted on it  
- * 
- * The Arduino MUST be powered by ~5V; the stepper will 
- * otherwise draw too much current and the Arduino will
- * not be detected. 
+ * 3) Magnet mounted to stepper motor. The magnet should be close enough 
+ *    to the hall effect sensor to exploit the sensor's dynamic range
+ *    as the motor completes the specified number of steps in either 
+ *    direction. 
+ * 4) The Arduino MUST be powered by ~5V; the stepper will 
+ *    otherwise draw too much current and the Arduino will
+ *    not be detected. 
  *  
  * 
  * INSTRUCTIONS:
