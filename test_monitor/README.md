@@ -17,3 +17,4 @@ This directory currently contains three programs for displaying simple visual st
 * **test_grating_up_down.py**: displays a sinusoidal mean-gray vertical moving grating
 * **test_black.py**: displays pure black
 
+For detailed instructions, see header comments in each file.
