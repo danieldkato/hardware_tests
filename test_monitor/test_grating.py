@@ -4,11 +4,41 @@ Created on Tue Dec 15 11:31:40 2015
 
 @author: Dan
 
-Run this script to display a moving grating on a monitor. Optionally, display a colored rectangle in front of the grating in order to change its color. 
+Last updated DDK 6/7/16
 
-In most cases, the stimulus will be presented on a secondary monitor dedicated to presenting visual stimuli, rather than on the main display. Specify the monitor on which to display a window by setting the window's "screen" attribute to the index assigned to the monitor by the OS. Indexing starts at 0, which will most likely be assigned to the main display, so indices for stimulus displays will probably start at 1.   
+OVERVIEW:
+This script displays a sinusoidal mean-gray horizontal moving grating on a specified monitor. Use to test monitor luminance, calibrate brightness-luminance curve, etc. 
+
+
+REQUIREMENTS:
+`python` >=2.7
+`psychopy`
+
+Make sure that the `monitor` object referred to in the definition of `mywin` has been defined in the local instance of psychopy.
+
+For best results, use a graphics card that supports syncing calls to win.flip() with the vertical blank interval (VBI) of the screen. Failing to sync calls to win.flip() with the VBI will result in "tearing", i.e., one contiguous block of pixel rows will display one frame while the remaining rows will display the subsequent frame. Note that the graphics cards included with many laptops by default do not support syncing win.flip() with the VBI!
+
+
+INSTRUCTIONS:
+Ensure that the `screen` attribute specified in the assignment of `mywin` is set to the appropriate monitor. Note that this is different from the `monitor` option; whereas `monitor` is an object that simply stores a number of data fields related to the monitor (like its model number, max resolution, dimensions, distance, etc.), `screen` is the actual hardware index used by the OS to identify the monitor. 
+
+In most cases, the stimulus will be presented on a secondary monitor dedicated to presenting visual stimuli, rather than on the main display. Indexing starts at 0, which will most likely be assigned to the main display, so indices for stimulus displays will probably start at 1.   
+ 
+Ensure that the resolution specified in the assignment of `mywin` matches the desired resolution. Specify the stimulus parameters, like stimulus duration, spatial frequency, and speed, in the `#Grating properties` section. Optionally, display a colored rectangle in front of the grating in order to change its color. 
+
+Navigate to the directory containing this script in a command line window and enter:
+
+`python test_grating.py`
+
+or hit the `run` button in an IDE like Spyder. 
+
+
+DESCRIPTION:
+Run this script to display a sinusoidal mean-gray horizontal moving grating on a monitor.
 
 Setting the colors of the grating stimulus requires some tricks, because simply setting the "color" attribute of the GratingStim object will NOT result in alternating bands of black and the specified color. Rather, the way Pysychopy's GratingStim works is that you specify one color, which is represented as a vector originating at [0, 0, 0] - the coordinates of grey in Psychopy's color space - then the grating object computes the opposite vector in color space. The grating stimulus then consists of alternating bands of the specified color and its opposite. Thus, in order to achieve alternating bands of a specified color and black, it's better to just create a monochromatic grating then put a colored, semi-transparent mask in front of it.    
+
+Thus far, this has almost always been used with a secondary KD50G21-40NT-A1 display (distributed through AdaFruit as 'HDMI 4 Pi 5" Display not Touchscreen 800x480-HDMI/VGA/NTSC/PAL').
 """
 
 import time
