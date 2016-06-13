@@ -34,4 +34,10 @@ In addition, this program requires MATLAB's data acquisition toolbox ver. 2.16 o
 The baud rates specified in `get_sepaker_spectrogram.ino` and `get_speaker_spectrogram.m` must agree.
 
 ###INSTRUCTIONS:
-Ensure that the serial port specified in `get_speaker_spectrogram.m` matches the serial port connected to the Arduino microcontroller. Upload `get_speaker_spector.ino` to the Arduino then run `get_speaker_spectrogram.m` in MATLAB. 
+Ensure that the serial port specified in `get_speaker_spectrogram.m` matches the serial port connected to the Arduino microcontroller. 
+
+Ensure that the DAQ board and channel number specified by `currDAQ` and `chanID`, respectively, match the DAQ board and channel connected to the recording equipment.
+
+Specify the desired stimulus duration, minimum frequency and maximum frequency in `get_sepaker_spectrogram.m`. If the specified hardware is not suitable for generating or recording the signals of interest, the program will return a warning.
+
+If the stimulus parameters and hardware configuration are satisfactory, upload `get_speaker_spector.ino` to the Arduino then run `get_speaker_spectrogram.m` in MATLAB. 
