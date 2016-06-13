@@ -16,7 +16,9 @@ REQUIREMENTS:
 
 Make sure that the `monitor` object referred to in the definition of `mywin` has been defined in the local instance of psychopy.
 
-For best results, use a graphics card that supports syncing calls to win.flip() with the vertical blank interval (VBI) of the screen. Failing to sync calls to win.flip() with the VBI will result in "tearing", i.e., one contiguous block of pixel rows will display one frame while the remaining rows will display the subsequent frame. Note that the graphics cards included with many laptops by default do not support syncing win.flip() with the VBI!
+For best results, use a graphics card that supports syncing calls to win.flip() with the vertical blank interval (VBI) of the screen. Failing to sync calls to win.flip() with the VBI will result in "tearing", i.e., one contiguous block of pixel rows will display one frame while the remaining rows will display the subsequent frame. Note that the graphics cards included with many laptops by default do not support syncing win.flip() with the VBI! For more detail, see section 2.7.5 ("Sync to VBL and wait for VBL") of the psychopy documentation at: 
+
+http://www.psychopy.org/PsychoPyManual.pdf
 
 
 INSTRUCTIONS:
