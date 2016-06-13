@@ -3,12 +3,12 @@
 ##TEST_MONITOR
 
 ###OVERVIEW:
-Python scripts for testing monitors intended to deliver visual psychophysical stimuli. Use to ensure that monitor, graphics card and connections are working and to characterize display properties like luminance, hue, etc. 
+Scripts for testing monitors intended to deliver visual psychophysical stimuli. Use to ensure that monitor, graphics card and connections are working and to characterize display properties like luminance, hue, etc. 
 
 
 ###REQUIREMENTS:
-`python` >2.7
-`psychopy` module, available at http://www.psychopy.org/
+* `python` >2.7
+* `psychopy` module, available at http://www.psychopy.org/
 
 
 ###DESCRIPTION:
