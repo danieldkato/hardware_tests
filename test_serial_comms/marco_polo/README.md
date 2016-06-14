@@ -7,7 +7,7 @@ This directory contains files for a simple program that transmits an arbitrary, 
 
 ###REQUIREMENTS:
 * `python` >=2.7
-* 'pyserial' python serial port extension, available at https://pypi.python.org/pypi/pyserial
+* `pyserial` python serial port extension, available at https://pypi.python.org/pypi/pyserial
 
 This directory should include the following files:
 * `marco_polo.py`
