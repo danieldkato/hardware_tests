@@ -6,6 +6,9 @@
 This directory contains files for a simple program that transmits an arbitrary, user-defined test string from Python to an Arduino microcontroller, then has the Arduino append an acknowledgement message to the received string and echo it back to the desktop. The test message is specified in a command line terminal window.
 
 ###REQUIREMENTS:
+* `python` >=2.7
+* 'pyserial' python serial port extension, available at https://pypi.python.org/pypi/pyserial
+
 This directory should include the following files:
 * `marco_polo.py`
 * `marco_polo.ino`
