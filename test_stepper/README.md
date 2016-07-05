@@ -10,7 +10,7 @@ This directory contains code for testing Arduino-controlled stepper motors, hall
 
 * `test_stepper_HES`: sketch for testing a stepper with feedback from a hall effect sensor. 
 
-For detailed instructions and specific requirements, see comments in header of each sketch. 
+For detailed instructions and specific requirements for each sketch, see comments in header of each. 
 
 ###COMMON REQUIREMENTS:
 Most of these sketches require that the Arduino library `Stepper` be included in the `library` folder of the Arduino *core* directory (i.e., the one located somewhere like `Program Files` - not to be confused with the `library` folder in the Arduino *sketchbook* directory, which is likely to be somewhere like `My Documents`). `Stepper` is included with most distributions of the Arduino software, so in most cases it is probably already installed.
