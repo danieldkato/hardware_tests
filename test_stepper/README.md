@@ -12,7 +12,7 @@ This directory contains code for testing Arduino-controlled stepper motors, hall
 
 
 ###REQUIREMENTS:
-Most of these sketches require that the Arduino `Stepper` library be included in the `library` folder of the Arduino *core* directory (i.e., the one located somewhere like `Program Files` - not to be confused with the `library` folder in the Arduino *sketchbook* directory, which is likely to be somewhere like `My Documents`). `Stepper` is included with most distributions of the Arduino software.
+Most of these sketches require that the Arduino library `Stepper` be included in the `library` folder of the Arduino *core* directory (i.e., the one located somewhere like `Program Files` - not to be confused with the `library` folder in the Arduino *sketchbook* directory, which is likely to be somewhere like `My Documents`). `Stepper` is included with most distributions of the Arduino software.
 
 All sketches in this directory require that the Arduino be powered by ~5V. If the Arduino is not powered, the stepper motor will draw too much current and the board will not be detected over the serial port. 
 
