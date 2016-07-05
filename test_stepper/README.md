@@ -2,7 +2,7 @@
 
 ##TEST_STEPPER
 ###OVERVIEW:
-This directory contains code for testing Arduino-controlled stepper motors, hall effect sensors, associated input and output pins, and connections in between. This directory includes two Arduino sketches:
+This directory contains code for testing Arduino-controlled stepper motors, hall effect sensors, associated input and output pins, and connections in between. This directory includes the following programs:
 
 * `test_stepper`: sketch for testing the basic function of a stepper, without any feedback from a hall effect sensor.
 
