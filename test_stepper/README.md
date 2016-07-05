@@ -6,6 +6,8 @@ This directory contains code for testing Arduino-controlled stepper motors, hall
 
 * `test_stepper`: sketch for testing the basic function of a stepper, without any feedback from a hall effect sensor.
 
+* `test_HES`: a sketch for testing the basic function of a hall effect sensor, without using the feedback to constrain the movement of a stepper.
+
 * `test_stepper_HES`: sketch for testing a stepper with feedback from a hall effect sensor. 
 
 
