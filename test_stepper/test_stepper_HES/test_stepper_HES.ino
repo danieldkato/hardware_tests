@@ -39,7 +39,7 @@ const int STPR1_ENBL = 7;
 const int HALL_PIN = 1;
 int hall_thresh = 50;
 int hall_val = 500;
-int stepCCW = -20;
+int stepCCW = -50;
 long period = 2000;
 
 //Instantiate stepper object
