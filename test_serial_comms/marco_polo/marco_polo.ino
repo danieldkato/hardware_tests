@@ -53,7 +53,7 @@ String readLine(){
         inputString+=inChar;  
       }
       else {
-        inputString+=acknowledgeString+"\n";
+        inputString+=acknowledgeString;
         stringComplete=true;
       }
     }
