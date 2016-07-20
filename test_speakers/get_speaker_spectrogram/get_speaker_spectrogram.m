@@ -1,5 +1,5 @@
 %%
-% Last updated DDK 6/7/16
+% Last updated DDK 7/20/16
 
 % OVERVIEW: 
 % This script constitutes the desktop-side code for
@@ -17,6 +17,11 @@
 % microcontroller. The baud rates specified in these two files must agree.
 % This script requires MATLAB's data acquisition toolbox ver 2.16 or above.
 % 
+% *WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
+% physiology'), this script often raises an out-of-memory error and crashes
+% when it tries to call spectrogram() on line 305. If collecting data on
+% the computer, it may be necessary to analyze the data offline on another.
+%
 % For detailed hardware requirements, see the README.md file for the
 % directory containing this script.
 
@@ -293,6 +298,10 @@ legend(legendStr);
 
 
 %Create spectrogram:
+%WARNING: Calling spectrogram on hs05bruno ('') has raised errors related
+%to memory issues before. It may be necessary to actually the data offline
+%on another computer.
+
 %s = spectrogram(data);
 %spectrogram(data, 'yaxis');
 spectrogram(data, 128, 120);
