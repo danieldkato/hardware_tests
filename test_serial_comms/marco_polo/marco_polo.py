@@ -32,40 +32,44 @@ filePath = '\\hardware_tests\\test_serial_comms\\marco_polo\\marco_polo.ino' #th
 uploadPath =  sketchbookPath + filePath
 
 def marco(inputStr):
-	
-	#Upload sketch to Arduino
-	os.chdir(ArduinoPath)
-	os.system('arduino.exe --board arduino:avr:uno --port %s \
-	--pref sketchbook.path=%s\
-	--upload %s'
-	%(port , sketchbookPath, uploadPath))
-	print('Compiling and uploading sketch...')
-	time.sleep(7) #Compiling and uploading takes a long time!
-	print('Upload complete.')
+    
+    #Upload sketch to Arduino
+    os.chdir(ArduinoPath)
+    os.system('arduino.exe --board arduino:avr:uno --port %s \
+    --pref sketchbook.path=%s\
+    --upload %s'
+    %(port , sketchbookPath, uploadPath))
+    print('Compiling and uploading sketch...')
+    time.sleep(7) #Compiling and uploading takes a long time!
+    print('Upload complete.')
 
-	#Initialize serial port connection
-	connected = False
-	ser = serial.Serial(port, 9600, timeout=2)
+    #Initialize serial port connection
+    connected = False
+    ser = serial.Serial(port, 9600, timeout=2)
 
-	#Wait to receive signal that handshake is complete
-	while not connected:
-		serin = ser.readline()
-		connected = True
-		print('Serial port open')
-		
-	#Write a test string; Python 3.4 and greater requires strings to be converted to bytes
-	if sys.version_info >= (3, 4):
-	    ser.write(bytes(inputStr+'\n','UTF-8'))
-	else:
-	    ser.write( inputStr + '\n' )
+    #Wait to receive signal that handshake is complete
+    while not connected:
+        serin = ser.readline()
+        connected = True
+        print('Serial port open')
+        
+    #Write a test string; Python 3.4 and greater requires strings to be converted to bytes
+    if sys.version_info >= (3, 4):
+        ser.write(bytes(inputStr+'\n','UTF-8'))
+    else:
+        ser.write( inputStr + '\n' )
+    
+    echo = ser.readline()
+    if sys.version_info >= (3, 4):
+        echo = echo.decode(encoding = 'UTF-8')
 
-	#Read echo back from Arduino
-	print(ser.readline())
+    #Read echo back from Arduino
+    print(echo)
 
-	#Clean up
-	ser.close()
-	print('Serial port closed')
+    #Clean up
+    ser.close()
+    print('Serial port closed')
 
 if __name__ == "__main__":
-	import sys
-	marco(sys.argv[1])
+    import sys
+    marco(sys.argv[1])
