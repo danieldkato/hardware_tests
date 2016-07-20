@@ -51,19 +51,20 @@
 %Define current test parameters:
 
 %HW parameters:
-currSpeaker = 'ACS340'; %enter unique model number
+currSpeaker = 'Green'; %enter unique model number
 currMic = '378C01'; %enter unique model number
 currSignalConditioner = '480E09'; %enter unique model number
 
 currDAQ = 'Dev1'; %Name for PCI-6221 in DAQ toolbox on the ephys computer 
 chanID = 8;
-sampleRate = 150000;
+desiredSampleRate = 150000;
 
 portID = 'COM13';
 baudRate = 9600;
 
 %Stimulus parameters:
 preStimDur = 1; %seconds
+postStimDur = 1;
 stimDur = 5; %seconds
 stimMinFreq = 4000; %Hz
 stimMaxFreq = 20000; %Hz
@@ -75,7 +76,8 @@ stimMaxFreq = 20000; %Hz
 %Each speaker is represented by a cell array with the format:
 %   {speaker name, min freq(Hz), max freq(Hz)}
 speakers = {
-  {'Altec Lansing ACS340',30,20000}  
+  {'Altec Lansing ACS340',30,20000};
+  {'Green speaker',30,20000}
 };
 
 %2. Microphones:
@@ -205,11 +207,11 @@ end
 %Configure analog input object:
 chan = addchannel(AI, chanID);
 AI.Channel.InputRange = [-10 10];
-AI.SampleRate = sampleRate;
-Fs = sampleRate;
-AI.SamplesPerTrigger = ( (stimDur-1) * sampleRate );
+AI.SampleRate = desiredSampleRate;
+trueSampleRate = double(AI.SampleRate); %MATLAB may not use the exact sample rate specified
+Fs = trueSampleRate;
+AI.SamplesPerTrigger = (preStimDur + stimDur + postStimDur) * trueSampleRate;
 AI.TriggerType = 'Manual';
-blocksize = AI.SamplesPerTrigger;
 
 %Create and open serial communication object:
 arduino = serial(portID, 'BaudRate', baudRate);
@@ -217,6 +219,9 @@ fopen(arduino);
 pause(3); %wait for handshake to complete
 
 %Send stimulus information to Arduino
+fprintf(arduino,'%s',strcat(num2str(preStimDur),'\n'));
+disp(fscanf(arduino)); %Scan serial port for echo of stim duration
+pause(.1);
 fprintf(arduino,'%s',strcat(num2str(stimDur),'\n'));
 disp(fscanf(arduino)); %Scan serial port for echo of stim duration
 pause(.1);
@@ -225,10 +230,6 @@ disp(fscanf(arduino)); %Scan serial port for echo of min frequency
 pause(.1);
 fprintf(arduino,'%s',strcat(num2str(stimMaxFreq),'\n'));
 disp(fscanf(arduino)); %Scan serial port for echo of max frequency
-
-
-%Pause for pre-stimulus period:
-pause(preStimDur);
 
 %Issue trigger to Arduino:
 fprintf(arduino,'%s','1');
@@ -239,7 +240,7 @@ disp('Starting data acquisition...');
 trigger(AI);
 
 %Wait for AI object to finish data acquisition:
-wait(AI, stimDur+1);
+wait(AI, preStimDur + stimDur + postStimDur + .1);
 disp('... data acquisition complete.');
 
 %Close serial communication object:
@@ -247,25 +248,30 @@ fclose(arduino);
 
 %Get the data from the analog input object:
 data = getdata(AI);
-%csvwrite('micData', data);
+csvwrite('micData.csv', data);
 
 %Plot raw data to make sure signal looks reasonable
 figure;
-seconds = [1:length(data)]./sampleRate;
+hold on;
+seconds = [1:length(data)]./trueSampleRate;
 plot(seconds, data);
 title('Raw data');
 xlabel('Time (s)');
+yl = ylim;
+rectangle('Position',[preStimDur yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
+set(gca,'children',flipud(get(gca,'children')))
 
-
-%{
+%%{
 %Calculate fft:
-xfft = abs(fft(data));
+stimData = data(preStimDur*trueSampleRate:end);
+xfft = abs(fft(stimData));
 
 %Avoid taking the log of 0.
 index = find(xfft == 0);
 xfft(index) = 1e-17;
 
 %Convert to decibels:
+blocksize = stimDur * trueSampleRate;
 mag = 20*log10(xfft);
 mag = mag(1:floor(blocksize/2));
 f = (0:length(mag)-1)*Fs/blocksize;
