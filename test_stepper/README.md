@@ -10,6 +10,8 @@ This directory contains code for testing Arduino-controlled stepper motors, hall
 
 * `test_stepper_HES`: sketch for testing a stepper with feedback from a hall effect sensor. 
 
+* `disable_stepper`: sketch for setting LOW the digital enable pin for the H-bridge used to control the stepper motor. This may be necessary to run if a previous sketch (like `test_stepper_HES`, for example) leaves the digital enable pin HIGH, which will cause the H-bridge to overheat.
+
 For detailed instructions and specific requirements for each sketch, see comments in header of each. 
 
 ###COMMON REQUIREMENTS:
