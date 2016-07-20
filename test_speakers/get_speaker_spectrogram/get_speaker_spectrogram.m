@@ -7,7 +7,7 @@
 % stimulus from an Arduino-controlled speaker, recording the output through
 % a prepolarized microphone, then generating a spectrogram of the speaker
 % output in MATLAB. Use this program in conjunction with
-% `get_sepaker_spectrogram.in` to assess how much power a potential
+% `get_sepaker_spectrogram.ino` to assess how much power a potential
 % stimulus speaker generates in the hearing range of mice.
 
 
@@ -19,8 +19,8 @@
 % 
 % *WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
-% when it tries to call spectrogram() on line 305. If collecting data on
-% the computer, it may be necessary to analyze the data offline on another.
+% when it tries to call spectrogram(). If collecting data on hs05bruno8, it
+% may be necessary to analyze the data offline on another computer.
 %
 % For detailed hardware requirements, see the README.md file for the
 % directory containing this script.
