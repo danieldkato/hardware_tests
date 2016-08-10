@@ -60,9 +60,14 @@ int maxFreq;
 String maxFreqStr;
 boolean maxFreqRec = false;
 
+int preStimDur;
+String preStimStr;
+boolean preStimRec = false;
+
 int stimDur;
 String stimDurStr;
 boolean stimDurRec = false;
+
 Tone cueTones[1];
 
 boolean complete = false;
@@ -77,6 +82,14 @@ void setup() {
   
   Serial.begin(9600);
   delay(2000);
+
+  //Get the pre-stimulus duration from the MATLAB script
+  while ( preStimRec == false){
+    preStimStr = getLine();
+    preStimDur = preStimStr.toInt() * 1000; //remember to convert to milliseconds
+    Serial.println(preStimStr); //echo back duration to confirm receipt
+    preStimRec = true;
+  }
 
   //Get the stimulus duration from the MATLAB script
   while ( stimDurRec == false){
@@ -108,6 +121,7 @@ void setup() {
 void loop() {
   if( complete == false ){
     // put your main code here, to run repeatedly:
+    delay(preStimDur);
     long start = millis();
     long now = millis();
     while ( now - start < stimDur ){
