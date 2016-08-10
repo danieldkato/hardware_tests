@@ -253,7 +253,8 @@ fclose(arduino);
 
 %Get the data from the analog input object:
 data = getdata(AI);
-csvwrite('micData.csv', data);
+filename = strcat([currSpeaker, '_', currMic, '_', currSignalConditioner, '_', datestr(now,'yymmdd_HH-MM'), '.csv' ]);
+csvwrite(filename, data);
 
 %Plot raw data to make sure signal looks reasonable
 figure;
