@@ -301,13 +301,11 @@ legend(legendStr);
 %WARNING: Calling spectrogram on hs05bruno ('') has raised errors related
 %to memory issues before. It may be necessary to actually the data offline
 %on another computer.
-
-%s = spectrogram(data);
-%spectrogram(data, 'yaxis');
-spectrogram(data, 128, 120);
-titleStr2 = strcat(['Spectrogram of ', speakerName, ', ', num2str(stimMinFreq),'-',num2str(stimMaxFreq), ' Hz white noise' ]);
-title(titleStr2);
-%}
+if strcmp(getenv('computername'), 'HS05BRUNO8') == 0
+    spectrogram(data, 128, 120, [], 'yaxis');
+    titleStr2 = strcat(['Spectrogram of ', speakerName, ', ', num2str(stimMinFreq),'-',num2str(stimMaxFreq), ' Hz white noise' ]);
+    title(titleStr2);
+end 
 
 %Clean up:
 delete(AI);
