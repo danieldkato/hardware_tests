@@ -83,6 +83,7 @@ stimMaxFreq = 20000; %Hz
 speakers = {
   {'Altec Lansing ACS340',30,20000};
   {'Green speaker',30,20000}
+  {'Polycell Dome Tweerer', 30, 20000}
 };
 
 %2. Microphones:
