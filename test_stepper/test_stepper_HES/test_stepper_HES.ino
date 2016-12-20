@@ -79,7 +79,7 @@ void fwd(){
 void back(){
   digitalWrite(DIR_PIN, LOW);
   delay(1);
-  for(int i = 0; i < 50; i++){rotate_one_step(); delay(1);}
+  for(int i = 0; i < 150; i++){rotate_one_step(); delay(1);}
   Serial.println("stepper retracted");
 }
 
