@@ -32,14 +32,17 @@
 #include <Stepper.h>
 
 //Declare stepper constants and variables
+const int FULLSTP_PER_ROTATION = 200;
 const int STP_PIN = 6;
 const int DIR_PIN = 8;
 const int HALL_PIN = 0;
-int stepHalfDelay = 4000; // microseconds
+int stepHalfDelay = 1500; // microseconds
 int microstep = 8;
 int hall_thresh = 50;
 int hall_val = 500;
 long period = 2000;
+int rotDeg = 50;
+int numSteps = floor((rotDeg/360.0) * FULLSTP_PER_ROTATION) * microstep;
 
 void setup() {
   // put your setup code here, to run once:
@@ -70,7 +73,7 @@ void fwd(){
   hall_val = analogRead(HALL_PIN);
   while(hall_val>hall_thresh){
     rotate_one_step(); //how to deal with direction??
-    delay(1);
+    //delay(1);
     hall_val = analogRead(HALL_PIN);
   }
   Serial.println("stepper extended");
@@ -78,8 +81,8 @@ void fwd(){
 
 void back(){
   digitalWrite(DIR_PIN, LOW);
-  delay(1);
-  for(int i = 0; i < 50; i++){rotate_one_step(); delay(1);}
+  //delay(1);
+  for(int i = 0; i < numSteps; i++){rotate_one_step();}
   Serial.println("stepper retracted");
 }
 
