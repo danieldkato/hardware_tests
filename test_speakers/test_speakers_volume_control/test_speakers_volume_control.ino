@@ -12,6 +12,7 @@
  * This sketch requires the Arduino Volume library by Connor Nishijima.
  * This library can be downloaded using the Arduino IDE's Library Manager 
  * or cloned or downloaded directly from https://github.com/connornishijima/arduino-volume1.git
+ * See link for documentation on using Volume library.
  * 
  * The speaker MUST BE CONNECTED TO OUTPUT PIN 5 IF RUNNING ON AN ARDUINO 
  * UNO. If running on a different Arduino board, see https://github.com/connornishijima/arduino-volume1#supported-pins  
