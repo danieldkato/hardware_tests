@@ -7,8 +7,11 @@ function validateMic(name, min, max)
         return
     end
     
+    match = 0;
+    
     for i = 1:length(Mics)
         if strcmp(name, Mics(i).Name)
+            match = 1;
             if min < Mics(i).MinF      
                 warning('Desired minimum stimulus frequency outside of microphone range'); 
             end
