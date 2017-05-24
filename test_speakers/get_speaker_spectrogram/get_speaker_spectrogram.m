@@ -1,4 +1,4 @@
-function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID)
+function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, spkrName)
 %%
 % Last updated DDK 7/20/16
 
@@ -14,9 +14,9 @@ function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID)
 %
 % REQUIREMENTS:
 % 1) A host PC configured for use with suitable data acquisition hardware 
-% (e.g. a National Instruments PCI data acquisition card and BNC Connector block, 
-% etc.). For more detailed hardware requirements, see the README available at
-% https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
+% (e.g. a National Instruments PCI data acquisition card connected to a BNC
+% Connector block, etc.). For more detailed hardware requirements, see the
+% README available at https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
 % 
 % 2) Suitable audio recording equipment (microphone, preconditioner, etc.).
 % For more detailed hardware requirements, see the README available at
@@ -129,11 +129,15 @@ stimMaxFreq = 20000; %Hz
 %1. Speakers:
 %Each speaker is represented by a cell array with the format:
 %   {speaker name, min freq(Hz), max freq(Hz)}
+%{
 speakers = {
   {'Altec Lansing ACS340',30,20000};
   {'Green speaker',30,20000}
   {'Polycell Dome Tweeter', 30, 20000}
 };
+%}
+
+validateSpeakers(spkrName, stimMinFreq, stimMaxFreq);
 
 %2. Microphones:
 %Each microphone is represented by a cell array with the format:
@@ -157,6 +161,7 @@ signalConditioners = {
 %return any necessary warnings
 
 %Evaluate speakers
+%{
 spkrFound = 0;
 spkrInd = 0;
 currSpkrMin = 0;
@@ -249,7 +254,7 @@ elseif scFound == 1
         warning('Desired maximum stimulus frequency outside of signal conditioner range.');
     end
 end
-
+%}
 
 AI = analoginput('nidaq', currDAQ);
 AI.InputType = 'SingleEnded';
