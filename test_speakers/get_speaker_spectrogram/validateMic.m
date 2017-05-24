@@ -1,5 +1,12 @@
 function validateMic(name, min, max)
-    load('Mics.mat');
+    
+    try
+        load('Mics.mat');
+    catch ME
+        warning(ME, 'Microphone defintions not found, skipping validation. Requested stimulus frequencies may be outside of microphone range.');
+        return
+    end
+    
     for i = 1:length(Mics)
         if strcmp(name, Mics(i).Name)
             if min < Mics(i).MinF      
@@ -9,4 +16,8 @@ function validateMic(name, min, max)
                 warning('Desired maximum stimulus frequency outside of microphone range');
             end
         end
+    end
+    
+    if match == 0
+        warning('No match for specified microphone found in microphone definitions. Make sure that specified name exactly matches a name in definitions file. If no exact match exists, requested stimulus frequencies may be outside microphone range.');
     end
