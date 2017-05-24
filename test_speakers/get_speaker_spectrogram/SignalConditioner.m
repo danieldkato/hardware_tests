@@ -1,8 +1,8 @@
 classdef SignalConditioner
     properties
-        Name
-        MinF
-        MaxF
+        Name % signal conditioner name
+        MinF % minimum frequency (within -%5 of max signal), in Hz
+        MaxF % maximum frequency (within -%5 of max signal), in Hz
     end
     methods
         function obj = SignalConditioner(name, min, max)

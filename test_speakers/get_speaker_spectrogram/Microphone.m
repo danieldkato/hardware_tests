@@ -1,8 +1,8 @@
 classdef Microphone
     properties
-        Name
-        MinX
-        MaxF
+        Name % microphone name
+        MinX % minimum frequency (within +/- 1 dB of max response), in Hz
+        MaxF % maximum frequency (within +/- 1 dB of max response), in Hz
     end
     methods
         function obj = Microphone(name, min, max)
