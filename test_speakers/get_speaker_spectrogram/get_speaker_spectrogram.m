@@ -1,4 +1,4 @@
-function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, spkrName)
+function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, varargin)
 %%
 % Last updated DDK 7/20/16
 
@@ -123,6 +123,23 @@ stimMinFreq = 4000; %Hz
 stimMaxFreq = 20000; %Hz
 %}
 
+if ~isempty(varargin)
+    validateSpeakers(varargin{1}, stimMinFreq, stimMaxFreq);
+else
+    warning('No speaker specified; skipping speaker validation. Requested stimulus frequencies may lie outside of speaker range.');
+end
+
+if length(varargin) > 1
+    validateMic(varargin{2}, stimMinFreq, stimMaxFreq);
+else
+    warning('No microphone specified; skipping microphone validation. Requested stimulus frequencies may lie outside of microphone range.');
+end
+
+if length(varargin) > 2
+    validateSignalConditioner(varargin{3}, stimMinFreq, stimMaxFreq);
+else
+    warning('No signal conditioner specified; skipping signal conditioner validation. Requested stimulus frequencies may lie outside of microphone range.');
+end
 %%
 %Define hardware options:
 
@@ -138,6 +155,7 @@ speakers = {
 %}
 
 validateSpeakers(spkrName, stimMinFreq, stimMaxFreq);
+
 
 %2. Microphones:
 %Each microphone is represented by a cell array with the format:
