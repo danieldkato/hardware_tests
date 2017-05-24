@@ -1,3 +1,4 @@
+function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID)
 %%
 % Last updated DDK 7/20/16
 
@@ -40,6 +41,13 @@
 % physiology'), this script often raises an out-of-memory error and crashes
 % when it tries to call spectrogram(). If collecting data on hs05bruno8, it
 % may be necessary to analyze the data offline on another computer.
+%
+% 
+% INPUTS:
+% 1) stimDur - stimulus duration, in seconds
+% 2) stimMinFreq - lower bound of stimulus noise frequency band, in Hz 
+% 3) stimMaxFreq - upper bound of stimulus noise frequency band, in Hz 
+% 4) portID - String specifying the port connected to the Arduino microcontroller
 %
 %
 % INSTRUCTIONS: 
@@ -108,9 +116,12 @@ baudRate = 9600;
 %Stimulus parameters:
 preStimDur = 1; %seconds
 postStimDur = 1;
+
+%{
 stimDur = 5; %seconds
 stimMinFreq = 4000; %Hz
 stimMaxFreq = 20000; %Hz
+%}
 
 %%
 %Define hardware options:
