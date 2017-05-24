@@ -5,10 +5,10 @@ classdef SignalConditioner
         MaxF
     end
     methods
-        function obj = SingalConditioner(name, min, max)
+        function obj = SignalConditioner(name, min, max)
             obj.Name = name;
-            obj.min = min;
-            obj.max = max;
+            obj.MinF = min;
+            obj.MaxF = max;
         end
     end
 end
