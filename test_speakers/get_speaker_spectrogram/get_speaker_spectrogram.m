@@ -124,20 +124,26 @@ stimMaxFreq = 20000; %Hz
 %}
 
 if ~isempty(varargin)
+    spkr = varargin{1}; 
     validateSpeakers(varargin{1}, stimMinFreq, stimMaxFreq);
 else
+    spkr = 'unknown';
     warning('No speaker specified; skipping speaker validation. Requested stimulus frequencies may lie outside of speaker range.');
 end
 
 if length(varargin) > 1
+    mic = varargin{2};
     validateMic(varargin{2}, stimMinFreq, stimMaxFreq);
 else
+    mic = 'unknown';
     warning('No microphone specified; skipping microphone validation. Requested stimulus frequencies may lie outside of microphone range.');
 end
 
 if length(varargin) > 2
+    sigCond = varargin{3};
     validateSignalConditioner(varargin{3}, stimMinFreq, stimMaxFreq);
 else
+    sigCond = 'unknown';
     warning('No signal conditioner specified; skipping signal conditioner validation. Requested stimulus frequencies may lie outside of microphone range.');
 end
 %%
@@ -324,10 +330,10 @@ disp('... data acquisition complete.');
 %Close serial communication object:
 fclose(arduino);
 
-%Get the data from the analog input object:
+%Get the raw data from the analog input object:
 data = getdata(AI);
-filename = strcat([currSpeaker, '_', currMic, '_', currSignalConditioner, '_', datestr(now,'yymmdd_HH-MM'), '.csv' ]);
-csvwrite(filename, data);
+filename = strcat(['spkr-', rename(currSpeaker), '_mic-', rename(currMic), '_sigCond-', rename(currSignalConditioner), '_', datestr(now,'yymmdd_HH-MM'), '.csv' ]);
+csvwrite(filename, data); 
 
 %Plot raw data to make sure signal looks reasonable
 figure;
