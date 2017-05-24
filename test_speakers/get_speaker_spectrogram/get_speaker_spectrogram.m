@@ -9,33 +9,71 @@
 % output in MATLAB. Use this program in conjunction with
 % `get_sepaker_spectrogram.ino` to assess how much power a potential
 % stimulus speaker generates in the hearing range of mice.
-
-
+%
+%
 % REQUIREMENTS:
-% This script is intended to be run in conjunction with
-% `get_speaker_spectrogram.ino` running on a connected Arduino
-% microcontroller. The baud rates specified in these two files must agree.
-% This script requires MATLAB's data acquisition toolbox ver 2.16 or above.
+% 1) A host PC configured for use with suitable data acquisition hardware 
+% (e.g. a National Instruments PCI data acquisition card and BNC Connector block, 
+% etc.). For more detailed hardware requirements, see the README available at
+% https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
 % 
-% *WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
+% 2) Suitable audio recording equipment (microphone, preconditioner, etc.).
+% For more detailed hardware requirements, see the README available at
+% https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
+%
+% 3) An Arduino microcontroller connected to a two-terminal analog speaker.
+% For detailed hardware requirements, see the documentation for the 
+% corresponding Arduino sketch (described below) and 
+% https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram. 
+% 
+% 3) MATLAB data acquisition toolbox ver 2.16 or above.
+%
+% 4) The Arduino sketch `get_speaker_spectrogram.ino`, available at 
+% https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/get_speaker_spectrogram.ino. 
+% This sketch should be running concurrently on a connected Arduino microcontroller connected 
+% to the host PC.
+%
+% 5) The baud rates specified in `get_speaker_spectrogram.m` and 
+% `get_speaker_spectrogram.ino` must agree.
+% 
+% *IMPORTANT WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
 % when it tries to call spectrogram(). If collecting data on hs05bruno8, it
 % may be necessary to analyze the data offline on another computer.
 %
-% For detailed hardware requirements, see the README.md file for the
-% directory containing this script.
-
-
+%
 % INSTRUCTIONS: 
-% Specify the desired stimulus duration, minimum frequency and maximum
-% frequency in this script. Specify the model numbers of speaker,
-% microphone, and signal conditioner to be used in the current recording
-% session. Ensure that the DAQ board and channel number specified by
+% 1) Connect the host PC to the Arduino microcontroller. Optionally, to 
+% confirm that the Arduino, the speaker, and all connections are working,
+% upload the sketch `test_speakers.ino` (available at https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/test_speakers)
+% to the Arduino. The speaker should emit a short burst of white noise.
+%
+% 2) Connect the audio recording equipment to the host PC (this will
+% probably entail connecting a combined microphone/preamplifier to a signal
+% preconditioner, which in turn connects via BNC cable to a connector block, 
+% which in turn connects into a PCI data acquisition board. 
+%
+% 3) Position the microphone appropriately in front of the speaker. In most
+% cases, this will mean positioning microphone perpendicular to the speaker
+% diaphragm and less than inch away.
+%
+% 4) Ensure that the serial port specified in `portID` matches the serial 
+% port connected to the Arduino microcontroller.
+%
+% 5) Upload the corresponding `get_speaker_spectrogram.ino` 
+% to the Arduino microcontroller
+%
+% 6) Ensure that the DAQ board and channel number specified by
 % `currDAQ` and `chanID`, respectively, match the DAQ board and channel
-% connected to the recording equipment. Ensure that the specified serial
-% port matches the serial port connected to the Arduino microcontroller.
-% Upload `get_speaker_spectrogram` to the Arduino microcontroller, then run
-% this script.
+% connected to the recording equipment. 
+%
+% 7) Specify the desired stimulus duration, minimum frequency and maximum
+% frequency in this script. 
+% 
+% 8) Specify the model number of the speaker, microphone, and signal conditioner 
+% to be used in the current recording session. 
+%
+% 9) Run this script.
 
 
 % DESCRIPTION
