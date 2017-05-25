@@ -106,10 +106,10 @@ function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, vara
 spkr = 'unknown';
 mic = 'unknown';
 sigCond = 'unknown';
-sigCondGain = 'unknown';
+sigCondGain = [];
 
 % Define default values for optional analog data acquisiton parameters:
-chanID = 8;
+chanID = 10;
 desiredSampleRate = 150000; %samples/second
 currDAQ = 'Dev1'; %Name for PCI-6221 in DAQ toolbox on the ephys computer 
 
@@ -119,6 +119,10 @@ baudRate = 9600;
 % Define default values for optional stimulus parameters:
 preStimDur = 1; %seconds
 postStimDur = 1; %seconds
+
+% Define default values for physical microphone configuration with respect to speaker
+distance = []; % should be in mm
+angle = []; % should be in degrees
 
 % Parse optional parameters:
 if ~isempty(varargin)
@@ -170,6 +174,14 @@ if length(varargin) > 9
     postStimDur = varargin{10};
 end
 
+if length(varargin) > 10
+    distance = varargin{11};
+end
+
+if length(varargin) > 11
+    angle = varargin{10};
+end
+
 %{
 %HW parameters:
 currSpeaker = 'Green'; %enter unique model number
@@ -198,11 +210,11 @@ AI.TriggerType = 'Manual';
 % Create and open serial connection with Arduino:
 arduino = serial(portID, 'BaudRate', baudRate);
 fopen(arduino);
-pause(1); %wait for handshake to complete; this actually takes quite a long time
+pause(2); %wait for handshake to complete; this actually takes quite a long time
 
 % Send stimulus information to Arduino
 fprintf(arduino,'%s',strcat(num2str(preStimDur),'\n'));
-disp(fscanf(arduino)); %Scan serial port for echo of stim duration
+disp(fscanf(arduino)); %Scan serial port for echo of pre-stim duration
 pause(.1);
 fprintf(arduino,'%s',strcat(num2str(stimDur),'\n'));
 disp(fscanf(arduino)); %Scan serial port for echo of stim duration
@@ -215,6 +227,7 @@ disp(fscanf(arduino)); %Scan serial port for echo of max frequency
 
 %% Acquire analog data:
 startTime = datestr(now, 'yymmdd_HH-MM-SS');
+startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
 
 % Issue stimulus start trigger to Arduino:
 fprintf(arduino,'%s','1');
@@ -233,10 +246,13 @@ fclose(arduino);
 
 %% Get, plot and save raw data from the analog input object:
 data = getdata(AI);
+hwinfo = daqhwinfo(AI);
+disp(hwinfo.DeviceName);
 delete(AI);
 clear AI
 
-dirName = strcat([rename(currSpeaker), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic-', rename(currMic), '_sigCond-', rename(currSignalConditioner)]);
+dirName = strcat(['spkr',rename(spkr), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic', rename(mic), '_sigCond', rename(sigCond)]);
+disp(dirName);
 mkdir(dirName);
 old = cd(dirName);
 csvwrite(strcat([dirName, '.csv']), data); 
@@ -246,32 +262,39 @@ figure;
 hold on;
 seconds = [1:length(data)]./trueSampleRate;
 plot(seconds, data);
-title('Raw data');
+ylabel('Voltage (V)');
 xlabel('Time (s)');
 yl = ylim;
 rectangle('Position',[preStimDur yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
 set(gca,'children',flipud(get(gca,'children')));
-savefig(dirName); % save figure
+titleStr = {strcat([num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMaxFreq/1000)), ' kHz noise']);
+            strcat(['acquired from speaker ', spkr, ' ', startTimeTitle]);
+            strcat(['Mic: ', mic]);
+            strcat(['Signal Conditioner: ', sigCond, ', Gain: x', num2str(sigCondGain)]);
+            };
+title(titleStr);
+% savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
 
 %% Write metadata
-hwinfo = daqhwinfo(AI);
-metadata = {{'Speaker', spkr},
-            {'MinFrequency', strcat(num2str(stimMinFreq),' Hz')},
-            {'MaxFrequency', strcat(num2str(stimMaxFreq),' Hz')},
-            {'StimDuration', stract(num2str(stimDur), ' sec')},
-            {'PreStimDuration', strcat(num2str(preStimDur), ' sec')},
-            {'PostStimDuration', strcat(num2str(postStimDur), ' sec')},
-            {'SampleRate', num2str(AI.SampleRate)},
-            {'Date', startTime},
-            {'Driver', driver},
-            {'DAQdeviceName', hwinfo.DeviceName},
-            {'Channel', num2str(chanID)},
-            {'Microphone', mic},
-            {'SignalConditioner', sigCond},
-            {'SignalConditionerGain', num2str(scGain)}
+metadata = {{'Speaker', strcat(spkr,'\n')},
+            {'MinStimFrequency', strcat(num2str(stimMinFreq),' Hz\n')},
+            {'MaxStimFrequency', strcat(num2str(stimMaxFreq),' Hz\n')},
+            {'StimDuration', strcat(num2str(stimDur), ' sec\n')},
+            {'PreStimDuration', strcat(num2str(preStimDur), ' sec\n')},
+            {'PostStimDuration', strcat(num2str(postStimDur), ' sec\n')},
+            {'SampleRate', strcat(num2str(trueSampleRate), 'samples/sec \n')},
+            {'Date', strcat(startTimeTitle, '\n')},
+            %{'Driver', strcat(driver, '/n')},
+            {'DAQdeviceName', strcat(hwinfo.DeviceName, '/n')},
+            {'Channel', strcat(num2str(chanID),'\n')},
+            {'Microphone', strcat(mic, '\n')},
+            {'SignalConditioner', strcat(sigCond, '\n')},
+            {'SignalConditionerGain', num2str(sigCondGain)},
+            {'Distance', strcat([num2str(distance), ' mm\n'])},
+            {'Angle', strcat([num2str(angle), ' deg'])}
             };
     
-fileID = fopen(strcat(dirName, '_metadata.txt'), 'w');
+fileID = fopen(strcat(dirName, '_metadata.txt'), 'wt');
 %fprintf(fileID, strcat(['date:', startTime]));
 %fprintf(fildID, strcat(['duration:', ]));
 for i =1:length(metadata)
@@ -284,7 +307,7 @@ fclose(fileID);
 cd(old);
 
 %% 
-%%{
+%{
 %Calculate fft:
 stimData = data(preStimDur*trueSampleRate:end);
 xfft = abs(fft(stimData));
@@ -327,5 +350,5 @@ end
 
 
 disp('Done');
-
+%}
 
