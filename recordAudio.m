@@ -1,7 +1,5 @@
 function recordAudio(duration, device, chanID, varargin)
-    
-    % disp(duration);
-    
+    %% Parse inputs
     p = inputParser;
     defaultMic = 'unknown';
     defaultSignalConditioner = 'unknown';
@@ -28,6 +26,7 @@ function recordAudio(duration, device, chanID, varargin)
     sigCond = p.Results.SignalConditioner;
     scGain = p.Results.SignalConditionerGain;
     
+    %% Set up analog input
     AI = analoginput(driver, device);
     AI.inputType = 'SingleEnded';
     chan = addchannel(AI, chanID);
@@ -36,21 +35,22 @@ function recordAudio(duration, device, chanID, varargin)
     AI.SamplesPerTrigger = duration * AI.SampleRate;
     AI.TriggerType = 'Manual';
     
-    startTime = datestr(now, 'yymmdd_HH-MM-SS');
-    
+    %% Acquire data
     start(AI);
+    startTime = datestr(now, 'yymmdd_HH-MM-SS');
     trigger(AI);
-    
     wait(AI, duration + 0.1);
     
+    %% Save data to seconary storage
     data = getdata(AI);
+    plot(data); % plot data to make sure it looks sensible
     dirName = strcat(['audio_recording_', startTime, '_',num2str(duration),'s_', num2str(sampleRate/1000), 'Hz']);
     mkdir(dirName);
     cd(dirName);
     filename = strcat(dirName, '.csv');
     csvwrite(filename, data);
     
-
+    %% Write metadata
     hwinfo = daqhwinfo(AI);
     metadata = {{'Date', startTime},
                 {'SampleRate', num2str(AI.SampleRate)},
@@ -70,5 +70,3 @@ function recordAudio(duration, device, chanID, varargin)
     end
     
     fclose(fileID);
-    % disp(p.Results.Vendor);
-    % disp(p.Results.SampleRate);
