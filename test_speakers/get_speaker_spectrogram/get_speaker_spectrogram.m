@@ -1,6 +1,7 @@
 function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, varargin)
-%%
-% Last updated DDK 7/20/16
+% get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID [, spkr, mic, sigCond])
+
+% Last updated DDK 2017-05-25
 
 % OVERVIEW: 
 % This script constitutes the desktop-side code for
@@ -98,31 +99,31 @@ function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, vara
 % stimulus. Once the stimulus duration elapses, the script ends the
 % recording and generates a spectrogram of the recorded signal. 
 
-%%
-%Define current test parameters:
+%% Parse inputs into stimulus and DAQ parameters, and, where possible, validate hardware:
 
-%HW parameters:
-currSpeaker = 'Green'; %enter unique model number
-currMic = '378C01'; %enter unique model number
-currSignalConditioner = '480E09'; %enter unique model number
+% Define default values for optional audio recording equipment parameters: 
+spkr = 'unknown';
+mic = 'unknown';
+sigCond = 'unknown';
 
+% Define default values for optional Arduino communications parameters:
+portID = 'COM13';
+baudRate = 9600;
+
+% Define default values for optional analog data acquisiton parameters:
 currDAQ = 'Dev1'; %Name for PCI-6221 in DAQ toolbox on the ephys computer 
 chanID = 8;
 desiredSampleRate = 150000;
 
-portID = 'COM13';
-baudRate = 9600;
+% Define default values for optional stimulus parameters:
+preStimDur = 1; % in seconds
+postStimDur = 1; % in seconds
 
-%Stimulus parameters:
-preStimDur = 1; %seconds
-postStimDur = 1;
-
-
+% Parse optional audio recording hardware parameters
 if ~isempty(varargin)
     spkr = varargin{1}; 
     validateSpeakers(varargin{1}, stimMinFreq, stimMaxFreq);
 else
-    spkr = 'unknown';
     warning('No speaker specified; skipping speaker validation. Requested stimulus frequencies may lie outside of speaker range.');
 end
 
@@ -130,7 +131,6 @@ if length(varargin) > 1
     mic = varargin{2};
     validateMic(varargin{2}, stimMinFreq, stimMaxFreq);
 else
-    mic = 'unknown';
     warning('No microphone specified; skipping microphone validation. Requested stimulus frequencies may lie outside of microphone range.');
 end
 
@@ -138,9 +138,16 @@ if length(varargin) > 2
     sigCond = varargin{3};
     validateSignalConditioner(varargin{3}, stimMinFreq, stimMaxFreq);
 else
-    sigCond = 'unknown';
     warning('No signal conditioner specified; skipping signal conditioner validation. Requested stimulus frequencies may lie outside of microphone range.');
 end
+
+%HW parameters:
+currSpeaker = 'Green'; %enter unique model number
+currMic = '378C01'; %enter unique model number
+currSignalConditioner = '480E09'; %enter unique model number
+
+
+
 
 %% Configure analog input object:
 AI = analoginput('nidaq', currDAQ);
@@ -163,7 +170,7 @@ AI.TriggerType = 'Manual';
 % Create and open serial connection with Arduino:
 arduino = serial(portID, 'BaudRate', baudRate);
 fopen(arduino);
-pause(3); %wait for handshake to complete
+pause(1); %wait for handshake to complete; this actually takes quite a long time
 
 % Send stimulus information to Arduino
 fprintf(arduino,'%s',strcat(num2str(preStimDur),'\n'));
@@ -179,6 +186,7 @@ fprintf(arduino,'%s',strcat(num2str(stimMaxFreq),'\n'));
 disp(fscanf(arduino)); %Scan serial port for echo of max frequency
 
 %% Acquire analog data:
+startTime = datestr(now, 'yymmdd_HH-MM-SS');
 
 % Issue stimulus start trigger to Arduino:
 fprintf(arduino,'%s','1');
@@ -195,10 +203,9 @@ disp('... data acquisition complete.');
 %Close serial communication with Arduino:
 fclose(arduino);
 
-
-%% Get the raw data from the analog input object:
+%% Get, plot and save raw data from the analog input object:
 data = getdata(AI);
-filename = strcat(['spkr-', rename(currSpeaker), '_mic-', rename(currMic), '_sigCond-', rename(currSignalConditioner), '_', datestr(now,'yymmdd_HH-MM'), '.csv' ]);
+filename = strcat(['spkr-', rename(currSpeaker), '_mic-', rename(currMic), '_sigCond-', rename(currSignalConditioner), '_', startTime, '.csv' ]);
 csvwrite(filename, data); 
 
 %Plot raw data to make sure signal looks reasonable
@@ -213,6 +220,8 @@ rectangle('Position',[preStimDur yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9
 set(gca,'children',flipud(get(gca,'children')));
 
 
+
+%% 
 %%{
 %Calculate fft:
 stimData = data(preStimDur*trueSampleRate:end);
