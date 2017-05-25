@@ -42,6 +42,7 @@ function recordAudio(duration, device, chanID, varargin)
     %% Acquire data
     start(AI);
     startTime = datestr(now, 'yymmdd_HH-MM-SS');
+    startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
     trigger(AI);
     wait(AI, duration + 0.1);
     
@@ -49,7 +50,7 @@ function recordAudio(duration, device, chanID, varargin)
     data = getdata(AI);
     dirName = strcat(['audio_recording_', startTime, '_',num2str(duration),'s_', num2str(sampleRate), 'samplesPerSec']);
     mkdir(dirName);
-    cd(dirName);
+    old = cd(dirName);
     filename = strcat(dirName, '.csv');
     csvwrite(filename, data);
     
@@ -58,10 +59,16 @@ function recordAudio(duration, device, chanID, varargin)
     hold on;
     seconds = [1:length(data)]./trueSampleRate;
     plot(seconds, data);
-    title(strcat(['Audio recording ', starTime, ', ', num2str(sampleRate), ' samples/sec, mic: ', mic, ', signal conditioner: ', sigCond, ', gain:', num2str(scGain) ]));
+    %title(strcat(['Audio recording ', startTime, ', ', num2str(sampleRate), ' samples/sec, mic: ', mic, ', signal conditioner: ', sigCond, ', gain:', num2str(scGain) ]));
+    title({strcat(['Audio recording ', startTimeTitle]); 
+           strcat(['Mic: ', mic]);
+           strcat(['Signal Conditioner: ', sigCond, ', gain: x', num2str(scGain)]);
+           strcat([num2str(sampleRate), ' samples/sec']);
+           });
     xlabel('Time (s)');
     ylabel('Volts (V)');
-    savefig(dirName); % save figure
+    %disp(dirName);
+    %savefig(dirName); % save figure
     
     %% Write metadata
     hwinfo = daqhwinfo(AI);
@@ -83,3 +90,4 @@ function recordAudio(duration, device, chanID, varargin)
     end
     
     fclose(fileID);
+    cd(old);
