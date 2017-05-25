@@ -28,9 +28,9 @@ function recordAudio(duration, device, chanID, varargin)
     sigCond = p.Results.SignalConditioner;
     scGain = p.Results.SignalConditionerGain;
     
-    AI = analogInput(driver, device);
+    AI = analoginput(driver, device);
     AI.inputType = 'SingleEnded';
-    chan = addChannel(AI, chanID);
+    chan = addchannel(AI, chanID);
     AI.Channel.InputRange = [-10 10];
     AI.SampleRate = sampleRate;
     AI.SamplesPerTrigger = duration * AI.SampleRate;
