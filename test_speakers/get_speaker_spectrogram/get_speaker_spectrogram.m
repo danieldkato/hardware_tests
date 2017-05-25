@@ -117,11 +117,6 @@ baudRate = 9600;
 preStimDur = 1; %seconds
 postStimDur = 1;
 
-%{
-stimDur = 5; %seconds
-stimMinFreq = 4000; %Hz
-stimMaxFreq = 20000; %Hz
-%}
 
 if ~isempty(varargin)
     spkr = varargin{1}; 
@@ -146,140 +141,8 @@ else
     sigCond = 'unknown';
     warning('No signal conditioner specified; skipping signal conditioner validation. Requested stimulus frequencies may lie outside of microphone range.');
 end
-%%
-%Define hardware options:
 
-%1. Speakers:
-%Each speaker is represented by a cell array with the format:
-%   {speaker name, min freq(Hz), max freq(Hz)}
-%{
-speakers = {
-  {'Altec Lansing ACS340',30,20000};
-  {'Green speaker',30,20000}
-  {'Polycell Dome Tweeter', 30, 20000}
-};
-%}
-
-validateSpeakers(spkrName, stimMinFreq, stimMaxFreq);
-
-
-%2. Microphones:
-%Each microphone is represented by a cell array with the format:
-%   {mic name, frequency range (+/-1 db) min (Hz), frequency range (+/-1 db) max(Hz)}
-mics = {
-    {'PCB Piezoelectronics 378C01 1/4" free-field prepolarized mirophone and preamplifier',7,12500}
-};
-
-%3. Signal conditioners:
-%Each signal conditioner is represented by a cell array with the format:
-%   {signal conditioner name, frequency range (-5%) min (Hz), frequency range (-5%) max (Hz)}
-signalConditioners = {
-    {'PCB Peizoelectronics 480E09 ICP sensor signal conditioner',0.15,100000}
-};
-
-%4. DAQ boards - hardware info included in daqtoolbox
-
-
-%%
-%Check that hardware configuration is appropriate for desired stimulus,
-%return any necessary warnings
-
-%Evaluate speakers
-%{
-spkrFound = 0;
-spkrInd = 0;
-currSpkrMin = 0;
-currSpkrMax = 0;
-for ii = 1:length(speakers)
-    if ~isempty(strfind(speakers{ii}{1}, currSpeaker))
-        spkrInd = ii;
-        spkrFound = spkrFound + 1;
-        currSpkrMin = speakers{ii}{2};
-        currSpkrMax = speakers{ii}{3};
-    end
-end
-
-if spkrFound == 0
-    warning('Selected speaker specifications not found; desired stimulus may not be within range.');
-elseif spkrFound > 1
-    warning('Speaker specifications could not be determined because provided model number matches multiple devices; desired stimulus may not be within range.');
-elseif spkrFound == 1
-    if currSpkrMin > stimMinFreq 
-        warning('Desired minimum stimulus frequency outside of speaker range.');
-    end
-
-    if currSpkrMax < stimMaxFreq
-        warning('Desired maximum stimulus frequency outside of speaker range.');
-    end
-end
-
-
-%Evaluate microphone
-micFound = 0;
-micInd = 0;
-currMicMin = 0;
-currMicMax = 0;
-for jj = 1:length(mics)
-    if ~isempty(strfind(mics{jj}{1}, currMic))
-        micInd = jj;
-        micFound = micFound + 1;
-        currMicMin = mics{jj}{2};
-        currMicMax = mics{jj}{3};
-    end
-end
-
-if micFound == 0
-    warning('Selected microphone specifications not found; desired stimulus may not be within range.');
-elseif micFound > 1
-    warning('Microphone specifications could not be determined because provided model number matches multiple devices; desired stimulus may not be within range.');
-elseif micFound == 1
-    if currMicMin > stimMinFreq 
-        warning('Desired minimum stimulus frequency outside of microphone range.');
-    end
-
-    if currMicMax < stimMaxFreq
-        warning('Desired maximum stimulus frequency outside of microphone range.');
-    end
-end
-
-
-%Evaluate signal conditioner
-scFound =0;
-scInd = 0;
-currSCMin = 0;
-currSCMax = 0;
-for kk = 1:length(signalConditioners)
-    if ~isempty(strfind(signalConditioners{kk}{1}, currSignalConditioner))
-        scInd = kk;
-        scFound = scFound + 1;
-        currSCMin = signalConditioners{kk}{2};
-        currSCMax = signalConditioners{kk}{3};
-        
-        if currSCMin < stimMinFreq 
-            warning('Desired minimum stimulus frequency outside of signal conditioner range.');
-        end
-        
-        if currSCMax > stimMaxFreq
-            warning('Desired maximum stimulus frequency outside of signal conditioner range.');
-        end
-    end
-end
-
-if scFound == 0
-    warning('Selected signal conditioner specifications not found; desired stimulus may not be within range.');
-elseif scFound > 1
-    warning('Signal conditioner specifications could not be determined because provided model number matches multiple devices; desired stimulus may not be within range.');
-elseif scFound == 1
-    if currSCMin > stimMinFreq 
-        warning('Desired minimum stimulus frequency outside of signal conditioner range.');
-    end
-
-    if currSCMax < stimMaxFreq
-        warning('Desired maximum stimulus frequency outside of signal conditioner range.');
-    end
-end
-%}
-
+%% Configure analog input object:
 AI = analoginput('nidaq', currDAQ);
 AI.InputType = 'SingleEnded';
 maxSampleRate = daqhwinfo(AI,'MaxSampleRate');
@@ -287,8 +150,6 @@ if maxSampleRate < stimMaxFreq/2
     warning('DAQ board max sampling rate is less than Nyquist rate for desired stimulus.');
 end
 
-%%
-%Configure analog input object:
 chan = addchannel(AI, chanID);
 AI.Channel.InputRange = [-10 10];
 AI.SampleRate = desiredSampleRate;
@@ -297,12 +158,14 @@ Fs = trueSampleRate;
 AI.SamplesPerTrigger = (preStimDur + stimDur + postStimDur) * trueSampleRate;
 AI.TriggerType = 'Manual';
 
-%Create and open serial communication object:
+%% Send stimulus parameters to Arduino 
+
+% Create and open serial connection with Arduino:
 arduino = serial(portID, 'BaudRate', baudRate);
 fopen(arduino);
 pause(3); %wait for handshake to complete
 
-%Send stimulus information to Arduino
+% Send stimulus information to Arduino
 fprintf(arduino,'%s',strcat(num2str(preStimDur),'\n'));
 disp(fscanf(arduino)); %Scan serial port for echo of stim duration
 pause(.1);
@@ -315,10 +178,12 @@ pause(.1);
 fprintf(arduino,'%s',strcat(num2str(stimMaxFreq),'\n'));
 disp(fscanf(arduino)); %Scan serial port for echo of max frequency
 
-%Issue trigger to Arduino:
+%% Acquire analog data:
+
+% Issue stimulus start trigger to Arduino:
 fprintf(arduino,'%s','1');
 
-%Begin data acquisition:
+% Begin data acquisition:
 start(AI);
 disp('Starting data acquisition...');
 trigger(AI);
@@ -327,10 +192,11 @@ trigger(AI);
 wait(AI, preStimDur + stimDur + postStimDur + .1);
 disp('... data acquisition complete.');
 
-%Close serial communication object:
+%Close serial communication with Arduino:
 fclose(arduino);
 
-%Get the raw data from the analog input object:
+
+%% Get the raw data from the analog input object:
 data = getdata(AI);
 filename = strcat(['spkr-', rename(currSpeaker), '_mic-', rename(currMic), '_sigCond-', rename(currSignalConditioner), '_', datestr(now,'yymmdd_HH-MM'), '.csv' ]);
 csvwrite(filename, data); 
@@ -344,7 +210,8 @@ title('Raw data');
 xlabel('Time (s)');
 yl = ylim;
 rectangle('Position',[preStimDur yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
-set(gca,'children',flipud(get(gca,'children')))
+set(gca,'children',flipud(get(gca,'children')));
+
 
 %%{
 %Calculate fft:
