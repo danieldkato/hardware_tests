@@ -10,12 +10,18 @@ function validateSpeaker(name, min, max)
     match = 0;
     
     for i = 1:length(Speakers)
-        if strcmp(name, Speakers(i).Name)
+        if strcmp(name, Speakers(i).Mdl)
             match = 1;
-            if min < Speakers(i).MinF      
+            
+            if isnan(Speakers(i).MinF)
+                warning('Minimum frequency not specified in selected speaker definition. Specified stimulus may be outside of speaker frequency range.');
+            elseif min < Speakers(i).MinF      
                 warning('Desired minimum stimulus frequency outside of speaker range'); 
             end
-            if max > Speakers(i).MaxF
+            
+            if isnan(Speakers(i).MaxF)
+                warning('Maximum frequency not specified in selected speaker definition. Specified stimulus may be outside of speaker frequency range.');            
+            elseif max > Speakers(i).MaxF
                 warning('Desired maximum stimulus frequency outside of speaker range');
             end
         end

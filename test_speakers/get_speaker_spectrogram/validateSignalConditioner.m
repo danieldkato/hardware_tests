@@ -12,10 +12,16 @@ function validateSignalConditioner(name, min, max)
     for i = 1:length(SignalConditioners)
         if strcmp(name, SignalConditioners(i).Name)
             match = 1;
-            if min < SignalConditioners(i).MinF      
+            
+            if isnan(SignalConditioners(i).MinF)
+                warning('Minimum frequency not specified in selected signal conditioner definition. Specified stimulus may be outside of signal conditioner frequency range.');
+            elseif min < SignalConditioners(i).MinF      
                 warning('Desired minimum stimulus frequency outside of signal conditioner range'); 
             end
-            if max > SignalConditioners(i).MaxF
+
+            if isnan(SignalConditioners(i).MaxF)
+                warning('Maximum frequency not specified in selected signal conditioner definition. Specified stimulus may be outside of signal conditioner frequency range.');
+            elseif max > SignalConditioners(i).MaxF
                 warning('Desired maximum stimulus frequency outside of signal conditioner range');
             end
         end

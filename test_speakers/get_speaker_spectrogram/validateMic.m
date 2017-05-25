@@ -12,10 +12,16 @@ function validateMic(name, min, max)
     for i = 1:length(Mics)
         if strcmp(name, Mics(i).Name)
             match = 1;
-            if min < Mics(i).MinF      
+            
+            if isnan(Mics(i).MinF)
+                warning('Minimum frequency not specified in selected microphone definition. Specified stimulus may be outside of microphone frequency range.');
+            elseif min < Mics(i).MinF      
                 warning('Desired minimum stimulus frequency outside of microphone range'); 
             end
-            if max > Mics(i).MaxF
+            
+            if isnan(Mics(i).MaxF)
+                warning('Maximum frequency not specified in selected microphone definition. Specified stimulus may be outside of microphone frequency range.');
+            elseif max > Mics(i).MaxF
                 warning('Desired maximum stimulus frequency outside of microphone range');
             end
         end
