@@ -1,4 +1,7 @@
 function recordAudio(duration, device, chanID, varargin)
+% recordAudio(duration, device, chanID)
+% recordAudio(duration, device, chanID [, SampleRate, Driver, Mic, SignalConditioner, SignalConditionerGain])
+
     %% Parse inputs
     p = inputParser;
     defaultMic = 'unknown';
