@@ -10,11 +10,11 @@ function recordAudio(duration, device, chanID, varargin)
     addRequired(p, 'duration');
     addRequired(p, 'device');
     addRequired(p, 'channel');
-    addOptional(p, 'SampleRate', defaultSampleRate);
-    addOptional(p, 'Driver', defaultDriver);
-    addOptional(p, 'Mic', defaultMic);
-    addOptional(p, 'SignalConditioner', defaultSignalConditioner);
-    addOptional(p, 'SignalConditionerGain', defaultSignalConditionerGain);
+    addOptional(p, 'SampleRate', defaultSampleRate); % add optional positional argument
+    addOptional(p, 'Driver', defaultDriver); % add optional positional argument
+    addOptional(p, 'Mic', defaultMic); % add optional positional argument
+    addOptional(p, 'SignalConditioner', defaultSignalConditioner); % add optional positional argument
+    addOptional(p, 'SignalConditionerGain', defaultSignalConditionerGain); % add optional positional argument
     
     parse(p, duration, device, chanID, varargin{:});
     
@@ -32,6 +32,7 @@ function recordAudio(duration, device, chanID, varargin)
     chan = addchannel(AI, chanID);
     AI.Channel.InputRange = [-10 10];
     AI.SampleRate = sampleRate;
+    trueSampleRate = double(AI.SampleRate);
     AI.SamplesPerTrigger = duration * AI.SampleRate;
     AI.TriggerType = 'Manual';
     
@@ -41,14 +42,23 @@ function recordAudio(duration, device, chanID, varargin)
     trigger(AI);
     wait(AI, duration + 0.1);
     
-    %% Save data to seconary storage
+    %% Save data to secondary storage
     data = getdata(AI);
-    plot(data); % plot data to make sure it looks sensible
-    dirName = strcat(['audio_recording_', startTime, '_',num2str(duration),'s_', num2str(sampleRate/1000), 'Hz']);
+    dirName = strcat(['audio_recording_', startTime, '_',num2str(duration),'s_', num2str(sampleRate), 'samplesPerSec']);
     mkdir(dirName);
     cd(dirName);
     filename = strcat(dirName, '.csv');
     csvwrite(filename, data);
+    
+    %Plot raw data to make sure signal looks reasonable
+    figure;
+    hold on;
+    seconds = [1:length(data)]./trueSampleRate;
+    plot(seconds, data);
+    title(strcat(['Audio recording ', starTime, ', ', num2str(sampleRate), ' samples/sec, mic: ', mic, ', signal conditioner: ', sigCond, ', gain:', num2str(scGain) ]));
+    xlabel('Time (s)');
+    ylabel('Volts (V)');
+    savefig(dirName); % save figure
     
     %% Write metadata
     hwinfo = daqhwinfo(AI);
