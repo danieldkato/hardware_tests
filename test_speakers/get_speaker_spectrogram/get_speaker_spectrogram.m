@@ -1,6 +1,6 @@
 function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, varargin)
 % get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID)
-% get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID [, spkr, mic, sigCond, chanID, desiredSampleRate, currDAQ, baudRate, preStimDur, postStimDur])
+% get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID [, spkr, mic, sigCond, sigCondGain, chanID, desiredSampleRate, currDAQ, baudRate, preStimDur, postStimDur])
 
 % Last updated DDK 2017-05-25
 
@@ -106,18 +106,19 @@ function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, vara
 spkr = 'unknown';
 mic = 'unknown';
 sigCond = 'unknown';
+sigCondGain = 'unknown';
 
 % Define default values for optional analog data acquisiton parameters:
 chanID = 8;
-desiredSampleRate = 150000;
+desiredSampleRate = 150000; %samples/second
 currDAQ = 'Dev1'; %Name for PCI-6221 in DAQ toolbox on the ephys computer 
 
 % Define default values for optional Arduino communications parameters:
 baudRate = 9600;
 
 % Define default values for optional stimulus parameters:
-preStimDur = 1; % in seconds
-postStimDur = 1; % in seconds
+preStimDur = 1; %seconds
+postStimDur = 1; %seconds
 
 % Parse optional parameters:
 if ~isempty(varargin)
@@ -142,27 +143,31 @@ else
 end
 
 if length(varargin) > 3
-    chanID = varargin{4};
+    sigCondGain = varargin{4};
 end
 
 if length(varargin) > 4
-    desiredSampleRate = varargin{5};
+    chanID = varargin{5};
 end
 
 if length(varargin) > 5
-    currDAQ = varargin{6};
+    desiredSampleRate = varargin{6};
 end
 
 if length(varargin) > 6
-    baudRate = varargin{7};
+    currDAQ = varargin{7};
 end
 
 if length(varargin) > 7
-    preStimDur = varargin{8};
+    baudRate = varargin{8};
 end
 
 if length(varargin) > 8
-    postStimDur = varargin{9};
+    preStimDur = varargin{9};
+end
+
+if length(varargin) > 9
+    postStimDur = varargin{10};
 end
 
 %{
@@ -228,8 +233,13 @@ fclose(arduino);
 
 %% Get, plot and save raw data from the analog input object:
 data = getdata(AI);
-filename = strcat(['spkr-', rename(currSpeaker), '_mic-', rename(currMic), '_sigCond-', rename(currSignalConditioner), '_', startTime, '.csv' ]);
-csvwrite(filename, data); 
+delete(AI);
+clear AI
+
+dirName = strcat([rename(currSpeaker), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic-', rename(currMic), '_sigCond-', rename(currSignalConditioner)]);
+mkdir(dirName);
+old = cd(dirName);
+csvwrite(strcat([dirName, '.csv']), data); 
 
 %Plot raw data to make sure signal looks reasonable
 figure;
@@ -241,8 +251,37 @@ xlabel('Time (s)');
 yl = ylim;
 rectangle('Position',[preStimDur yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
 set(gca,'children',flipud(get(gca,'children')));
+savefig(dirName); % save figure
+
+%% Write metadata
+hwinfo = daqhwinfo(AI);
+metadata = {{'Speaker', spkr},
+            {'MinFrequency', strcat(num2str(stimMinFreq),' Hz')},
+            {'MaxFrequency', strcat(num2str(stimMaxFreq),' Hz')},
+            {'StimDuration', stract(num2str(stimDur), ' sec')},
+            {'PreStimDuration', strcat(num2str(preStimDur), ' sec')},
+            {'PostStimDuration', strcat(num2str(postStimDur), ' sec')},
+            {'SampleRate', num2str(AI.SampleRate)},
+            {'Date', startTime},
+            {'Driver', driver},
+            {'DAQdeviceName', hwinfo.DeviceName},
+            {'Channel', num2str(chanID)},
+            {'Microphone', mic},
+            {'SignalConditioner', sigCond},
+            {'SignalConditionerGain', num2str(scGain)}
+            };
+    
+fileID = fopen(strcat(dirName, '_metadata.txt'), 'w');
+%fprintf(fileID, strcat(['date:', startTime]));
+%fprintf(fildID, strcat(['duration:', ]));
+for i =1:length(metadata)
+    fprintf(fileID, strcat([metadata{i}{1},': ',metadata{i}{2}]));
+end
+
+fclose(fileID);
 
 
+cd(old);
 
 %% 
 %%{
@@ -286,9 +325,6 @@ if strcmp(getenv('computername'), 'HS05BRUNO8') == 0
     title(titleStr2);
 end 
 
-%Clean up:
-delete(AI);
-clear AI
 
 disp('Done');
 
