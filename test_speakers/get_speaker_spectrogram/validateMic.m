@@ -10,7 +10,7 @@ function validateMic(name, min, max)
     match = 0;
     
     for i = 1:length(Mics)
-        if strcmp(name, Mics(i).Name)
+        if strcmp(name, Mics(i).Mdl)
             match = 1;
             
             if isnan(Mics(i).MinF)

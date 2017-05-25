@@ -10,7 +10,7 @@ function validateSignalConditioner(name, min, max)
     match = 0;
     
     for i = 1:length(SignalConditioners)
-        if strcmp(name, SignalConditioners(i).Name)
+        if strcmp(name, SignalConditioners(i).Mdl)
             match = 1;
             
             if isnan(SignalConditioners(i).MinF)
