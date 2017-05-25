@@ -1,5 +1,6 @@
 function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, varargin)
-% get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID [, spkr, mic, sigCond])
+% get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID)
+% get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID [, spkr, mic, sigCond, chanID, desiredSampleRate, currDAQ, baudRate, preStimDur, postStimDur])
 
 % Last updated DDK 2017-05-25
 
@@ -106,20 +107,19 @@ spkr = 'unknown';
 mic = 'unknown';
 sigCond = 'unknown';
 
-% Define default values for optional Arduino communications parameters:
-portID = 'COM13';
-baudRate = 9600;
-
 % Define default values for optional analog data acquisiton parameters:
-currDAQ = 'Dev1'; %Name for PCI-6221 in DAQ toolbox on the ephys computer 
 chanID = 8;
 desiredSampleRate = 150000;
+currDAQ = 'Dev1'; %Name for PCI-6221 in DAQ toolbox on the ephys computer 
+
+% Define default values for optional Arduino communications parameters:
+baudRate = 9600;
 
 % Define default values for optional stimulus parameters:
 preStimDur = 1; % in seconds
 postStimDur = 1; % in seconds
 
-% Parse optional audio recording hardware parameters
+% Parse optional parameters:
 if ~isempty(varargin)
     spkr = varargin{1}; 
     validateSpeakers(varargin{1}, stimMinFreq, stimMaxFreq);
@@ -141,13 +141,36 @@ else
     warning('No signal conditioner specified; skipping signal conditioner validation. Requested stimulus frequencies may lie outside of microphone range.');
 end
 
+if length(varargin) > 3
+    chanID = varargin{4};
+end
+
+if length(varargin) > 4
+    desiredSampleRate = varargin{5};
+end
+
+if length(varargin) > 5
+    currDAQ = varargin{6};
+end
+
+if length(varargin) > 6
+    baudRate = varargin{7};
+end
+
+if length(varargin) > 7
+    preStimDur = varargin{8};
+end
+
+if length(varargin) > 8
+    postStimDur = varargin{9};
+end
+
+%{
 %HW parameters:
 currSpeaker = 'Green'; %enter unique model number
 currMic = '378C01'; %enter unique model number
 currSignalConditioner = '480E09'; %enter unique model number
-
-
-
+%}
 
 %% Configure analog input object:
 AI = analoginput('nidaq', currDAQ);
