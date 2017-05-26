@@ -1,4 +1,4 @@
-function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, varargin)
+function get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFreq, portID, varargin)
 % get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID)
 % get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID [, spkr, mic, sigCond, sigCondGain, chanID, desiredSampleRate, currDAQ, baudRate, preStimDur, postStimDur])
 
@@ -114,6 +114,10 @@ function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, vara
 
 %% Parse inputs into stimulus and DAQ parameters, and, where possible, validate hardware:
 
+sigCondGain = input('Please enter the gain on any signal conditioners being used in the current setup. If no signal conditioners are being used, please enter "1".');
+distance = input('Please enter the distance between the microphone cap and the speaker in millimeters.');
+angle = input('Please enter the angle between the long axis of the microphone and axis normal to the speaker diaphragm in degrees.');
+
 % Define default values for optional audio recording equipment parameters: 
 spkr = 'unknown';
 mic = 'unknown';
@@ -136,6 +140,8 @@ postStimDur = 1; %seconds
 distance = []; % should be in mm
 angle = []; % should be in degrees
 
+
+%{
 % Parse optional parameters:
 if ~isempty(varargin)
     spkr = varargin{1}; 
@@ -193,6 +199,7 @@ end
 if length(varargin) > 11
     angle = varargin{10};
 end
+%}
 
 %% Configure analog input object:
 AI = analoginput('nidaq', currDAQ);
