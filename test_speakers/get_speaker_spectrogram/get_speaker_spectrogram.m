@@ -270,20 +270,29 @@ title(titleStr);
 %savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
 
 %% Write data and metadata into a struct and save to secondary storage to allow for easy analysis later
-Session.trueSampleRate = trueSampleRate;
+Session.Speaker = spkr;
+Session.trueSampleRate.value = trueSampleRate;
+Session.trueSampleRate.units = 'samples/second';
 Session.sigCondGain = sigCondGain;
-Session.stimMinFreq = stimMinFreq;
-Session.stimMaxFreq = stimMaxFreq;
-Session.stimDur = stimDur;
-Session.preStimDur = preStimDur;
-Session.postStimDur = postStimDur;
+Session.stimMinFreq.value = stimMinFreq;
+Session.stimMinFreq.units = 'Hz';
+Session.stimMaxFreq.value = stimMaxFreq;
+Session.stimMaxFreq.units = 'Hz';
+Session.stimDur.value = stimDur;
+Session.stimDur.units = 'seconds';
+Session.preStimDur.value = preStimDur;
+Session.preStimDur.units = 'seconds';
+Session.postStimDur.value = postStimDur;
+Session.postStimDur.units = 'seconds';
 Session.Date = startTimeTitle;
 Session.DAQdeviceName = hwinfo.DeviceName;
 Session.Channel = chanID;
 Session.Microphone = mic;
 Session.SignalConditioner = sigCond;
-Session.Distance = distance;
-Session.Angle = angle;
+Session.Distance.value = distance;
+Session.Distance.units = 'millimeters';
+Session.Angle.value = angle;
+Session.Angle.units = 'degrees';
 
 dirName = strcat(['spkr',rename(spkr), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic', rename(mic), '_sigCond', rename(sigCond)]);
 mkdir(dirName);
