@@ -100,6 +100,18 @@ function get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID, vara
 % stimulus. Once the stimulus duration elapses, the script ends the
 % recording and generates a spectrogram of the recorded signal. 
 
+% TODO:
+% 1) Want to change inputs to make it more foolproof. Arguments that are
+% likely to be forgotten should be required inputs: e.g., signal
+% conditioner gain, distance, and angle. Perhaps not only that, but also to
+% ensure that users don't lazily reuse input parameters from the last call,
+% actually prompt the user for command-line input for these parameters
+% (especially since they're not onerous to type).
+
+% 2) For the other (many) parameters that are less likely to change, put
+% them in a configuration file (like a MATLAB-evaluable text file) and have
+% them read in. 
+
 %% Parse inputs into stimulus and DAQ parameters, and, where possible, validate hardware:
 
 % Define default values for optional audio recording equipment parameters: 
@@ -182,13 +194,6 @@ if length(varargin) > 11
     angle = varargin{10};
 end
 
-%{
-%HW parameters:
-currSpeaker = 'Green'; %enter unique model number
-currMic = '378C01'; %enter unique model number
-currSignalConditioner = '480E09'; %enter unique model number
-%}
-
 %% Configure analog input object:
 AI = analoginput('nidaq', currDAQ);
 AI.InputType = 'SingleEnded';
@@ -244,22 +249,11 @@ disp('... data acquisition complete.');
 %Close serial communication with Arduino:
 fclose(arduino);
 
-%% Get, plot and save raw data from the analog input object:
-data = getdata(AI);
+%% Plot raw data from the analog input object:
+Session.data = getdata(AI); % create a session object that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
-disp(hwinfo.DeviceName);
-delete(AI);
-clear AI
-
-dirName = strcat(['spkr',rename(spkr), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic', rename(mic), '_sigCond', rename(sigCond)]);
-disp(dirName);
-mkdir(dirName);
-old = cd(dirName);
-csvwrite(strcat([dirName, '.csv']), data); 
-
-%Plot raw data to make sure signal looks reasonable
-figure;
-hold on;
+delete(AI); clear AI;
+figure; hold on;
 seconds = [1:length(data)]./trueSampleRate;
 plot(seconds, data);
 ylabel('Voltage (V)');
@@ -273,9 +267,32 @@ titleStr = {strcat([num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMax
             strcat(['Signal Conditioner: ', sigCond, ', Gain: x', num2str(sigCondGain)]);
             };
 title(titleStr);
-% savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
+%savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
 
-%% Write metadata
+%% Write data and metadata into a struct and save to secondary storage to allow for easy analysis later
+Session.trueSampleRate = trueSampleRate;
+Session.sigCondGain = sigCondGain;
+Session.stimMinFreq = stimMinFreq;
+Session.stimMaxFreq = stimMaxFreq;
+Session.stimDur = stimDur;
+Session.preStimDur = preStimDur;
+Session.postStimDur = postStimDur;
+Session.Date = startTimeTitle;
+Session.DAQdeviceName = hwinfo.DeviceName;
+Session.Channel = chanID;
+Session.Microphone = mic;
+Session.SignalConditioner = sigCond;
+Session.Distance = distance;
+Session.Angle = angle;
+
+dirName = strcat(['spkr',rename(spkr), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic', rename(mic), '_sigCond', rename(sigCond)]);
+mkdir(dirName);
+old = cd(dirName);
+csvwrite(strcat([dirName, '.csv']), data); 
+save(dirName, Session);
+
+%% Write metadata as txt for non-MATLAB analysis?
+%{
 metadata = {{'Speaker', strcat(spkr,'\n')},
             {'MinStimFrequency', strcat(num2str(stimMinFreq),' Hz\n')},
             {'MaxStimFrequency', strcat(num2str(stimMaxFreq),' Hz\n')},
@@ -302,7 +319,7 @@ for i =1:length(metadata)
 end
 
 fclose(fileID);
-
+%}
 
 cd(old);
 
