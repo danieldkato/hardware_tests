@@ -1,4 +1,4 @@
-function get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFreq, portID, varargin)
+function get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFreq, portID, configFile)
 % get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID)
 % get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID [, spkr, mic, sigCond, sigCondGain, chanID, desiredSampleRate, currDAQ, baudRate, preStimDur, postStimDur])
 
@@ -114,9 +114,56 @@ function get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFreq, por
 
 %% Parse inputs into stimulus and DAQ parameters, and, where possible, validate hardware:
 
-sigCondGain = input('Please enter the gain on any signal conditioners being used in the current setup. If no signal conditioners are being used, please enter "1".');
-distance = input('Please enter the distance between the microphone cap and the speaker in millimeters.');
-angle = input('Please enter the angle between the long axis of the microphone and axis normal to the speaker diaphragm in degrees.');
+sigCondGain = input('Please enter the gain on any signal conditioners being used in the current setup. If no signal conditioners are being used, please enter "1".'); % requiring user input for this because it's easy to forget to update
+distance = input('Please enter the distance between the microphone cap and the speaker in millimeters.'); % requiring user input for this because it's easy to forget to update
+angle = input('Please enter the angle between the long axis of the microphone and axis normal to the speaker diaphragm in degrees.'); % requiring user input for this because it's easy to forget to update
+
+% Define default settings:
+Defaults.PreStimDuration.val = 1;
+Defaults.PreStimDuration.units = 'seconds';
+Defaults.PostStimDuration.val = 1;
+Defaults.PostStimDuration.units = 'seconds';
+Defaults.Microphone = 'unknown';
+Defaults.SignalConditioner = 'unknown';
+Defaults.DAQDeviceDriver = 'nidaq';
+Defaults.DAQChannel = 10;
+Defaults.DAQTgtSampleRate.val = 150000;
+Defaults.DAQTgtSampleRate.units = 'samples per second';
+Defaults.DAQSerialBaudRate = 9600;
+requiredFields = fieldnames(Defaults);
+
+% Load settings specified in config file:
+fid = fopen(configFile);
+content = fscanf(fid, '%c');
+eval(content);
+
+% Validate that config file includes required settings; if not, throw a warning and 
+for i = 1:length(requiredFields)
+    if ~isfield(Recording, requiredFields{i}) % If a field is missing entirely from the loaded condig structure...
+        if isfield(Defaults.(requiredFields{i}), 'val') % ... and if the missing field is supposed to have separate value and units sub-fields...
+            Recording.(requiredFields{i}).val = Defaults.(requiredFields{i}).val;
+            Recording.(requiredFields{i}).units = Defaults.(requiredFields{i}).units;
+            defaultStr = strcat([num2str(Defaults.(requiredFields{i}).val), ' ', Defaults.(requiredFields{i}).units]);
+        else % ... if the missing field doesn't have spearate value and unit sub-fields...
+            Recording.(requiredFields{i}) = Defaults.(requiredFields{i});
+            if ~ischar(Defaults.(requiredFields{i}))
+                defaultStr = num2str(Defaults.(requiredFields{i}));
+            else
+                defaultStr = Defaults.(requiredFields{i});
+            end
+        end
+        warning(strcat([requiredFields{i}, ' not specified in config file. Using default value of ', defaultStr]));     
+    elseif isfield(Defaults.(requiredFields{i}), 'val') &&  ~isfield(Recording.(requiredFields{i}), 'val') % If a field consists of value and units sub-fields and is missing the value sub-field...
+        Recording.(requiredFields{i}).val = Defaults.(requiredFields{i}).val;
+        Recording.(requiredFields{i}).units = Defaults.(requiredFields{i}).units;
+        defaultStr = strcat([num2str(Defaults(requiredFields{i}).val), ' ', Defaults(requiredFields{i}).units]);
+        warning(strcat([requiredFields{i}, 'not specified in config file. Using default value of ', defaultStr]));
+    elseif isfield(Defaults.(requiredFields{i}), 'units') && ~isfield(Recording.(requiredFields{i}), 'units') % If a field consists of value and units sub-fields and is missing the units sub-field... 
+        Recording.(requiredFields{i}).units = 'unknown';
+        warning(strcat(['Units not specified for ', requiredFields{i}, 'field. Units will be set to "unknown".']));
+    end
+end 
+
 
 % Define default values for optional audio recording equipment parameters: 
 spkr = 'unknown';
