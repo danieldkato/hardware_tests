@@ -1,7 +1,15 @@
-function makeSpectrogram()
+function makeSpectrogram(path)
+
+%Load data and metadata from secondary storage:
+load(path);
+preStimDur = Session.preStimDur.value;
+trueSampleRate = Session.trueSampleRate.value;
+stimDur = Session.stimDur.value;
+stimMinFreq = Session.stimMinFreq.value;
+stimMaxFreq = Session.stimMaxFreq.value;
 
 %Calculate fft:
-stimData = data(preStimDur*trueSampleRate:end);
+stimData = Session.data(ceil(preStimDur*trueSampleRate):end);
 xfft = abs(fft(stimData));
 
 %Avoid taking the log of 0.
@@ -12,33 +20,42 @@ xfft(index) = 1e-17;
 blocksize = stimDur * trueSampleRate;
 mag = 20*log10(xfft);
 mag = mag(1:floor(blocksize/2));
-f = (0:length(mag)-1)*Fs/blocksize;
+f = (0:length(mag)-1)*trueSampleRate/blocksize;
 f = f(:);
 
 %Plot fft:
 figure;
 plot(f,mag);
 grid on
-ylabel('Magnitude (dB)');
-xlabel('Frequency (Hz)');
+%ylabel('Magnitude (dB)');
+%xlabel('Frequency (Hz)');
+
+
+%{
 speakerName = speakers{spkrInd}{1};
 micName = mics{micInd}{1};
 scName = signalConditioners{scInd}{1};
-titleStr = strcat(['Frequency components of ', speakerName, ', ', num2str(stimMinFreq),'-',num2str(stimMaxFreq), ' Hz white noise' ]);
+%}
+% titleStr = strcat(['Frequency components of ', Session.speakerName, ', ', num2str(stimMinFreq),'-',num2str(stimMaxFreq), ' Hz white noise' ]);
+titleStr = {strcat([num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMaxFreq/1000)), ' kHz noise']);
+            strcat(['acquired from speaker ', Session.Speaker, ' ', Session.Date]);
+            strcat(['Mic: ', Session.Microphone]);
+            strcat(['Signal Conditioner: ', Session.SignalConditioner, ', Gain: x', num2str(Session.sigCondGain)]);
+            };
 title(titleStr);
+
+%{
 legendStr = strcat([micName, ' with ', scName]);
 legend(legendStr);
-
+%}
 
 %Create spectrogram:
-%WARNING: Calling spectrogram on hs05bruno ('') has raised errors related
-%to memory issues before. It may be necessary to actually the data offline
-%on another computer.
-if strcmp(getenv('computername'), 'HS05BRUNO8') == 0
-    spectrogram(data, 128, 120, [], 'yaxis');
-    titleStr2 = strcat(['Spectrogram of ', speakerName, ', ', num2str(stimMinFreq),'-',num2str(stimMaxFreq), ' Hz white noise' ]);
-    title(titleStr2);
-end 
+%WARNING: Calling spectrogram on hs05bruno ('') has raises errors related to memory issues.
+figure;
+hold on;
+spectrogram(Session.data, 128, 120, [], 'yaxis');
+%titleStr2 = strcat(['Spectrogram of ', speakerName, ', ', num2str(stimMinFreq),'-',num2str(stimMaxFreq), ' Hz white noise' ]);
+title(titleStr);
 
 
 disp('Done');
