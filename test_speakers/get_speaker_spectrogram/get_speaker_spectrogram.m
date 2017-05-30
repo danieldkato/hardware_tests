@@ -129,7 +129,7 @@ Defaults.DAQDeviceDriver = 'nidaq';
 Defaults.DAQChannel = 10;
 Defaults.DAQTgtSampleRate.val = 150000;
 Defaults.DAQTgtSampleRate.units = 'samples per second';
-Defaults.DAQSerialBaudRate = 9600;
+Defaults.SerialBaudRate = 9600;
 requiredFields = fieldnames(Defaults);
 
 % Load settings specified in config file:
@@ -137,7 +137,7 @@ fid = fopen(configFile);
 content = fscanf(fid, '%c');
 eval(content);
 
-% Validate that config file includes required settings; if not, throw a warning and 
+% Validate that config file includes required settings; if not, throw a warning and use defaults
 for i = 1:length(requiredFields)
     if ~isfield(Recording, requiredFields{i}) % If a field is missing entirely from the loaded condig structure...
         if isfield(Defaults.(requiredFields{i}), 'val') % ... and if the missing field is supposed to have separate value and units sub-fields...
@@ -271,6 +271,8 @@ arduino = serial(portID, 'BaudRate', baudRate);
 fopen(arduino);
 pause(2); %wait for handshake to complete; this actually takes quite a long time
 
+params = [preStimDur, stimDur, stimMinFreq, stimMaxFreq];
+
 % Send stimulus information to Arduino
 fprintf(arduino,'%s',strcat(num2str(preStimDur),'\n'));
 disp(fscanf(arduino)); %Scan serial port for echo of pre-stim duration
@@ -304,12 +306,12 @@ disp('... data acquisition complete.');
 fclose(arduino);
 
 %% Plot raw data from the analog input object:
-Session.data = getdata(AI); % create a session object that will glue the recording data together with metadata critical for interpretation
+Recording.Data = getdata(AI); % create a session object that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
 figure; hold on;
-seconds = [1:length(data)]./trueSampleRate;
-plot(seconds, data);
+seconds = [1:length(Recording.Data)]./trueSampleRate;
+plot(seconds, Recording.Data)
 ylabel('Voltage (V)');
 xlabel('Time (s)');
 yl = ylim;
@@ -323,38 +325,32 @@ titleStr = {strcat([num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMax
 title(titleStr);
 %savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
 
-%% Write data and metadata into a struct and save to secondary storage to allow for easy analysis later
-Session.Speaker = spkr;
-Session.trueSampleRate.value = trueSampleRate;
-Session.trueSampleRate.units = 'samples/second';
-Session.sigCondGain = sigCondGain;
-Session.stimMinFreq.value = stimMinFreq;
-Session.stimMinFreq.units = 'Hz';
-Session.stimMaxFreq.value = stimMaxFreq;
-Session.stimMaxFreq.units = 'Hz';
-Session.stimDur.value = stimDur;
-Session.stimDur.units = 'seconds';
-Session.preStimDur.value = preStimDur;
-Session.preStimDur.units = 'seconds';
-Session.postStimDur.value = postStimDur;
-Session.postStimDur.units = 'seconds';
-Session.Date = startTimeTitle;
-Session.DAQdeviceName = hwinfo.DeviceName;
-Session.Channel = chanID;
-Session.Microphone = mic;
-Session.SignalConditioner = sigCond;
-Session.Distance.value = distance;
-Session.Distance.units = 'millimeters';
-Session.Angle.value = angle;
-Session.Angle.units = 'degrees';
+%% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
+Recording.Speaker = spkr;
+Recording.stimMinFreq.val = stimMinFreq;
+Recording.stimMinFreq.units = 'Hz';
+Recording.stimMaxFreq.val = stimMaxFreq;
+Recording.stimMaxFreq.units = 'Hz';
+Recording.stimDur.val = stimDur;
+Recording.stimDur.units = 'seconds';
+Recording.Distance.val = distance;
+Recording.Distance.units = 'millimeters';
+Recording.Angle.val = angle;
+Recording.Angle.units = 'degrees';
+Recording.trueSampleRate.val = trueSampleRate;
+Recording.trueSampleRate.units = 'samples/second';
 
 dirName = strcat(['spkr',rename(spkr), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic', rename(mic), '_sigCond', rename(sigCond)]);
 mkdir(dirName);
 old = cd(dirName);
-csvwrite(strcat([dirName, '.csv']), data); 
-save(dirName, Session);
+save(dirName, 'Recording');
 
-%% Write metadata as txt for non-MATLAB analysis?
+%% Write data as .csv metadata as .txt for non-MATLAB analysis?
+
+csvwrite(strcat([dirName, '.csv']), Recording.Data); 
+allFieldNames = fieldnames(Recording);
+metadataFieldNames = allFieldNames(cellfun(@(x) ~strcmp(x, 'Data'), allFieldNames)); % exclude data from the fields to write
+
 %{
 metadata = {{'Speaker', strcat(spkr,'\n')},
             {'MinStimFrequency', strcat(num2str(stimMinFreq),' Hz\n')},
@@ -373,15 +369,27 @@ metadata = {{'Speaker', strcat(spkr,'\n')},
             {'Distance', strcat([num2str(distance), ' mm\n'])},
             {'Angle', strcat([num2str(angle), ' deg'])}
             };
+%}
     
 fileID = fopen(strcat(dirName, '_metadata.txt'), 'wt');
 %fprintf(fileID, strcat(['date:', startTime]));
 %fprintf(fildID, strcat(['duration:', ]));
-for i =1:length(metadata)
-    fprintf(fileID, strcat([metadata{i}{1},': ',metadata{i}{2}]));
+for i =1:length(metadataFieldNames)
+    if isfield(Recording.(metadataFieldNames{i}), 'val')
+        fprintf(fileID, strcat([metadataFieldNames{i},'.val: ', num2str(Recording.(metadataFieldNames{i}).val), '\n']));
+        fprintf(fileID, strcat([metadataFieldNames{i},'.units: ', getfield(getfield(Recording, metadataFieldNames{i}), 'units'), '\n' ]));
+    else
+        val = getfield(Recording,metadataFieldNames{i});
+        if isnumeric(val)
+            val = num2str(val);
+        end
+        disp(metadataFieldNames{i});
+        fprintf(fileID, strcat([metadataFieldNames{i},': ', val, '\n']));
+    end
+    %fprintf(fileID, strcat([metadata{i}{1},': ',metadata{i}{2}]));
 end
 
 fclose(fileID);
-%}
+
 
 cd(old);
