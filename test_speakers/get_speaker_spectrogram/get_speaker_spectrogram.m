@@ -274,6 +274,13 @@ pause(2); %wait for handshake to complete; this actually takes quite a long time
 params = [preStimDur, stimDur, stimMinFreq, stimMaxFreq];
 
 % Send stimulus information to Arduino
+for p = 1:length(params)
+    fprintf(arduino,'%s',strcat(num2str(params(p)),'\n'));
+    disp(fscanf(arduino)); %Scan serial port for echo of pre-stim duration
+    pause(.1);    
+end
+
+%{
 fprintf(arduino,'%s',strcat(num2str(preStimDur),'\n'));
 disp(fscanf(arduino)); %Scan serial port for echo of pre-stim duration
 pause(.1);
@@ -285,6 +292,7 @@ disp(fscanf(arduino)); %Scan serial port for echo of min frequency
 pause(.1);
 fprintf(arduino,'%s',strcat(num2str(stimMaxFreq),'\n'));
 disp(fscanf(arduino)); %Scan serial port for echo of max frequency
+%}
 
 %% Acquire analog data:
 startTime = datestr(now, 'yymmdd_HH-MM-SS');
