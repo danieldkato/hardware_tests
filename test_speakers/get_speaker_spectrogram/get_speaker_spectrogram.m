@@ -164,90 +164,6 @@ for i = 1:length(requiredFields)
     end
 end 
 
-%{
-% Define default values for optional audio recording equipment parameters: 
-spkr = 'unknown';
-mic = 'unknown';
-sigCond = 'unknown';
-sigCondGain = [];
-
-% Define default values for optional analog data acquisiton parameters:
-chanID = 10;
-desiredSampleRate = 150000; %samples/second
-currDAQ = 'Dev1'; %Name for PCI-6221 in DAQ toolbox on the ephys computer 
-
-% Define default values for optional Arduino communications parameters:
-baudRate = 9600;
-
-% Define default values for optional stimulus parameters:
-preStimDur = 1; %seconds
-postStimDur = 1; %seconds
-
-% Define default values for physical microphone configuration with respect to speaker
-distance = []; % should be in mm
-angle = []; % should be in degrees
-%}
-
-%{
-% Parse optional parameters:
-if ~isempty(varargin)
-    spkr = varargin{1}; 
-    validateSpeakers(varargin{1}, stimMinFreq, stimMaxFreq);
-else
-    warning('No speaker specified; skipping speaker validation. Requested stimulus frequencies may lie outside of speaker range.');
-end
-
-if length(varargin) > 1
-    mic = varargin{2};
-    validateMic(varargin{2}, stimMinFreq, stimMaxFreq);
-else
-    warning('No microphone specified; skipping microphone validation. Requested stimulus frequencies may lie outside of microphone range.');
-end
-
-if length(varargin) > 2
-    sigCond = varargin{3};
-    validateSignalConditioner(varargin{3}, stimMinFreq, stimMaxFreq);
-else
-    warning('No signal conditioner specified; skipping signal conditioner validation. Requested stimulus frequencies may lie outside of microphone range.');
-end
-
-if length(varargin) > 3
-    sigCondGain = varargin{4};
-end
-
-if length(varargin) > 4
-    chanID = varargin{5};
-end
-
-if length(varargin) > 5
-    desiredSampleRate = varargin{6};
-end
-
-if length(varargin) > 6
-    currDAQ = varargin{7};
-end
-
-if length(varargin) > 7
-    baudRate = varargin{8};
-end
-
-if length(varargin) > 8
-    preStimDur = varargin{9};
-end
-
-if length(varargin) > 9
-    postStimDur = varargin{10};
-end
-
-if length(varargin) > 10
-    distance = varargin{11};
-end
-
-if length(varargin) > 11
-    angle = varargin{10};
-end
-%}
-
 %% Configure analog input object:
 AI = analoginput(Recording.DAQDeviceDriver, Recording.DAQDeviceID);
 AI.InputType = 'SingleEnded';
@@ -262,7 +178,7 @@ disp(Recording.DAQTgtSampleRate);
 AI.SampleRate = Recording.DAQTgtSampleRate.val;
 trueSampleRate = double(AI.SampleRate); %MATLAB may not use the exact sample rate specified
 Fs = trueSampleRate;
-AI.SamplesPerTrigger = (Recording.PreStimDuration.val + stimDur + Recording.PostStimDuration.val) * trueSampleRate;
+AI.SamplesPerTrigger = ceil((Recording.PreStimDuration.val + stimDur + Recording.PostStimDuration.val) * trueSampleRate);
 AI.TriggerType = 'Manual';
 
 %% Send stimulus parameters to Arduino 
@@ -359,27 +275,7 @@ save(dirName, 'Recording');
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
 allFieldNames = fieldnames(Recording);
 metadataFieldNames = allFieldNames(cellfun(@(x) ~strcmp(x, 'Data'), allFieldNames)); % exclude data from the fields to write
-
-%{
-metadata = {{'Speaker', strcat(spkr,'\n')},
-            {'MinStimFrequency', strcat(num2str(stimMinFreq),' Hz\n')},
-            {'MaxStimFrequency', strcat(num2str(stimMaxFreq),' Hz\n')},
-            {'StimDuration', strcat(num2str(stimDur), ' sec\n')},
-            {'PreStimDuration', strcat(num2str(preStimDur), ' sec\n')},
-            {'PostStimDuration', strcat(num2str(postStimDur), ' sec\n')},
-            {'SampleRate', strcat(num2str(trueSampleRate), 'samples/sec \n')},
-            {'Date', strcat(startTimeTitle, '\n')},
-            %{'Driver', strcat(driver, '/n')},
-            {'DAQdeviceName', strcat(hwinfo.DeviceName, '/n')},
-            {'Channel', strcat(num2str(chanID),'\n')},
-            {'Microphone', strcat(mic, '\n')},
-            {'SignalConditioner', strcat(sigCond, '\n')},
-            {'SignalConditionerGain', num2str(sigCondGain)},
-            {'Distance', strcat([num2str(distance), ' mm\n'])},
-            {'Angle', strcat([num2str(angle), ' deg'])}
-            };
-%}
-    
+ 
 fileID = fopen(strcat(dirName, '_metadata.txt'), 'wt');
 %fprintf(fileID, strcat(['date:', startTime]));
 %fprintf(fildID, strcat(['duration:', ]));
@@ -392,13 +288,9 @@ for i =1:length(metadataFieldNames)
         if isnumeric(val)
             val = num2str(val);
         end
-        disp(metadataFieldNames{i});
         fprintf(fileID, strcat([metadataFieldNames{i},': ', val, '\n']));
     end
     %fprintf(fileID, strcat([metadata{i}{1},': ',metadata{i}{2}]));
 end
-
 fclose(fileID);
-
-
 cd(old);
