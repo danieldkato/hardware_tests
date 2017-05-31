@@ -164,7 +164,7 @@ for i = 1:length(requiredFields)
     end
 end 
 
-
+%{
 % Define default values for optional audio recording equipment parameters: 
 spkr = 'unknown';
 mic = 'unknown';
@@ -186,7 +186,7 @@ postStimDur = 1; %seconds
 % Define default values for physical microphone configuration with respect to speaker
 distance = []; % should be in mm
 angle = []; % should be in degrees
-
+%}
 
 %{
 % Parse optional parameters:
@@ -249,29 +249,30 @@ end
 %}
 
 %% Configure analog input object:
-AI = analoginput('nidaq', currDAQ);
+AI = analoginput(Recording.DAQDeviceDriver, Recording.DAQDeviceID);
 AI.InputType = 'SingleEnded';
 maxSampleRate = daqhwinfo(AI,'MaxSampleRate');
 if maxSampleRate < stimMaxFreq/2
     warning('DAQ board max sampling rate is less than Nyquist rate for desired stimulus.');
 end
 
-chan = addchannel(AI, chanID);
+chan = addchannel(AI, Recording.DAQChannel);
 AI.Channel.InputRange = [-10 10];
-AI.SampleRate = desiredSampleRate;
+disp(Recording.DAQTgtSampleRate);
+AI.SampleRate = Recording.DAQTgtSampleRate.val;
 trueSampleRate = double(AI.SampleRate); %MATLAB may not use the exact sample rate specified
 Fs = trueSampleRate;
-AI.SamplesPerTrigger = (preStimDur + stimDur + postStimDur) * trueSampleRate;
+AI.SamplesPerTrigger = (Recording.PreStimDuration.val + stimDur + Recording.PostStimDuration.val) * trueSampleRate;
 AI.TriggerType = 'Manual';
 
 %% Send stimulus parameters to Arduino 
 
 % Create and open serial connection with Arduino:
-arduino = serial(portID, 'BaudRate', baudRate);
+arduino = serial(portID, 'BaudRate', Recording.SerialBaudRate);
 fopen(arduino);
 pause(2); %wait for handshake to complete; this actually takes quite a long time
 
-params = [preStimDur, stimDur, stimMinFreq, stimMaxFreq];
+params = [Recording.PreStimDuration.val, stimDur, stimMinFreq, stimMaxFreq];
 
 % Send stimulus information to Arduino
 for p = 1:length(params)
@@ -307,7 +308,7 @@ disp('Starting data acquisition...');
 trigger(AI);
 
 %Wait for AI object to finish data acquisition:
-wait(AI, preStimDur + stimDur + postStimDur + .1);
+wait(AI, Recording.PreStimDuration.val + stimDur + Recording.PostStimDuration.val + .1);
 disp('... data acquisition complete.');
 
 %Close serial communication with Arduino:
@@ -323,18 +324,18 @@ plot(seconds, Recording.Data)
 ylabel('Voltage (V)');
 xlabel('Time (s)');
 yl = ylim;
-rectangle('Position',[preStimDur yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
+rectangle('Position',[Recording.PreStimDuration.val yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
 set(gca,'children',flipud(get(gca,'children')));
-titleStr = {strcat(['Speaker ', spkr, ' delivering ',num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMaxFreq/1000)), ' kHz band-limited noise']);
+titleStr = {strcat(['Speaker ', speaker, ' delivering ',num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMaxFreq/1000)), ' kHz band-limited noise']);
             strcat(['acquired ', startTimeTitle]);
-            strcat(['Mic: ', mic]);
-            strcat(['Signal Conditioner: ', sigCond, ', Gain: x', num2str(sigCondGain)]);
+            strcat(['Mic: ', Recording.Microphone]);
+            strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
             };
 title(titleStr);
 %savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
-Recording.Speaker = spkr;
+Recording.Speaker = speaker;
 Recording.stimMinFreq.val = stimMinFreq;
 Recording.stimMinFreq.units = 'Hz';
 Recording.stimMaxFreq.val = stimMaxFreq;
@@ -348,7 +349,7 @@ Recording.Angle.units = 'degrees';
 Recording.trueSampleRate.val = trueSampleRate;
 Recording.trueSampleRate.units = 'samples/second';
 
-dirName = strcat(['spkr',rename(spkr), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic', rename(mic), '_sigCond', rename(sigCond)]);
+dirName = strcat(['spkr',rename(speaker), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic', rename(Recording.Microphone), '_sigCond', rename(Recording.SignalConditioner)]);
 mkdir(dirName);
 old = cd(dirName);
 save(dirName, 'Recording');
