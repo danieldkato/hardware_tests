@@ -50,7 +50,7 @@
 
 #include <Tone.h>
 
-int spkrPin = 13;
+int spkrPin = 5;
 
 int minFreq;
 String minFreqStr;
@@ -87,7 +87,7 @@ void setup() {
   while ( preStimRec == false){
     preStimStr = getLine();
     preStimDur = preStimStr.toInt() * 1000; //remember to convert to milliseconds
-    Serial.println(preStimStr); //echo back duration to confirm receipt
+    Serial.println("ACK pre-stimulus duration = " + preStimStr + " seconds"); //echo back duration to confirm receipt
     preStimRec = true;
   }
 
@@ -95,7 +95,7 @@ void setup() {
   while ( stimDurRec == false){
     stimDurStr = getLine();
     stimDur = stimDurStr.toInt() * 1000; //remember to convert to milliseconds
-    Serial.println(stimDurStr); //echo back duration to confirm receipt
+    Serial.println("ACK stimulus duration = " + stimDurStr + " seconds"); //echo back duration to confirm receipt
     stimDurRec = true;
   }
 
@@ -103,7 +103,7 @@ void setup() {
   while ( minFreqRec == false){
     minFreqStr = getLine();
     minFreq = minFreqStr.toInt();
-    Serial.println(minFreqStr); //echo back minimum frequency to confirm receipt
+    Serial.println("ACK minimum stimulus frequency = " + minFreqStr + " Hz"); //echo back minimum frequency to confirm receipt
     minFreqRec = true;
   }
 
@@ -111,7 +111,7 @@ void setup() {
   while ( maxFreqRec == false){
     maxFreqStr = getLine();
     maxFreq = maxFreqStr.toInt();
-    Serial.println(maxFreqStr); //echo back maxmimum frequency to confirm receipt
+    Serial.println("ACK maximum stimulus frequency = " + maxFreqStr + " Hz"); //echo back maxmimum frequency to confirm receipt
     maxFreqRec = true;
   }
 }
