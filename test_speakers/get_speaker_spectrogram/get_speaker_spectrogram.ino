@@ -119,7 +119,7 @@ void setup() {
 
 //Deliver stimulus:
 void loop() {
-  if( complete == false ){
+  if( complete == false && Serial.available()){
     // put your main code here, to run repeatedly:
     delay(preStimDur);
     long start = millis();
