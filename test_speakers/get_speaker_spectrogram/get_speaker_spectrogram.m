@@ -1,89 +1,165 @@
 function get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFreq, portID, configFile)
-% get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID)
-% get_speaker_spectrogram(stimDur, stimMinFreq, stimMaxFreq, portID [, spkr, mic, sigCond, sigCondGain, chanID, desiredSampleRate, currDAQ, baudRate, preStimDur, postStimDur])
 
-% Last updated DDK 2017-05-25
+% DOCUMENTATION TABLE OF CONTENTS:
+% I. SYNTAX
+% II. OVERVIEW
+% III. REQUIREMENTS
+% IV. INPUTS
+% V. OUTPUTS
+% VI: INSTRUCTIONS
 
-% OVERVIEW: 
-% This script constitutes the desktop-side code for
-% `get_speaker_spectrogram`, a program for generating a single white noise
-% stimulus from an Arduino-controlled speaker, recording the output through
-% a prepolarized microphone, then generating a spectrogram of the speaker
-% output in MATLAB. Use this program in conjunction with
-% `get_sepaker_spectrogram.ino` to assess how much power a potential
-% stimulus speaker generates in the hearing range of mice.
-%
-%
-% REQUIREMENTS:
-% 1) A host PC configured for use with suitable data acquisition hardware 
-% (e.g. a National Instruments PCI data acquisition card connected to a BNC
-% Connector block, etc.). For more detailed hardware requirements, see the
-% README available at https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
-% 
-% 2) Suitable audio recording equipment (microphone, preconditioner, etc.).
-% For more detailed hardware requirements, see the README available at
-% https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
-%
-% 3) An Arduino microcontroller connected to a two-terminal analog speaker.
-% For detailed hardware requirements, see the documentation for the 
-% corresponding Arduino sketch (described below) and 
-% https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram. 
-% 
-% 3) MATLAB data acquisition toolbox ver 2.16 or above.
-%
-% 4) The Arduino sketch `get_speaker_spectrogram.ino`, available at 
-% https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/get_speaker_spectrogram.ino. 
-% This sketch should be running concurrently on a connected Arduino microcontroller connected 
-% to the host PC.
-%
-% 5) The baud rates specified in `get_speaker_spectrogram.m` and 
-% `get_speaker_spectrogram.ino` must agree.
-% 
+% I. SYNTAX:
+% get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFeq, portID, configFile)
+
+
+% II. OVERVIEW: 
+% Use this function to record sound from a speaker generating band-limited
+% noise. This host-PC-side code instructs an Arduino to generate a
+% fixed-duration band-limited noise stimulus and records, saves, and plots
+% concurrent analog input from a microphone connected to a data acquisition
+% device. 
+
+
+% III. REQUIREMENTS:
+% A) Hardware
+    % 1) A host PC configured for use with suitable data acquisition hardware 
+    % (e.g. a National Instruments PCI data acquisition card connected to a BNC
+    % Connector block, etc.). 
+
+    % 2) Suitable audio recording equipment (microphone, preconditioner, etc.).
+    % For more detailed hardware requirements, see the README available at
+    % https://github.com/danieldkato/hardware_tests/tree/master/test_speake
+    % rs/get_speaker_spectrogram.
+
+    % 3) An Arduino microcontroller connected to a two-terminal analog speaker. 
+    
+% B) Software
+    % 1) MATLAB data acquisition toolbox. Must be a version
+    % supporting MATLAB's legacy DAQ interface, (will have to be
+    % updated in future versions to session-based interface).
+
+    % 2) The Arduino sketch `get_speaker_spectrogram.ino`, available at 
+    % https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/get_speaker_spectrogram.ino. 
+    % THE BAUD RATE SPECIFIED IN THIS SKETCH MUST MATCH THE BAUD RATE
+    % SPECIFIED IN THE CONFIG FILE PASSED AS INPUT TO THIS FUNCTION (see
+    % inputs below).
+
+    % 3) Hardware class definitions, databases, and validation functions,
+    % all available at:
+    % https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram
+    % These include:
+        % Speaker.m
+        % Microphone.m
+        % SignalConditioner.m
+        
+        % Speakers.mat
+        % Mics.mat
+        % SignalConditioners.mat
+        
+        % validateSpeakers.m
+        % validateMic.m
+        % validateSignalConditioner.m
+    
 % *IMPORTANT WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
 % when it tries to call spectrogram(). If collecting data on hs05bruno8, it
 % may be necessary to analyze the data offline on another computer.
+
+
+% IV. INPUTS:
+% 1) speaker - string specifying the model number of the speaker. If this
+% matches the model number of one of the speakers defined in Speakers.mat,
+% then get_speaker_spectrogram will perform validation on the speaker to
+% ensure that the speaker's specifications support the requested stimulus.
+% If they do not, the function will throw a warning.
+
+% 2) stimDur - stimulus duration, in seconds
+
+% 3) stimMinFreq - lower bound of stimulus noise frequency band, in Hz 
+
+% 4) stimMaxFreq - upper bound of stimulus noise frequency band, in Hz 
+
+% 5) portID - string specifying the port connected to the Arduino microcontroller
+
+% 6) configFile - path to a MATLAB-evaluable .txt file defining a structure
+% called `Recording`, which specifies various parameters necessary for
+% setting up data acquisition. While this function supplies default values
+% for all required fields, it is best practice to use a config file that
+% defines the following:
 %
-% 
-% INPUTS:
-% 1) stimDur - stimulus duration, in seconds
-% 2) stimMinFreq - lower bound of stimulus noise frequency band, in Hz 
-% 3) stimMaxFreq - upper bound of stimulus noise frequency band, in Hz 
-% 4) portID - String specifying the port connected to the Arduino microcontroller
-%
-%
-% INSTRUCTIONS: 
+%   Recording.PreStimDuration.val % numeric value specifying duration of pre-stimulus period, in seconds
+%   Recording.PostStimDuration.val % numeric value specifying duration of post-stimulus period, in seconds
+%   Recording.Microphone % string specifying the model number of the microphone
+%   Recording.SignalConditioner % string specifying the model number of the signal conditioner
+%   Recording.DAQDeviceDriver % string specifying the data acquisition driver to use for the current recording session
+%   Recording.DAQDeviceID % string specifying the data acquisition device ID to use for the current recording session
+%   Recording.DAQChannel % integer value specifying the data acquisition channel to use for the current recording session
+%   Recording.DAQTgtSampleRate.val % numeric value specifying the desired data acquisition rate in samples per second
+%   Recording.SerialBaudRate % integer value specifying the baud rate of the host-PC-to-Arduino serial connection 
+%   Recording.InputRangeMin.val % minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
+%   Recording.InputRangeMax.val % minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
+
+% For an example config file, see:
+% https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/config.txt
+
+% Note that it is also possible to specify alternative units for pre- and
+% post-stim duration, sample rate, and input range min and max, but this is
+% not recommended as this function assumes inputs are specified in the
+% units stated above.
+
+
+% V. OUTPUTS
+% This function has no formal return, but saves the following to secondary
+% storage: 
+
+% 1) A .mat file containing a structure called `Recordings`, which includes
+% all analog input data as well as stimulus and data acquisition metadata
+
+% 2) A .csv containing the analog input data (for any subsequent non-MATLAB analysis)
+
+% 3) A .txt containing stimulus and data acquisition metadata (for any subsequent non-MATLAB analysis)
+
+
+% VI: INSTRUCTIONS: 
 % 1) Connect the host PC to the Arduino microcontroller. Optionally, to 
 % confirm that the Arduino, the speaker, and all connections are working,
 % upload the sketch `test_speakers.ino` (available at https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/test_speakers)
 % to the Arduino. The speaker should emit a short burst of white noise.
-%
-% 2) Connect the audio recording equipment to the host PC (this will
+
+% 2) Connect the audio recording equipment to the host PC. This will
 % probably entail connecting a combined microphone/preamplifier to a signal
 % preconditioner, which in turn connects via BNC cable to a connector block, 
 % which in turn connects into a PCI data acquisition board. 
-%
+
 % 3) Position the microphone appropriately in front of the speaker. In most
-% cases, this will mean positioning microphone perpendicular to the speaker
-% diaphragm and less than inch away.
-%
+% cases, this will mean positioning the long axis of the microphone
+% perpendicular to the speaker diaphragm and less than 5 mm away.
+
 % 4) Ensure that the serial port specified in `portID` matches the serial 
 % port connected to the Arduino microcontroller.
-%
-% 5) Upload the corresponding `get_speaker_spectrogram.ino` 
-% to the Arduino microcontroller
-%
-% 6) Ensure that the DAQ board and channel number specified by
+
+% 5) Ensure that the baud rate specified in `get_speaker_spectrogram.ino`
+% matches the baud rate specified in the config file or the default value
+% of 9600.
+
+% 6) Upload `get_speaker_spectrogram.ino` to the Arduino microcontroller
+
+% 7) Ensure that the DAQ board and channel number specified by
 % `currDAQ` and `chanID`, respectively, match the DAQ board and channel
 % connected to the recording equipment. 
-%
-% 7) Specify the desired stimulus duration, minimum frequency and maximum
-% frequency in this script. 
-% 
-% 8) Specify the model number of the speaker, microphone, and signal conditioner 
-% to be used in the current recording session. 
-%
-% 9) Run this script.
+
+% 8) Run this script.
+
+% 9) When prompted, enter the following numeric inputs in the command line:
+
+%   - The gain on any signal conditioner in line with the microphone. If
+%   there is no signal conditioner, enter `1`.
+
+%   - The distance of the microphone from the speakers
+
+%   - Then angle of incidence of the sound on the microphone - i.e., the
+%   angle between the long axis of the microphone and the axis
+%   perpendicular to the speaker diaphragm. 
 
 
 % DESCRIPTION
@@ -100,17 +176,19 @@ function get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFreq, por
 % stimulus. Once the stimulus duration elapses, the script ends the
 % recording and generates a spectrogram of the recorded signal. 
 
-% TODO:
-% 1) Want to change inputs to make it more foolproof. Arguments that are
-% likely to be forgotten should be required inputs: e.g., signal
-% conditioner gain, distance, and angle. Perhaps not only that, but also to
-% ensure that users don't lazily reuse input parameters from the last call,
-% actually prompt the user for command-line input for these parameters
-% (especially since they're not onerous to type).
 
-% 2) For the other (many) parameters that are less likely to change, put
-% them in a configuration file (like a MATLAB-evaluable text file) and have
-% them read in. 
+% TODO:
+% 1) Should ultimately update this to use session-based, rather than
+% legacy DAQ interface (when we update MATLAB on ephys computer)
+
+% 2) Should ultimately update this so that figures are saved (when we
+% update to a version of MATLAB that has savefig)
+
+% 3) Should rename - this function doesn't generate spectrograms anymore,
+% it just records
+
+% Last updated DDK 2017-06-01
+
 
 %% Parse inputs into stimulus and DAQ parameters, and, where possible, validate hardware:
 
@@ -130,6 +208,10 @@ Defaults.DAQChannel = 10;
 Defaults.DAQTgtSampleRate.val = 150000;
 Defaults.DAQTgtSampleRate.units = 'samples per second';
 Defaults.SerialBaudRate = 9600;
+Defaults.InputRangeMin.val = -10;
+Defaults.InputRangeMin.units = 'volts';
+Defaults.InputRangeMax.val = 10;
+Defaults.InputRangeMax.units = 'volts';
 requiredFields = fieldnames(Defaults);
 
 % Load settings specified in config file:
@@ -164,6 +246,7 @@ for i = 1:length(requiredFields)
     end
 end 
 
+
 %% Configure analog input object:
 AI = analoginput(Recording.DAQDeviceDriver, Recording.DAQDeviceID);
 AI.InputType = 'SingleEnded';
@@ -181,6 +264,7 @@ Fs = trueSampleRate;
 AI.SamplesPerTrigger = ceil((Recording.PreStimDuration.val + stimDur + Recording.PostStimDuration.val) * trueSampleRate);
 AI.TriggerType = 'Manual';
 
+
 %% Send stimulus parameters to Arduino 
 
 % Create and open serial connection with Arduino:
@@ -196,6 +280,7 @@ for p = 1:length(params)
     disp(fscanf(arduino)); %Scan serial port for echo of pre-stim duration
     pause(.1);    
 end
+
 
 %% Acquire analog data:
 startTime = datestr(now, 'yymmdd_HH-MM-SS');
@@ -215,6 +300,7 @@ disp('... data acquisition complete.');
 
 %Close serial communication with Arduino:
 fclose(arduino);
+
 
 %% Plot raw data from the analog input object:
 Recording.Data = getdata(AI); % create a session object that will glue the recording data together with metadata critical for interpretation
@@ -237,6 +323,7 @@ titleStr = {strcat(['Speaker ', speaker, ' delivering ',num2str(floor(stimMinFre
 title(titleStr);
 %savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
 
+
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 Recording.Speaker = speaker;
 Recording.stimMinFreq.val = stimMinFreq;
@@ -256,6 +343,7 @@ dirName = strcat(['spkr',rename(speaker), '_', num2str(floor(stimMinFreq/1000)),
 mkdir(dirName);
 old = cd(dirName);
 save(dirName, 'Recording');
+
 
 %% Write data as .csv metadata as .txt for non-MATLAB analysis?
 
