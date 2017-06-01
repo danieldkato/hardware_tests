@@ -10,3 +10,7 @@ Recording.DAQChannel = 10;
 Recording.DAQTgtSampleRate.val = 150000;
 Recording.DAQTgtSampleRate.units = 'samples per second';
 Recording.SerialBaudRate = 9600;
+Recording.InputRangeMin.val = -0.2;
+Recording.InputRangeMin.units = 'volts';
+Recording.InputRangeMax.val = 0.2;
+Recording.InputRangeMax.units = 'volts';
