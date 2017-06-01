@@ -215,8 +215,6 @@ disp(fscanf(arduino)); %Scan serial port for echo of max frequency
 startTime = datestr(now, 'yymmdd_HH-MM-SS');
 startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
 
-pause(2);
-
 % Issue stimulus start trigger to Arduino:
 disp('Starting data acquisition...');
 fprintf(arduino,'%s','GO\n');
