@@ -173,7 +173,7 @@ if maxSampleRate < stimMaxFreq/2
 end
 
 chan = addchannel(AI, Recording.DAQChannel);
-AI.Channel.InputRange = [-10 10];
+AI.Channel.InputRange = [Recording.InputRangeMin.val Recording.InputRangeMax.val];
 disp(Recording.DAQTgtSampleRate);
 AI.SampleRate = Recording.DAQTgtSampleRate.val;
 trueSampleRate = double(AI.SampleRate); %MATLAB may not use the exact sample rate specified
@@ -215,12 +215,14 @@ disp(fscanf(arduino)); %Scan serial port for echo of max frequency
 startTime = datestr(now, 'yymmdd_HH-MM-SS');
 startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
 
+pause(2);
+
 % Issue stimulus start trigger to Arduino:
-fprintf(arduino,'%s','1');
+disp('Starting data acquisition...');
+fprintf(arduino,'%s','GO\n');
 
 % Begin data acquisition:
 start(AI);
-disp('Starting data acquisition...');
 trigger(AI);
 
 %Wait for AI object to finish data acquisition:
