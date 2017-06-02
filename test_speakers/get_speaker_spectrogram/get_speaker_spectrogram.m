@@ -323,8 +323,11 @@ end
 
 
 %% Acquire analog data:
-startTime = datestr(now, 'yymmdd_HH-MM-SS');
-startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
+%startTime = datestr(now, 'yymmdd_HH-MM-SS');
+%startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
+start = datetime;
+startTime = datestr(start, 'yymmdd_HH-MM-SS');
+startTimeTitle = datestr(start, 'yyyy-mm-dd HH:MM:SS');
 
 % Issue stimulus start trigger to Arduino:
 disp('Starting data acquisition...');
@@ -380,6 +383,8 @@ Recording.Angle.val = angle;
 Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
+Recording.Date = datestr(start, 'YYYY-MM-DD');
+Recording.Time = datestr(start, 'HH-MM-SS');
 
 dirName = strcat(['spkr',rename(speaker), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic', rename(Recording.Microphone), '_sigCond', rename(Recording.SignalConditioner)]);
 mkdir(dirName);
