@@ -384,7 +384,7 @@ Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
 Recording.Date = datestr(start, 'YYYY-MM-DD');
-Recording.Time = datestr(start, 'HH-MM-SS');
+Recording.Time = datestr(start, 'HH:MM:SS');
 
 dirName = strcat(['spkr',rename(speaker), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic', rename(Recording.Microphone), '_sigCond', rename(Recording.SignalConditioner)]);
 mkdir(dirName);
