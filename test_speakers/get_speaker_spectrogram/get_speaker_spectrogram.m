@@ -261,8 +261,10 @@ warnings = {validateSpeakers(speaker, stimMinFreq, stimMaxFreq),
 %}
 
 spkrWarn = validateSpeakers(speaker, stimMinFreq, stimMaxFreq);
-micWarn = validateMic(speaker, stimMinFreq, stimMaxFreq);
-sigCondWarn = validateSignalConditioner(speaker, stimMinFreq, stimMaxFreq);
+micWarn = validateMic(Recording.Microphone, stimMinFreq, stimMaxFreq);
+disp('sigCond name:');
+disp(Recording.SignalConditioner);
+sigCondWarn = validateSignalConditioner(Recording.SignalConditioner, stimMinFreq, stimMaxFreq);
 disp('spkr validation');
 disp(spkrWarn);
 disp('mic validation');
@@ -355,7 +357,7 @@ rectangle('Position',[Recording.PreStimDuration.val yl(1) stimDur yl(2)-yl(1)], 
 set(gca,'children',flipud(get(gca,'children')));
 titleStr = {strcat(['Speaker ', speaker, ' delivering ',num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMaxFreq/1000)), ' kHz band-limited noise']);
             strcat(['acquired ', startTimeTitle]);
-            strcat([distance, ' mm,', angle, ' degrees from microphone']);
+            %strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
             strcat(['Mic: ', Recording.Microphone]);
             strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
             };
