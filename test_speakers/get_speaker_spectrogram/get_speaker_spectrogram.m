@@ -252,10 +252,38 @@ for i = 1:length(requiredFields)
 end 
 
 % Validate hardware
-validateSpeakers(speaker, stimMinFreq, stimMaxFreq);
-validateMic(speaker, stimMinFreq, stimMaxFreq);
-validateSignalConditioner(speaker, stimMinFreq, stimMaxFreq);
+Recording.Warnings = {};
+%{
+warnings = {validateSpeakers(speaker, stimMinFreq, stimMaxFreq),
+            validateMic(speaker, stimMinFreq, stimMaxFreq),
+            validateSignalConditioner(speaker, stimMinFreq, stimMaxFreq)
+}; 
+%}
 
+spkrWarn = validateSpeakers(speaker, stimMinFreq, stimMaxFreq);
+micWarn = validateMic(speaker, stimMinFreq, stimMaxFreq);
+sigCondWarn = validateSignalConditioner(speaker, stimMinFreq, stimMaxFreq);
+disp('spkr validation');
+disp(spkrWarn);
+disp('mic validation');
+disp(micWarn);
+disp('sigCond validation');
+disp(sigCondWarn);
+
+warnings = {spkrWarn, micWarn, sigCondWarn};
+disp(warnings);
+
+for w = 1:length(warnings)
+    if ~isempty(warnings{w})
+        for x = 1:length(warnings{w})
+            %disp(warnings);
+            Recording.Warnings = horzcat(Recording.Warnings, warnings{w}{x});
+        end
+    end
+end
+
+disp('Recording.Warnings');
+disp(Recording.Warnings);
 
 %% Configure analog input object:
 AI = analoginput(Recording.DAQDeviceDriver, Recording.DAQDeviceID);
@@ -361,12 +389,12 @@ save(dirName, 'Recording');
 
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
 allFieldNames = fieldnames(Recording);
-metadataFieldNames = allFieldNames(cellfun(@(x) ~strcmp(x, 'Data'), allFieldNames)); % exclude data from the fields to write
+metadataFieldNames = allFieldNames(cellfun(@(x) ~strcmp(x, 'Data') & ~strcmp(x, 'Warnings'), allFieldNames)); % exclude data from the fields to write, as well as warnings; this needs to be written in a special way
  
 fileID = fopen(strcat(dirName, '_metadata.txt'), 'wt');
 %fprintf(fileID, strcat(['date:', startTime]));
 %fprintf(fildID, strcat(['duration:', ]));
-for i =1:length(metadataFieldNames)
+for i = 1:length(metadataFieldNames)
     if isfield(Recording.(metadataFieldNames{i}), 'val')
         fprintf(fileID, strcat([metadataFieldNames{i},'.val: ', num2str(Recording.(metadataFieldNames{i}).val), '\n']));
         fprintf(fileID, strcat([metadataFieldNames{i},'.units: ', getfield(getfield(Recording, metadataFieldNames{i}), 'units'), '\n' ]));
@@ -379,5 +407,19 @@ for i =1:length(metadataFieldNames)
     end
     %fprintf(fileID, strcat([metadata{i}{1},': ',metadata{i}{2}]));
 end
+
+% Write any hardware warnings:
+rwStr = 'Recording.Warnings: ';
+padding = repmat(' ', 1, length(rwStr));
+fprintf(fileID, rwStr);
+for w = 1:length(Recording.Warnings)
+    if w == 1
+        lead = [];
+    else 
+        lead = padding;
+    end
+    fprintf(fileID, strcat([lead, Recording.Warnings{w}, '\n']));
+end
+
 fclose(fileID);
 cd(old);
