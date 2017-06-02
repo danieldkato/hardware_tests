@@ -6,7 +6,7 @@ function get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFreq, por
 % III. REQUIREMENTS
 % IV. INPUTS
 % V. OUTPUTS
-% VI: INSTRUCTIONS
+% VI. INSTRUCTIONS
 
 % I. SYNTAX:
 % get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFeq, portID, configFile)
@@ -28,8 +28,7 @@ function get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFreq, por
 
     % 2) Suitable audio recording equipment (microphone, preconditioner, etc.).
     % For more detailed hardware requirements, see the README available at
-    % https://github.com/danieldkato/hardware_tests/tree/master/test_speake
-    % rs/get_speaker_spectrogram.
+    % https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
 
     % 3) An Arduino microcontroller connected to a two-terminal analog speaker. 
     
@@ -152,14 +151,16 @@ function get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFreq, por
 
 % 9) When prompted, enter the following numeric inputs in the command line:
 
-%   - The gain on any signal conditioner in line with the microphone. If
-%   there is no signal conditioner, enter `1`.
+%   - The product of all gains on any signal conditioners or amplifiers in
+%   line with the microphone. For example, if there is a signal conditioner
+%   with a gain of 10 in line with another amplifier with a gain of 50, set
+%   this to 500. If there is no signal conditioner, enter `1`. (we need this to recover the amplitude of the actual voltage signal put out by the microphone, which, along with the microphone spec sheet, can be used to infer the actual sound pressure level on the mic in Pa)
 
-%   - The distance of the microphone from the speakers
+%   - The distance of the microphone from the speakers, in millimeters
 
 %   - Then angle of incidence of the sound on the microphone - i.e., the
 %   angle between the long axis of the microphone and the axis
-%   perpendicular to the speaker diaphragm. 
+%   perpendicular to the speaker diaphragm - in degrees. 
 
 
 % DESCRIPTION
@@ -186,6 +187,10 @@ function get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFreq, por
 
 % 3) Should rename - this function doesn't generate spectrograms anymore,
 % it just records
+
+% 4) Add support for single-ended vs. differential input
+
+% 5) Should add a log of all warnings to metadata
 
 % Last updated DDK 2017-06-01
 
@@ -326,18 +331,19 @@ title(titleStr);
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 Recording.Speaker = speaker;
-Recording.stimMinFreq.val = stimMinFreq;
-Recording.stimMinFreq.units = 'Hz';
-Recording.stimMaxFreq.val = stimMaxFreq;
-Recording.stimMaxFreq.units = 'Hz';
-Recording.stimDur.val = stimDur;
-Recording.stimDur.units = 'seconds';
+Recording.StimMinFreq.val = stimMinFreq;
+Recording.StimMinFreq.units = 'Hz';
+Recording.StimMaxFreq.val = stimMaxFreq;
+Recording.StimMaxFreq.units = 'Hz';
+Recording.StimDur.val = stimDur;
+Recording.StimDur.units = 'seconds';
+Recording.SignalConditionerGain = sigCondGain;
 Recording.Distance.val = distance;
 Recording.Distance.units = 'millimeters';
 Recording.Angle.val = angle;
 Recording.Angle.units = 'degrees';
-Recording.trueSampleRate.val = trueSampleRate;
-Recording.trueSampleRate.units = 'samples/second';
+Recording.TrueSampleRate.val = trueSampleRate;
+Recording.TrueSampleRate.units = 'samples/second';
 
 dirName = strcat(['spkr',rename(speaker), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime, '_mic', rename(Recording.Microphone), '_sigCond', rename(Recording.SignalConditioner)]);
 mkdir(dirName);
