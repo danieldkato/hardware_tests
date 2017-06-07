@@ -78,6 +78,5 @@ DFT(2:end-1) = 2*DFT(2:end-1);
 % https://en.wikipedia.org/wiki/Root_mean_square
 % https://dsp.stackexchange.com/questions/14808/spl-values-from-fft-of-microphone-signal
 F2PaRMS = DFT/sqrt(2);
-Recording
 
 end
