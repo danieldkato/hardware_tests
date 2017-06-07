@@ -30,7 +30,7 @@ function f2rms = dftRMS(Recording)
 %   Data % actual recording data
 %   TrueSampleRate % actual sample rate, in Hz, of recording 
 %   PreStimDuration.val % pre-stimulus period duration, in seconds (can be 0)
-%   PostStimDuration.val % post-stimulus period duration, in seconds (ca be 0)
+%   PostStimDuration.val % post-stimulus period duration, in seconds (can be 0)
 %   Microphone % model number of microphone used to make recording
 
 
