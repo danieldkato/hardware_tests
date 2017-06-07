@@ -1,4 +1,4 @@
-function F2PaRMS = dftRMS(Recording)
+function f2rms = dftRMS(Recording)
 
 % DOCUMENTATION TABLE OF CONTENTS
 % I. SYNTAX
@@ -10,23 +10,30 @@ function F2PaRMS = dftRMS(Recording)
 
 %%
 % I. SYNTAX
-% DFTPa = DFT2Pa(stimData)
+% f2rms = dftRMS(stimData)
 
 % II. OVERVIEW
-% This function takes a time-series of an analog of an auditory
-% stimulus and returns its discrete fourier transform expressed in Pascals.
-% In other words, for each frequency, it gives the amplitude of the wave of
-% that frequenct that would be needed to reconstruct the original stimulus.
+% This function takes a time-series vector of an audio recording and
+% returns a vector of rms amplitudes for each frequency component. In other
+% words, for each frequency, it gives the rms amplitude of the sinusoid of
+% that frequency that would be needed to reconstruct the original stimulus.
 
 % III. REQUIREMENTS
 % 
 
 % IV. INPUTS
+% 1) Recording - a struct containing data and metadat from an audio
+% recording. It must have at least the following fields:
+%   PreStimDuration.val - post-stimulus period duration, in seconds
+%   PostStim
 
+
+% TODO:
+% Make this useable with non-struct inputs?
 
 
 %% Load voltage trace and get recording metadata    
-preStimDur = Recording.PostStimDuration.val;
+preStimDur = Recording.PreStimDuration.val;
 postStimDur = Recording.PostStimDuration.val;
 stimVolts = Recording.Data(ceil(preStimDur*trueSampleRate):length(Recording.Data) - ceil(postStimDur * Recording.TrueSampleRate));
 
@@ -77,6 +84,6 @@ DFT(2:end-1) = 2*DFT(2:end-1);
 % divided by sqrt(2):
 % https://en.wikipedia.org/wiki/Root_mean_square
 % https://dsp.stackexchange.com/questions/14808/spl-values-from-fft-of-microphone-signal
-F2PaRMS = DFT/sqrt(2);
+f2rms = DFT/sqrt(2);
 
 end
