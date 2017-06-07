@@ -10,7 +10,8 @@ function f2rms = dftRMS(Recording)
 
 %%
 % I. SYNTAX
-% f2rms = dftRMS(stimData)
+% f2rms = dftRMS(Recording)
+
 
 % II. OVERVIEW
 % This function takes a time-series vector of an audio recording and
@@ -18,18 +19,29 @@ function f2rms = dftRMS(Recording)
 % words, for each frequency, it gives the rms amplitude of the sinusoid of
 % that frequency that would be needed to reconstruct the original stimulus.
 
+
 % III. REQUIREMENTS
 % 
+
 
 % IV. INPUTS
 % 1) Recording - a struct containing data and metadat from an audio
 % recording. It must have at least the following fields:
-%   PreStimDuration.val - post-stimulus period duration, in seconds
-%   PostStim
+%   Data % actual recording data
+%   TrueSampleRate % actual sample rate, in Hz, of recording 
+%   PreStimDuration.val % pre-stimulus period duration, in seconds (can be 0)
+%   PostStimDuration.val % post-stimulus period duration, in seconds (ca be 0)
+%   Microphone % model number of microphone used to make recording
+
+
+% V. OUTPUTS
+% 1) f2rms - a 1 x N vector where the i-th element specifies the RMS
+% amplitude of the i-th frequency component of the original signal. 
 
 
 % TODO:
-% Make this useable with non-struct inputs?
+% 1) Provide alternative syntax to accept HDF5 inputs?
+% 2) Provide alternative syntax to accept non-struct, non-HDF5 inputs?
 
 
 %% Load voltage trace and get recording metadata    
