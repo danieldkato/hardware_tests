@@ -49,15 +49,7 @@ preStimDur = Recording.PreStimDuration.val;
 postStimDur = Recording.PostStimDuration.val;
 stimVolts = Recording.Data(ceil(preStimDur*trueSampleRate):length(Recording.Data) - ceil(postStimDur * Recording.TrueSampleRate));
 
-% Get mic sensitivity by looking it up; might want to offer alternative
-% ways of entering mic sensitivity if make this optional if mic database is
-% not available
-load('Mics.mat') % load microphone specs
-for m = 1:length(Mics)
-        if strcmp(Mics(m).Mdl, Recording.Microphone)
-            sensitivity = Mics(m).Sensitivity * 1000; % convert from mV/Pa to V/Pa
-        end
-end
+
 
 
 %%
