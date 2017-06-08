@@ -45,16 +45,12 @@ function f2rms = dftRMS(Recording)
 
 
 %% Load voltage trace and get recording metadata    
-preStimDur = Recording.PreStimDuration.val;
-postStimDur = Recording.PostStimDuration.val;
-stimVolts = Recording.Data(ceil(preStimDur*trueSampleRate):length(Recording.Data) - ceil(postStimDur * Recording.TrueSampleRate));
+pascals = volts2pascals(Recording); % convert voltage to pascals
 
-
-
-
-%%
+preStimDur = Recording.PreStimDuration.val; % get pre-stimulus duration to identify semgent of trace corresponding to stimulus
+postStimDur = Recording.PostStimDuration.val; % get post-stimulus duration to identify semgent of trace corresponding to stimulus
+stimPascals = pascals(ceil(preStimDur*trueSampleRate):length(Recording.Data) - ceil(postStimDur * Recording.TrueSampleRate));
 N = length(stimVolts);
-P = stimVolts/sensitivity; % convert voltage trace to pressure trace in pascals
 
 % Get DFT of pressure trace using fft(). In order to convert this to an
 % peak-to-peak *amplitude* spectrum (as opposed to a power spectrum), take
