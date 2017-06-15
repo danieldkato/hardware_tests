@@ -9,15 +9,14 @@ function f2rms = dftRMS(Recording)
 
 %%
 % I. OVERVIEW
-% This function takes a time-series of an audio recording and returns its
-% Fourier tansform in terms of RMS amplitude for each frequency component.
-% In other words, for each frequency, it gives the rms amplitude of the
-% sinusoid of that frequency that would be needed to reconstruct the
-% original stimulus.
+% This function takes an audio recording in the time domain and returns its
+% Fourier tansform in terms of pascals RMS. In other words, for each
+% frequency, it gives the rms amplitude of the sinusoid of that frequency
+% that would be needed to reconstruct the original stimulus.
 
 
 % II. REQUIREMENTS
-% 1) volts2pascals
+% 1) volts2pascals, available at https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram/conversion
 
 
 % III. INPUTS
