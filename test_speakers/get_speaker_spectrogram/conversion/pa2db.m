@@ -1,4 +1,4 @@
-function dB = pa2db(p)
+function dB = pa2db(P)
 %% DOCUMENTATION TABLE OF CONTENTS
 % I. OVERVIEW
 % I. REQUIREMENTS
