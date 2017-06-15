@@ -44,7 +44,7 @@ pascals = volts2pascals(Recording); % convert voltage to pascals
 
 preStimDur = Recording.PreStimDuration.val; % get pre-stimulus duration to identify semgent of trace corresponding to stimulus
 postStimDur = Recording.PostStimDuration.val; % get post-stimulus duration to identify semgent of trace corresponding to stimulus
-stimPascals = pascals(ceil(preStimDur*trueSampleRate):length(Recording.Data) - ceil(postStimDur * Recording.TrueSampleRate));
+stimPascals = pascals(ceil(preStimDur*TrueSampleRate):length(Recording.Data) - ceil(postStimDur * Recording.TrueSampleRate));
 N = length(stimVolts);
 
 % Get DFT of pressure trace using fft(). In order to convert this to an
