@@ -1,27 +1,24 @@
 function P = db2pa(dB)
 %% DOCUMENTATION TABLE OF CONTENTS
-% I. SYNTAX
-% II. OVERVIEW
-% III. REQUIREMENTS
-% IV. INPUTS
-% V. OUTPUTS
+
+% I. OVERVIEW
+% II. REQUIREMENTS
+% III. INPUTS
+% IV. OUTPUTS
 
 %%
-% I. SYNTAX
-% P = db2pa(dB)
-
-% II. OVERVIEW
+% I. OVERVIEW
 % This function converts a vector of sound pressure level values expressed
 % in dB SPL to a vector of sound pressure level values expressed in
 % pascals.
 
-% III. REQUIREMENTS
+% II. REQUIREMENTS
 % None (beyond those needed to run MATALB).
 
-% IV. INPUTS
+% II. INPUTS
 % dB - a 1 x n vector of sound pressure level values expressed in dB SPL
 
-% V. OUTPUTS
+% IV. OUTPUTS
 % P - a 1 x n vector of sound pressure level values expressed in pascals
 
 
