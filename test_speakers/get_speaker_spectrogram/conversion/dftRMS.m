@@ -44,8 +44,13 @@ pascals = volts2pascals(Recording); % convert voltage to pascals
 
 preStimDur = Recording.PreStimDuration.val; % get pre-stimulus duration to identify semgent of trace corresponding to stimulus
 postStimDur = Recording.PostStimDuration.val; % get post-stimulus duration to identify semgent of trace corresponding to stimulus
-stimPascals = pascals(ceil(preStimDur*TrueSampleRate):length(Recording.Data) - ceil(postStimDur * Recording.TrueSampleRate));
-N = length(stimVolts);
+P = pascals(ceil(preStimDur*Recording.TrueSampleRate.val):length(Recording.Data) - ceil(postStimDur * Recording.TrueSampleRate.val));
+
+% want to make this even-lengthed if it isn't already
+if mod(length(P),2) ~= 0
+    P = P(1:end-1);
+end
+N = length(P);
 
 % Get DFT of pressure trace using fft(). In order to convert this to an
 % peak-to-peak *amplitude* spectrum (as opposed to a power spectrum), take
