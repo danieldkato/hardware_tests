@@ -61,4 +61,6 @@ for m = 1:length(Mics)
         end
 end
 
-pascals = Recording.Data/sensitivity;
+figure;
+plot(Recording.Data);
+pascals = Recording.Data*sensitivity;
