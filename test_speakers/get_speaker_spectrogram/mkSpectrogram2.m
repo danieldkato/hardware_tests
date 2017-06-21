@@ -122,7 +122,7 @@ if length(varargin)>0
 end
 
 S.Audiogram = audiogramPath;
-S.Microphone = 'unknown';
+S.Speaker = 'unknown';
 
 %% Define desired frequency bands:
 range1 = [4 8];
@@ -172,25 +172,30 @@ S.ScaleFactor = range2integral/range1integral;
 % Plot raw periodogram:
 figure;
 hold on;
-plot(S.FrequenciesKHz, S.DFT.AmplitudesDBSPL);
+rawPeriodogram = plot(S.FrequenciesKHz, S.DFT.AmplitudesDBSPL);
 
 % Smooth the periodogram:
 boxWidth = 100;
 smoothIndices = (boxWidth/2:1:length(S.DFT.AmplitudesDBSPL)-boxWidth/2);
 dbSmooth = arrayfun(@(a) mean(S.DFT.AmplitudesDBSPL(a-boxWidth/2+1:a+boxWidth/2)), smoothIndices);
-plot(S.FrequenciesKHz(smoothIndices), dbSmooth, 'Color', [0, 0, 0.5]);
+smoothPeriodogram = plot(S.FrequenciesKHz(smoothIndices), dbSmooth, 'Color', [0, 0, 0.5]);
 
 % Plot audiogram:
-plot(S.FrequenciesKHz, Audiogram.ThreshDB.Interpolated, 'LineWidth', 1.5);
-xlabel('Frequency (kHz)');
-ylabel('Volume (dB SPL)');
+audiogramPlot = plot(S.FrequenciesKHz, Audiogram.ThreshDB.Interpolated, 'LineWidth', 1.5, 'Color', [1, 0, 0]);
 
 % Plot rectangles corresponding to target frequency ranges:
 yl = ylim;
 recY = [yl fliplr(yl)];
-p1 = patch([S.Band1.FrequenciesKHz(1) S.Band1.FrequenciesKHz(1) S.Band1.FrequenciesKHz(2) S.Band1.FrequenciesKHz(2)], recY, [0.75, 0.0, 0.0], 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-p2 = patch([S.Band2.FrequenciesKHz(1) S.Band2.FrequenciesKHz(1) S.Band2.FrequenciesKHz(2) S.Band2.FrequenciesKHz(2)], recY, [0.75, 0.0, 0.0], 'FaceAlpha', 0.2, 'EdgeColor', 'none');
+p1 = patch([S.Band1.FrequenciesKHz(1) S.Band1.FrequenciesKHz(1) S.Band1.FrequenciesKHz(2) S.Band1.FrequenciesKHz(2)], recY, [0.95, 0.95, 0.25], 'FaceAlpha', 0.3, 'EdgeColor', 'none');
+p2 = patch([S.Band2.FrequenciesKHz(1) S.Band2.FrequenciesKHz(1) S.Band2.FrequenciesKHz(2) S.Band2.FrequenciesKHz(2)], recY, [0.95, 0.95, 0.25], 'FaceAlpha', 0.3, 'EdgeColor', 'none');
 
+% Label figure
+title(strcat(['Speaker ', S.Speaker, ' response chart & murine audiogram']));
+xlabel('Frequency (kHz)');
+ylabel('Volume (dB SPL)');
+legend([rawPeriodogram, audiogramPlot], {strcat(['Speaker ', S.Speaker, ' response chart']),
+        'Murine audiogram'
+    });
 
 %{
 figure;
