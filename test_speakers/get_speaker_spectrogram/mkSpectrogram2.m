@@ -193,8 +193,9 @@ p2 = patch([S.Band2.FrequenciesKHz(1) S.Band2.FrequenciesKHz(1) S.Band2.Frequenc
 title(strcat(['Speaker ', S.Speaker, ' response chart & murine audiogram']));
 xlabel('Frequency (kHz)');
 ylabel('Volume (dB SPL)');
+agName = strcat([Audiogram.Authors{1}{1}, ' et al ', num2str(Audiogram.Year)]);
 legend([rawPeriodogram, audiogramPlot], {strcat(['Speaker ', S.Speaker, ' response chart']),
-        'Murine audiogram'
+        strcat(['Murine audiogram (', agName, ')'])
     });
 
 %{
