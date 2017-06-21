@@ -1,4 +1,4 @@
-function f2rms = dftRMS(Recording)
+function D = dftRMS(Recording)
 
 % DOCUMENTATION TABLE OF CONTENTS
 % I. OVERVIEW
@@ -32,10 +32,10 @@ function f2rms = dftRMS(Recording)
 
 
 % IV. OUTPUTS
-% 1) f2rms - a structure with the following fields:
-%   a) Amplitudes - 1 x N vector where the i-th element specifies the RMS
+% 1) D - a structure with the following fields:
+%   a) AmplitudesPaRMS - 1 x N DFT vector where the i-th element specifies the RMS
 %      amplitude of the i-th frequency component of the original signal.
-%   b) Frequencies - 1 x N vector of the frequencies associated with each
+%   b) FrequenciesHz - 1 x N vector of the frequencies associated with each
 %      frequency component, in Hz
 
 
@@ -46,18 +46,15 @@ function f2rms = dftRMS(Recording)
 
 %% Pre-processing:
 
-% convert voltage to pascals:
+% Convert voltage to pascals:
 pascals = volts2pascals(Recording); 
 
-% extract data from just the stimulus period:
+% Extract data from just the stimulus period:
 preStimDur = Recording.PreStimDuration.val; 
 postStimDur = Recording.PostStimDuration.val; 
 P = pascals(ceil(preStimDur*Recording.TrueSampleRate.val):length(Recording.Data) - ceil(postStimDur * Recording.TrueSampleRate.val));
 
-% plot the stimulus in pascals to make sure it looks reasonable:
-times = 1/Recording.TrueSampleRate.val * (1:length(P));
-
-% make time-series even-lengthed if it isn't already:
+% Make time-series even-lengthed if it isn't already:
 if mod(length(P),2) ~= 0
     P = P(1:end-1);
 end
@@ -97,11 +94,11 @@ DFT(2:end-1) = 2*DFT(2:end-1);
 % divided by sqrt(2):
 % https://en.wikipedia.org/wiki/Root_mean_square
 % https://dsp.stackexchange.com/questions/14808/spl-values-from-fft-of-microphone-signal
-f2rms.Amplitudes = DFT/sqrt(2);
+D.AmplitudesPaRMS = DFT/sqrt(2);
 
 % Get the actual frequencies, in Hz, that each of these components
 % correspond to 
-f = (0:length(f2rms.Amplitudes)-1) * (Recording.TrueSampleRate.val/N);
-f2rms.Frequencies = f;
+f = (0:length(D.AmplitudesPaRMS)-1) * (Recording.TrueSampleRate.val/N);
+D.FrequenciesHz = f;
 
 end

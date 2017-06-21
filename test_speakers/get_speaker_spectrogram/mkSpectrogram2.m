@@ -1,66 +1,195 @@
-% this script can be just for plotting
-function S = mkSpectrogram2(recordingPath, band1, band2, audiogram)
+function S = mkSpectrogram2(recordingPath, band1, band2, varargin)
+
+% DOCUMENTATION TABLE OF CONTENTS:
+% I. OVERVIEW
+% II. REQUIREMENTS
+% III. INPUTS
+% IV. OUTPUTS
+
+
+%% 
+% I. OVERVIEW
+% This function computes the scale factor needed to ensure that acoustic
+% noise played in one frequency band from a given speaker matches the
+% loudness of noise played in another frequency band from the same speaker.
+% It also creates a plot that overlays the speaker's response chart, a
+% murine audiogram, and rectangular patches highlighting the requested
+% frequency bands to aid in manual selection of reasonable frequency bands.
+
+
+% II. REQUIREMENTS
+% 1) dftRMS.m, available at github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram/conversion
+%       a) This in turn requires volts2pascals.m, available at github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram/conversion
+% 2) pa2db.m, available at github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram/conversion
+% 3) db2pa.m, available at github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram/conversion
+% 4) Mics.mat, available github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram/hardwareDefs
+% 5) audiogram_Heffner2002.mat, avaialable at github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram/audiograms
+
+% Note that some of these requirements may have other dependencies of their own.
+% Also, see INPUTS below for input formatting requirements.
+
+
+% III. INPUTS
+% 1) recordingPath - string specifying the location of a .mat file
+% containing a structure called `Recording`. This structure must include at
+% least the following fields:
+%   a) Data - a 1 x N vector containing a time series recording of a 
+%      white noise stimulus, where N is the number of samples in the recording.
+%   b) Microphone - a string specifying the model number of the microphone
+%      used to record the stimulus (this is necessary to retrieve the
+%      sensitivity of the microphone from Mics.mat, which is in turn
+%      necessary to convert the raw voltage trace into actual sound
+%      pressure units that can be compared to the audiogram).
+%   c) PreStimDuration.val - duration of any pre-stimulus period, in
+%      seconds, included in the recording
+%   d) PreStimDuration.val - duration of any post-stimulus period, in
+%      seconds, included in the recording
+
+% 2) band1 - a 2-element array specifying the lower and upper bounds, in KHz, of the
+% first desired frequency range.
+
+% 3) band2 - a 2-element array specifying the lower and upper bounds, in KHz, of the
+% second desired frequency range.
+
+% 4) [optional] audiogramPath - string specifying the location of a .mat file
+% containing a structure called `Audiogram`. This structure must include at
+% least the following fields:
+%   a) ThreshDBSPL - a 1 x F vector of hearing thresholds, in dB SPL, where
+%   F is the number of frequencies for which hearing thresholds have been
+%   measured
+%   b) FreqKHz - a 1 x F vector of frequencies, in KHz, for which hearing
+%   thresholds have been measured. The frequency specified by a given
+%   element of FreqKHz must correspond to the hearing thresholds specified
+%   the corresponding element of ThreshDBSPL - in other words, the i-th
+%   element of ThreshDBSPL should be the hearing threshold at the frequency
+%   specified by the i-th element of FreqKHz
+
+% If no audiogramPath is specified, then the Audiogram structure saved in
+% `audiogram_Heffner2002.mat` will be used as a default. 
+
+
+%IV. OUTPUTS
+% 1) S, a structure with the following fields:
+%   a) ScaleFactor - the scalar by which the amplitude of any signal in the
+%   first frequency band must be multiplied in order to match the loudness
+%   of any signal in the second frequency band
+
+%   b) FrequenciesKHz - 1 x N vector specifying the frequencies, in KHz,
+%   for which the speaker's response function is defined. This function
+%   also linearly interpolates the audiogram data to define the audiogram
+%   for all of these frequencies as well. 
+
+%   c) DFT - structure containing information about the discrete Fourier
+%   transform of the recorded noise stimulus. This structure includes the
+%   following fields:
+%       i) FrequenciesHz - 1 x F vector of frequencies, in Hz, for which
+%       the discrete Fourier transform of the original recording is
+%       defined, where F is the number of frequencies in the DFT. Note that
+%       F is equal to the number of samples in the original time-series
+%       data.
+%       ii) AmplitudesPaRMS - 1 x F vector of amplitudes, in RMS pascals,
+%       associated with each frequency component of the original signal.
+%       That is, in order to reconstruct the original signal, then for all
+%       elements i of FrequenciesHz and AmplitudesPaRMS, you would need to
+%       add a sine wave with frequency FrequenciesHz(i) and
+%       AmplitudesPaRMS(i). 
+%       iii) AmplitudesDBSPL - same as AmplitudesPaRMS, but expressed in dB
+%       SPL. 
+
+%   c) Band1 - structure defining the bounds of the first frequency band.
+%   This structure includes the following fields:
+%       i) FrequenciesKHz - 2-element array defining the upper and lower
+%       bounds of the first frequency band in KHz
+%       ii) indices - 2-element array defining the upper and lower
+%       bounds of the first frequency band as indices into the frequency
+%       domain defined in S.FrequenciesKHz
+
+%   d) Band2 - same as Band1, but for the second frequency band
+
+%   e) Recording - string specifying the name of the .mat file containing
+%   the `Recording` struct used in the current analysis
+
+%   f) Audiogram - string specifying the name of the .mat file containing
+%   the `Audiogram` struct used in the current analysis
+
+
+%% Check if audiogram was defined, and if not, use default audiogram
+
+audiogramPath = 'audiogram_Heffner2002';
+
+if length(varargin)>0
+    audiogramPath = varargin{1};
+end
+
+S.Audiogram = audiogramPath;
+S.Microphone = 'unknown';
 
 %% Define desired frequency bands:
 range1 = [4 8];
 range2 = [15 19];
 
-S.band1.frequencies = band1;
-S.band2.frequencies = band2;
+S.Band1.FrequenciesKHz = band1;
+S.Band2.FrequenciesKHz = band2;
 
 
 %% Create periodogram of recording:
-load(nm); 
+load(recordingPath); 
+S.Recording = recordingPath;
+if isfield(Recording, 'Speaker')
+    S.Speaker = Recording.Speaker;
+end
 S.DFT = dftRMS(Recording); % get the Fourier transform of the recording in pascals RMS
-S.KHz = S.DFT.FrequenciesHz/1000; % convert frequencies associated with the DFT from Hz to KHz
-db = pa2db(S.DFT.AmplitudesPaRMS); % convert amplitudes associated with the DFT from pascals RMS into decibels; PLOTTING PURPOSES ONLY
+S.FrequenciesKHz = S.DFT.FrequenciesHz/1000; % convert frequencies associated with the DFT from Hz to KHz
+S.DFT.AmplitudesDBSPL = pa2db(S.DFT.AmplitudesPaRMS); % convert amplitudes associated with the DFT from pascals RMS into decibels; PLOTTING PURPOSES ONLY
 
 
 %% Load audiogram:
-load('audiogram_Heffner2002'); 
+load(audiogramPath); 
 
-Audiogram.ThreshPa = db2pa(Audiogram.ThreshDBSPL);
+Audiogram.ThreshPa.Raw = db2pa(Audiogram.ThreshDBSPL); % convert from dB SPL to pascals
 
 % Interpolate audiogram for comparison with periodogram;
 % output will have the same length as rmsPa.Amplitudes 
-interpolatedAudiogramPa = interp1(Audiogram.FreqKHz, Audiogram.ThreshPa, KHz)';
-interpolatedAudiogramDBSPL = interp1(Audiogram.FreqKHz, Audiogram.ThreshDBSPL, KHz)'; % for plotting purposes only
+Audiogram.ThreshPa.Interpolated = interp1(Audiogram.FreqKHz, Audiogram.ThreshPa.Raw, S.FrequenciesKHz)';
+Audiogram.ThreshDB.Interpolated = pa2db(Audiogram.ThreshPa.Interpolated); % for plotting purposes only
 
 
 %% Compute scale factor: 
-Ratio = S.DFTpa.Amplitudes./interpolatedAudiogramPa; % want to take this ratio in pascals, not decibels
+Ratio = S.DFT.AmplitudesPaRMS./Audiogram.ThreshPa.Interpolated; % want to take this ratio in pascals, not decibels
 
 % Convert bounds of desired frequency ranges from KHz into indices into Ratio:
-frequencyStep = max(KHz)/length(KHz); % frequency step size, in KHz per step
-range1indices = floor(range1./frequencyStep); 
-range2indices = floor(range2./frequencyStep);
+frequencyStep = max(S.FrequenciesKHz)/length(S.FrequenciesKHz); % frequency step size, in KHz per step
+S.Band1.indices = floor(band1./frequencyStep); 
+S.Band2.indices = floor(band2./frequencyStep);
 
-range1int = sum(Ratio(range1indices(1):range1indices(2)));
-range2int = sum(Ratio(range2indices(1):range2indices(2)));
-scaleFactor = range1int/range2int;
+range1integral = sum(Ratio(S.Band1.indices(1):S.Band1.indices(2)));
+range2integral = sum(Ratio(S.Band2.indices(1):S.Band2.indices(2)));
+S.ScaleFactor = range2integral/range1integral;
 
 
 %% Create figure with audiogram superimposed on periodogram:
+
+% Plot raw periodogram:
 figure;
 hold on;
-plot(KHz, db);
+plot(S.FrequenciesKHz, S.DFT.AmplitudesDBSPL);
 
 % Smooth the periodogram:
 boxWidth = 100;
-smoothIndices = (boxWidth/2:1:length(db)-boxWidth/2);
-dbSmooth = arrayfun(@(a) mean(db(a-boxWidth/2+1:a+boxWidth/2)), smoothIndices);
-plot(KHz(smoothIndices), dbSmooth, 'Color', [0, 0, 0.5]);
+smoothIndices = (boxWidth/2:1:length(S.DFT.AmplitudesDBSPL)-boxWidth/2);
+dbSmooth = arrayfun(@(a) mean(S.DFT.AmplitudesDBSPL(a-boxWidth/2+1:a+boxWidth/2)), smoothIndices);
+plot(S.FrequenciesKHz(smoothIndices), dbSmooth, 'Color', [0, 0, 0.5]);
 
 % Plot audiogram:
-plot(KHz, interpolatedAudiogramDBSPL, 'LineWidth', 1.5);
+plot(S.FrequenciesKHz, Audiogram.ThreshDB.Interpolated, 'LineWidth', 1.5);
 xlabel('Frequency (kHz)');
 ylabel('Volume (dB SPL)');
 
 % Plot rectangles corresponding to target frequency ranges:
 yl = ylim;
 recY = [yl fliplr(yl)];
-p = patch([range1(1) range1(1) range1(2) range1(2)], recY, [0.75, 0.0, 0.0], 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-p = patch([range2(1) range2(1) range2(2) range2(2)], recY, [0.75, 0.0, 0.0], 'FaceAlpha', 0.2, 'EdgeColor', 'none');
+p1 = patch([S.Band1.FrequenciesKHz(1) S.Band1.FrequenciesKHz(1) S.Band1.FrequenciesKHz(2) S.Band1.FrequenciesKHz(2)], recY, [0.75, 0.0, 0.0], 'FaceAlpha', 0.2, 'EdgeColor', 'none');
+p2 = patch([S.Band2.FrequenciesKHz(1) S.Band2.FrequenciesKHz(1) S.Band2.FrequenciesKHz(2) S.Band2.FrequenciesKHz(2)], recY, [0.75, 0.0, 0.0], 'FaceAlpha', 0.2, 'EdgeColor', 'none');
 
 
 %{

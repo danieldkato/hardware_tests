@@ -55,12 +55,29 @@ function pascals = volts2pascals(Recording)
 % ways of entering mic sensitivity if make this optional if mic database is
 % not available
 load('Mics.mat') % load microphone specs
+
+times = (1/Recording.TrueSampleRate.val) * (1:1:length(Recording.Data));
+
+% plot trace in volts
+figure;
+plot(times, Recording.Data);
+title('Raw time-domain signal');
+xlabel('Time (s)');
+ylabel('Signal (V)');
+xlim([min(times) max(times)]);
+
 for m = 1:length(Mics)
         if strcmp(Mics(m).Mdl, Recording.Microphone)
             sensitivity = Mics(m).Sensitivity * 1000; % convert from mV/Pa to V/Pa
         end
 end
 
-figure;
-plot(Recording.Data);
 pascals = Recording.Data*sensitivity;
+
+% plot trace in Pascals
+figure;
+plot(times, pascals);
+title('Time-domain signal in Pascals');
+xlabel('Time (s)');
+ylabel('Signal (Pa)');
+xlim([min(times) max(times)]);
