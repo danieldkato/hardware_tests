@@ -1,15 +1,19 @@
 % this script can be just for plotting
+function S = mkSpectrogram2(recordingPath, band1, band2, audiogram)
 
 %% Define desired frequency bands:
 range1 = [4 8];
 range2 = [15 19];
 
+S.band1.frequencies = band1;
+S.band2.frequencies = band2;
+
 
 %% Create periodogram of recording:
 load(nm); 
-DFTpa = dftRMS(Recording); % get the Fourier transform of the recording in pascals RMS
-KHz = DFTpa.Frequencies/1000; % convert frequencies associated with the DFT from Hz to KHz
-db = pa2db(DFTpa.Amplitudes); % convert amplitudes associated with the DFT from pascals RMS into decibels; PLOTTING PURPOSES ONLY
+S.DFT = dftRMS(Recording); % get the Fourier transform of the recording in pascals RMS
+S.KHz = S.DFT.FrequenciesHz/1000; % convert frequencies associated with the DFT from Hz to KHz
+db = pa2db(S.DFT.AmplitudesPaRMS); % convert amplitudes associated with the DFT from pascals RMS into decibels; PLOTTING PURPOSES ONLY
 
 
 %% Load audiogram:
@@ -24,7 +28,7 @@ interpolatedAudiogramDBSPL = interp1(Audiogram.FreqKHz, Audiogram.ThreshDBSPL, K
 
 
 %% Compute scale factor: 
-Ratio = DFTpa.Amplitudes./interpolatedAudiogramPa; % want to take this ratio in pascals, not decibels
+Ratio = S.DFTpa.Amplitudes./interpolatedAudiogramPa; % want to take this ratio in pascals, not decibels
 
 % Convert bounds of desired frequency ranges from KHz into indices into Ratio:
 frequencyStep = max(KHz)/length(KHz); % frequency step size, in KHz per step
