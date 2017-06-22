@@ -66,10 +66,16 @@ xlabel('Time (s)');
 ylabel('Signal (V)');
 xlim([min(times) max(times)]);
 
+found = 0;
 for m = 1:length(Mics)
         if strcmp(Mics(m).Mdl, Recording.Microphone)
             sensitivity = Mics(m).Sensitivity * 1000; % convert from mV/Pa to V/Pa
+            found = 1;
         end
+end
+
+if found == 1
+    error('Specified microphone model number not found in Mics.mat; mic sensitivity unknown, cannot convert from Volts to pascals.');
 end
 
 pascals = Recording.Data*sensitivity;

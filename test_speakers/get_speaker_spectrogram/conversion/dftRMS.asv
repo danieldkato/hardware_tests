@@ -10,8 +10,8 @@ function D = dftRMS(Recording)
 %%
 % I. OVERVIEW
 % This function takes an audio recording in the time domain and returns its
-% Fourier tansform in terms of RMS pascals. In other words, for each
-% frequency, it gives the amplitude in RMS pascals of the sinusoid of that
+% Fourier tansform in terms of pascals RMS. In other words, for each
+% frequency, it gives the amplitude in pascals rms of the sinusoid of that
 % frequency that would be needed to reconstruct the original stimulus.
 
 
