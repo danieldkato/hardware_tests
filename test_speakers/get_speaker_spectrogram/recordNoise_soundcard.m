@@ -57,7 +57,13 @@ function recordNoise_soundcard(speaker, stimDur, scale, configFile)
 
 % 2) stimDur - stimulus duration, in seconds
 
-% 3) configFile - path to a MATLAB-evaluable .txt file defining a structure
+% 3) scale - power parameter passed to the built-in MATLAB function wgn()
+% used in generating white noise. This parameter specifies the power of the
+% resulting signal in decibels relative to one Watt, assuming a load
+% impedance of 1 ohm. For more detail see the documentation for wgn() at 
+% https://www.mathworks.com/help/comm/ref/wgn.html
+
+% 4) configFile - path to a MATLAB-evaluable .txt file defining a structure
 % called `Recording`, which specifies various parameters necessary for
 % setting up data acquisition. While this function supplies default values
 % for all required fields, it is best practice to use a config file that
