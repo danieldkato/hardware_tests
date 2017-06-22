@@ -3,8 +3,9 @@ function S = mkSpectrogram2(recordingPath, band1, band2, varargin)
 % DOCUMENTATION TABLE OF CONTENTS:
 % I. OVERVIEW
 % II. REQUIREMENTS
-% III. INPUTS
-% IV. OUTPUTS
+% III. SYNTAX
+% IV. INPUTS
+% V. OUTPUTS
 
 
 %% I. OVERVIEW
@@ -28,7 +29,12 @@ function S = mkSpectrogram2(recordingPath, band1, band2, varargin)
 % Also, see INPUTS below for input formatting requirements.
 
 
-%% III. INPUTS
+%% III. SYNTAX
+% S = mkSpectrogram2(recordingPath, band1, band2)
+% S = mkSpectrogram2(recordingPath, band1, band2, audiogramPath)
+
+
+%% IV. INPUTS
 % 1) recordingPath - string specifying the location of a .mat file
 % containing a structure called `Recording`. This structure must include at
 % least the following fields:
@@ -68,7 +74,7 @@ function S = mkSpectrogram2(recordingPath, band1, band2, varargin)
 % `audiogram_Heffner2002.mat` will be used as a default. 
 
 
-%% IV. OUTPUTS
+%% V. OUTPUTS
 % 1) S, a structure with the following fields:
 
 %   a) ScaleFactor - the scalar by which the amplitude of any signal in the
