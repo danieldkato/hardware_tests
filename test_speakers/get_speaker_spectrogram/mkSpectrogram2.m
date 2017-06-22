@@ -6,6 +6,7 @@ function S = mkSpectrogram2(recordingPath, band1, band2, varargin)
 % III. SYNTAX
 % IV. INPUTS
 % V. OUTPUTS
+% VI. DESCRIPTION
 
 
 %% I. OVERVIEW
@@ -117,6 +118,49 @@ function S = mkSpectrogram2(recordingPath, band1, band2, varargin)
 
 %   f) Audiogram - structure containing audiogram data and metadata used to
 %      compute the scale factor
+
+
+%% VI. DESCRIPTION
+% The purpose of this function is to compute a scale factor by which the
+% amplitude of noise in one frequency band must be multiplied in order to
+% have the same loudness as noise in another frequency band. 
+
+% When a time-varying sinusoidal voltage signal of fixed amplitude is fed
+% to a speaker at different frequencies, the resulting sounds will have
+% different perceived loudness for two reasons: 1) the speaker itself
+% responds differently at different frequencies (i.e., the speaker's
+% "response chart" is not flat), and 2) the mouse's hearing threshold is
+% different for different frequencies (i.e., the mouse's "audiogram" is not
+% flat).
+
+% In order for two sounds of different frequencies f1 and f2 to have the
+% same perceived loudness, then the ratio of the sound pressure at f1 to
+% the mouse's hearing threshold at f1 - measured in linear units like
+% pascals (as opposed to logarithmic units like decibels) - must equal the
+% ratio of the sound pressure at f2 to the mouse's hearing threshold at f2.
+
+% To put it another way: suppose that R(f) is a function that defines the
+% sound pressure produced by the speaker at each frequency. Suppose
+% moreover that T(f) is the mouse's audiogram, i.e., a function that
+% defines the minimum detectable sound pressure at each frequency. Suppose
+% both R(f) and T(f) are in linear units like pascals (as opposed to
+% logarithmic units like decibels). In order for two sounds of different
+% frequencies f1 and f2 to have the same perceived loudness, then we want 
+
+% R(f1)/T(f1) = R(f2)/T(f2)
+
+% When dealing with a pair of frequency bands rather than a pair of
+% individual frequencies, we approximate the relationship between the
+% perceived loudness of each band with:
+
+% integral(R/T, f1min, f1max) = integral(R/T, f2min, f2max)
+
+% where integral(F/G, min, max) is the integral of F(x)/G(x) over the range
+% min to max. 
+
+% If these ratios are not equal, then one must be scaled by some
+% appropriate factor to equal the other. It is this scale factor that this
+% function computes.
 
 
 %% Check if audiogram was defined, and if not, use default audiogram
