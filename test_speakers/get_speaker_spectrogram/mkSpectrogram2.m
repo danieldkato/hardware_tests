@@ -112,10 +112,11 @@ function S = mkSpectrogram2(recordingPath, band1, band2, varargin)
 
 %   d) Band2 - same as Band1, but for the second frequency band
 
-%   e) Recording - all metadata fields from struct `Recording` used in the current analysis
+%   e) Recording - structure containing all metadata fields from the struct
+%      `Recording` used to compute the scale factor
 
-%   f) Audiogram - string specifying the name of the .mat file containing
-%   the struct `Audiogram` used in the current analysis
+%   f) Audiogram - structure containing audiogram data and metadata used to
+%      compute the scale factor
 
 
 %% Check if audiogram was defined, and if not, use default audiogram
@@ -210,7 +211,7 @@ legend([rawPeriodogram, audiogramPlot], {strcat(['Speaker ', S.Speaker, ' respon
 %% Write some recording metadata to S 
 Recording = rmfield(Recording, 'Data');
 S.Recording = Recording;
-
+S.Audiogram = Audiogram;
 
 %{
 figure;
