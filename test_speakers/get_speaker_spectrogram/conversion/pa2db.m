@@ -6,19 +6,18 @@ function dB = pa2db(P)
 % III. INPUTS
 % IV. OUTPUTS
 
-%%
-% I. OVERVIEW
+%% I. OVERVIEW
 % This function takes a vector of sound pressure values expressed in
 % pascals and returns a vector of of sound pressure values expressed in dB
 % SPL.
 
-% I. REQUIREMENTS
+%% II. REQUIREMENTS
 % None (beyond those needed to run MATLAB).
 
-% III. INPUTS
+%% III. INPUTS
 % 1) P - 1 x n vector of sound pressure values, expressed in pascals
 
-% IV. OUTPUTS
+%% IV. OUTPUTS
 % 1) dB - 1 x n vector of sound pressure values, expressed in dB SPL.
 
 % last updated DDK 2017-06-08
