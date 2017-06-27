@@ -1,4 +1,4 @@
-function S = mkSpectrogram2(recordingPath, band1, band2, varargin)
+function S = noiseScaleFactor(recordingPath, band1, band2, varargin)
 
 % DOCUMENTATION TABLE OF CONTENTS:
 % I. OVERVIEW
@@ -11,7 +11,7 @@ function S = mkSpectrogram2(recordingPath, band1, band2, varargin)
 
 %% I. OVERVIEW
 % This function computes the scale factor needed to ensure that acoustic
-% noise played in one frequency band from a given speaker matches the
+% noise played in one frequency band matches the
 % loudness of noise played in another frequency band from the same speaker.
 % It also creates a plot that overlays the speaker's response chart, a
 % murine audiogram, and rectangular patches highlighting the requested
@@ -159,8 +159,8 @@ function S = mkSpectrogram2(recordingPath, band1, band2, varargin)
 % min to max. 
 
 % If these ratios are not equal, then one must be scaled by some
-% appropriate factor to equal the other. It is this scale factor that this
-% function computes.
+% appropriate factor to equal the other. It is this scale factor that
+% this function computes.
 
 
 %% Check if audiogram was defined, and if not, use default audiogram
@@ -195,7 +195,6 @@ S.DFT.AmplitudesDBSPL = pa2db(S.DFT.AmplitudesPaRMS); % convert amplitudes assoc
 
 %% Load audiogram:
 load(audiogramPath); 
-
 Audiogram.ThreshPa.Raw = db2pa(Audiogram.ThreshDBSPL); % convert from dB SPL to pascals
 
 % Interpolate audiogram for comparison with periodogram;
