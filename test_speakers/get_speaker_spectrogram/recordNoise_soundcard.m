@@ -213,10 +213,8 @@ end
 AI = analoginput(Recording.DAQDeviceDriver, Recording.DAQDeviceID);
 AI.InputType = 'SingleEnded';
 maxSampleRate = daqhwinfo(AI,'MaxSampleRate');
-
 chan = addchannel(AI, Recording.DAQChannel);
 AI.Channel.InputRange = [Recording.InputRangeMin.val Recording.InputRangeMax.val];
-disp(Recording.DAQTgtSampleRate);
 AI.SampleRate = Recording.DAQTgtSampleRate.val;
 trueSampleRate = double(AI.SampleRate); %MATLAB may not use the exact sample rate specified
 Fs = trueSampleRate;
