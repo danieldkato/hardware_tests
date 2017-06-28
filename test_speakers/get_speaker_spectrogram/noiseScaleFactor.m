@@ -11,11 +11,11 @@ function S = noiseScaleFactor(recordingPath, band1, band2, varargin)
 
 %% I. OVERVIEW
 % This function computes the scale factor needed to ensure that acoustic
-% noise played in one frequency band matches the
-% loudness of noise played in another frequency band from the same speaker.
-% It also creates a plot that overlays the speaker's response chart, a
-% murine audiogram, and rectangular patches highlighting the requested
-% frequency bands to aid in manual selection of reasonable frequency bands.
+% noise played in one frequency band matches the loudness of noise played
+% in another frequency band from the same speaker. It also creates a plot
+% that overlays the speaker's response chart, a murine audiogram, and
+% rectangular patches highlighting the requested frequency bands to aid in
+% manual selection of reasonable frequency bands.
 
 
 %% II. REQUIREMENTS
