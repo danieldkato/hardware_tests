@@ -21,9 +21,10 @@ function recordWgn_soundcard(speaker, stimDur, scale, configFile)
     % acquisition hardware compatible with MATLAB's data acquisition toolbox(e.g., a National Instruments PCI data
     % acquisition card connected to a BNC Connector block). 
 
-    % 2) Audio recording equipment. This will most likely include a
-    % microphone, a preamplifier, and preconditioner.
-    % For more detailed hardware requirements, see the README available at
+    % 2) Audio recording equipment compatible with the analog-to-digital
+    % data acquisition equipment specified in 1). This will most likely
+    % include a prepolarized microphone, a preamplifier, and preconditioner. 
+    % For more detailed hardware requirements, see the README available at 
     % https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
 
     % 3) A sound card compatible  with MATLAB's sound() function. 
@@ -44,11 +45,7 @@ function recordWgn_soundcard(speaker, stimDur, scale, configFile)
 
 
 %% IV. INPUTS:
-% 1) speaker - string specifying the model number of the speaker. If this
-% matches the model number of one of the speakers defined in Speakers.mat,
-% then get_speaker_spectrogram will perform validation on the speaker to
-% ensure that the speaker's specifications support the requested stimulus.
-% If they do not, the function will throw a warning.
+% 1) speaker - string specifying the model number of the speaker.
 
 % 2) stimDur - stimulus duration, in seconds
 
@@ -74,6 +71,7 @@ function recordWgn_soundcard(speaker, stimDur, scale, configFile)
 %   Recording.DAQTgtSampleRate.val % numeric value specifying the desired data acquisition rate in samples per second
 %   Recording.InputRangeMin.val % minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
 %   Recording.InputRangeMax.val % minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
+%   Recording.Impedance.val % impedance value passed to MATLAB's builtin wgn() function to generate white noise waveform
 
 % For an example config file, see:
 % https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/config.txt
@@ -113,7 +111,7 @@ function recordWgn_soundcard(speaker, stimDur, scale, configFile)
 % `DAQDeviceID` and `DAQChannel` in the configSoundcard.txt, respectively,
 % match the DAQ board and channel connected to the recording equipment. 
 
-% 5) Run this script.
+% 5) Call this function.
 
 % 6) When prompted, enter the following numeric inputs in the command line:
 
