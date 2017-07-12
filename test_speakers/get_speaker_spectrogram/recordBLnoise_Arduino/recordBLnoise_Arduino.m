@@ -147,7 +147,7 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 % `currDAQ` and `chanID`, respectively, match the DAQ board and channel
 % connected to the recording equipment. 
 
-% 8) Run this script.
+% 8) Call this function.
 
 % 9) When prompted, enter the following numeric inputs in the command line:
 
