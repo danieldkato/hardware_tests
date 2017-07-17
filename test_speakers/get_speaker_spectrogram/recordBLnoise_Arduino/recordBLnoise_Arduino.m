@@ -383,6 +383,8 @@ Recording.Angle.val = angle;
 Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
+Recording.mFilePath = strcat(strrep(mfilename('fullpath'), '\', '\\'));
+Recording.mFileSHA1 = getSHA1();
 Recording.Date = datestr(startNow, 'YYYY-MM-DD');
 Recording.Time = datestr(startNow, 'HH:MM:SS');
 
@@ -395,6 +397,13 @@ save(dirName, 'Recording');
 %% Write data as .csv metadata as .txt for non-MATLAB analysis?
 
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
+Recording = rmfield(Recording, 'Data');
+Recording = rmfield(Recording, 'Warnings'); % just for convenience for the time being; but should figure out a way to include warnings
+fid = fopen('test.txt', 'wt');
+struct2txt(Recording, fid);
+fclose(fid);
+
+%{
 allFieldNames = fieldnames(Recording);
 metadataFieldNames = allFieldNames(cellfun(@(x) ~strcmp(x, 'Data') & ~strcmp(x, 'Warnings'), allFieldNames)); % exclude data from the fields to write, as well as warnings; this needs to be written in a special way
  
@@ -429,4 +438,6 @@ for w = 1:length(Recording.Warnings)
 end
 
 fclose(fileID);
+%}
+
 cd(old);
