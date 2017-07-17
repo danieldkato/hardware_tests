@@ -355,7 +355,6 @@ title(titleStr);
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 Recording.Speaker = speaker;
-Recording.StimDur.units = 'seconds';
 Recording.SignalConditionerGain = sigCondGain;
 Recording.Distance.val = distance;
 Recording.Distance.units = 'millimeters';
@@ -367,7 +366,10 @@ Recording.mFilePath = strcat(strrep(mfilename('fullpath'), '\', '\\'));
 Recording.mFileSHA1 = getSHA1();
 Recording.Date = startTimeTitle(1:10);
 Recording.Time = startTimeTitle(12:end);
+
+% These metadata fields need to be modified to be printed appropriately as text:
 Recording.VI.localPath = strcat(strrep(Recording.VI.localPath, '\', '\\'));
+Recording.ArduinoSketch.localPath = strcat(strrep(Recording.ArduinoSketch.localPath, '\', '\\'));
 
 dirName = strcat(['spkr',rename(speaker), '_noise_', startTime, '_mic', rename(Recording.Microphone), '_sigCond', rename(Recording.SignalConditioner)]);
 disp(dirName);
