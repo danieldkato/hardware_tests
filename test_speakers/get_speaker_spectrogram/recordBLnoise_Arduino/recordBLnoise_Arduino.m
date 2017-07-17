@@ -398,9 +398,18 @@ save(dirName, 'Recording');
 
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
 Recording = rmfield(Recording, 'Data');
-Recording = rmfield(Recording, 'Warnings'); % just for convenience for the time being; but should figure out a way to include warnings
+
+% just for convenience for the time being; but should figure out a way to include warnings
+Warnings = Recording.Warnings;
+Recording = rmfield(Recording, 'Warnings'); 
 fid = fopen('test.txt', 'wt');
 struct2txt(Recording, fid);
+warningBaseStr = 'Recording.Warnings = {';
+fprintf(fid, strcat([warningBaseStr, Warnings{1}, '\n']));
+for i = 2:length(Warnings)-1
+    fprintf(fid, strcat([repmat(' ', 1, length(warningBaseStr)), Warnings{i}, '\n']));
+end
+fprintf(fid, strcat([repmat(' ', 1, length(warningBaseStr)), Warnings{end}, '}\n']));
 fclose(fid);
 
 %{
