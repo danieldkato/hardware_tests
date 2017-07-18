@@ -287,6 +287,14 @@ end
 disp('Recording.Warnings');
 disp(Recording.Warnings);
 
+
+%% Upload Arduino sketch
+old = cd('C:\Program Files\Arduino\arduino-1.6.9-windows\arduino-1.6.9'); % need to cd here b/c Windows won't recognize arduino_debug as a command; not sure why, since I added it to Path environment variable
+[status, cmdout] = system(strcat(['arduino_debug --upload "', strrep(Recording.ArduinoSketch.Path, '\', '\\'), '"']));
+disp(cmdout);
+cd(old);
+
+
 %% Configure analog input object:
 AI = analoginput(Recording.DAQDeviceDriver, Recording.DAQDeviceID);
 AI.InputType = 'SingleEnded';
@@ -383,8 +391,10 @@ Recording.Angle.val = angle;
 Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
-Recording.mFilePath = strcat(strrep(mfilename('fullpath'), '\', '\\'));
-Recording.mFileSHA1 = getSHA1();
+Recording.ArduinoSketch.SHA1 = getSHA1(Recording.ArduinoSketch.Path);
+Recording.ArduinoSketch.Path = strrep(Recording.ArduinoSketch.Path, '\', '\\');
+Recording.mFile.Path = strrep(mfilename('fullpath'), '\', '\\');
+Recording.mFile.SHA1 = getSHA1();
 Recording.Date = datestr(startNow, 'YYYY-MM-DD');
 Recording.Time = datestr(startNow, 'HH:MM:SS');
 
