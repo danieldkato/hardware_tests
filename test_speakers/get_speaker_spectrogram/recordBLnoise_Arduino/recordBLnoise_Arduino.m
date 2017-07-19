@@ -145,15 +145,13 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 % matches the baud rate specified in the config file or the default value
 % of 9600.
 
-% 6) Upload `get_speaker_spectrogram.ino` to the Arduino microcontroller
-
-% 7) Ensure that the DAQ board and channel number specified by
+% 6) Ensure that the DAQ board and channel number specified by
 % `currDAQ` and `chanID`, respectively, match the DAQ board and channel
 % connected to the recording equipment. 
 
-% 8) Call this function.
+% 7) Call this function.
 
-% 9) When prompted, enter the following numeric inputs in the command line:
+% 8) When prompted, enter the following numeric inputs in the command line:
 
 %   - The product of all gains on any signal conditioners or amplifiers in
 %   line with the microphone. For example, if there is a signal conditioner
@@ -293,8 +291,10 @@ disp(Recording.Warnings);
 
 
 %% Upload Arduino sketch
+disp(strcat(['Uploading ', Recording.ArduinoSketch.Path, ' to Arduino...']));
 old = cd('C:\Program Files\Arduino\arduino-1.6.9-windows\arduino-1.6.9'); % need to cd here b/c Windows won't recognize arduino_debug as a command; not sure why, since I added it to Path environment variable
 [status, cmdout] = system(strcat(['arduino_debug --upload "', strrep(Recording.ArduinoSketch.Path, '\', '\\'), '"']));
+disp('... upload complete.');
 disp(cmdout);
 cd(old);
 
@@ -396,9 +396,8 @@ Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
 Recording.ArduinoSketch.SHA1 = getSHA1(Recording.ArduinoSketch.Path);
-Recording.ArduinoSketch.Path = strrep(Recording.ArduinoSketch.Path, '\', '\\');
-Recording.mFile.Path = strrep(mfilename('fullpath'), '\', '\\');
-Recording.mFile.SHA1 = getSHA1();
+Recording.mFile.Path = strcat(mfilename('fullpath'), '.m');
+Recording.mFile.SHA1 = getSHA1(Recording.mFile.Path);
 Recording.Date = datestr(startNow, 'YYYY-MM-DD');
 Recording.Time = datestr(startNow, 'HH:MM:SS');
 
