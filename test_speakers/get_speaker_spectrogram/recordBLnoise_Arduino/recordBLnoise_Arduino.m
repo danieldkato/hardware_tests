@@ -58,6 +58,10 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
         % validateSpeakers.m
         % validateMic.m
         % validateSignalConditioner.m
+        
+    % 4) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
+    
+    % 5) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
     
 % *IMPORTANT WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
