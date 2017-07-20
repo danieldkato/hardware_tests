@@ -61,7 +61,11 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
     % 4) National Instruments LabView systems engineering software.
     
     % 5) The LabView virtual instrument DigitalTriggeredAudioNoise.vi
+    
+    % 6) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
  
+    % 7) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
+    
 % *IMPORTANT WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
 % when it tries to call spectrogram(). If collecting data on hs05bruno8, it
@@ -214,7 +218,7 @@ Defaults.DAQDeviceDriver = 'nidaq';
 Defaults.DAQChannel = 10;
 Defaults.DAQTgtSampleRate.val = 150000;
 Defaults.DAQTgtSampleRate.units = 'samples per second';
-Defaults.SerialBaudRate = 9600;
+Defaults.BaudRate = 9600;
 Defaults.InputRangeMin.val = -10;
 Defaults.InputRangeMin.units = 'volts';
 Defaults.InputRangeMax.val = 10;
@@ -297,15 +301,16 @@ AI.TriggerType = 'Manual';
 %% Send stimulus parameters to Arduino 
 
 % Create and open serial connection with Arduino:
-arduino = serial(portID, 'BaudRate', Recording.SerialBaudRate);
+arduino = serial(portID, 'BaudRate', Recording.BaudRate);
 fopen(arduino);
 pause(2); %wait for handshake to complete; this actually takes quite a long time
+disp(fscanf(arduino)); 
 
 % Send stimulus information to Arduino
 instructions = strcat(['SET SPKRIDX ', num2str(stimID), '\n']);
 fprintf(arduino,'%s', instructions);
-%disp(fscanf(arduino)); 
-pause(.1);    
+disp(fscanf(arduino)); 
+pause(.5);    
 
 %% Acquire analog data:
 startTime = datestr(now, 'yymmdd_HH-MM-SS');
@@ -314,16 +319,18 @@ startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
 %startTime = datestr(startTime, 'yymmdd_HH-MM-SS');
 %startTimeTitle = datestr(startTime, 'yyyy-mm-dd HH:MM:SS');
 
-% Issue stimulus start trigger to Arduino:
 disp('Starting data acquisition...');
-fprintf(arduino,'%s','RELEASE_TRL\n');
+
 
 % Begin data acquisition:
 start(AI);
 trigger(AI);
 
+pause(Recording.PreStimDuration.val);
+fprintf(arduino,'%s','RELEASE_TRL\n'); % Issue stimulus start trigger to Arduino:
+
 %Wait for AI object to finish data acquisition:
-wait(AI, Recording.PreStimDuration.val + Recording.VI.StimDuration.val + Recording.PostStimDuration.val + .1);
+wait(AI, Recording.VI.StimDuration.val + Recording.PostStimDuration.val + .1);
 disp('... data acquisition complete.');
 
 %Close serial communication with Arduino:
@@ -354,6 +361,7 @@ title(titleStr);
 
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
+Recording.StimID = stimID;
 Recording.Speaker = speaker;
 Recording.SignalConditionerGain = sigCondGain;
 Recording.Distance.val = distance;
@@ -362,14 +370,12 @@ Recording.Angle.val = angle;
 Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
-Recording.mFilePath = strcat(strrep(mfilename('fullpath'), '\', '\\'));
-Recording.mFileSHA1 = getSHA1();
+Recording.mFilePath = strcat(mfilename('fullpath'), '.m');
+Recording.mFileSHA1 = getSHA1(Recording.mFilePath);
+Recording.ArduinoSketch.SHA1 = getSHA1(Recording.ArduinoSketch.LocalPath);
+Recording.VI.SHA1 = getSHA1(Recording.VI.LocalPath);
 Recording.Date = startTimeTitle(1:10);
 Recording.Time = startTimeTitle(12:end);
-
-% These metadata fields need to be modified to be printed appropriately as text:
-Recording.VI.localPath = strcat(strrep(Recording.VI.localPath, '\', '\\'));
-Recording.ArduinoSketch.localPath = strcat(strrep(Recording.ArduinoSketch.localPath, '\', '\\'));
 
 dirName = strcat(['spkr',rename(speaker), '_noise_', startTime, '_mic', rename(Recording.Microphone), '_sigCond', rename(Recording.SignalConditioner)]);
 disp(dirName);
