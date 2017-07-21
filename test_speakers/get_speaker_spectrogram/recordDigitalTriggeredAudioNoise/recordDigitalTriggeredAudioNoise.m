@@ -354,15 +354,16 @@ Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
 Recording.mFile.Path = strcat(mfilename('fullpath'), '.m');
-Recording.mFile.SHA1 = getSHA1(Recording.mFilePath);
-Recording.ArduinoSketch.SHA1 = getSHA1(Recording.ArduinoSketch.LocalPath);
+Recording.mFile.SHA1 = getSHA1(Recording.mFile.Path);
+Recording.Arduino.Sketch.SHA1 = getSHA1(Recording.Arduino.Sketch.LocalPath);
+Recording.Arduino.Port = portID;
 Recording.VI.SHA1 = getSHA1(Recording.VI.LocalPath);
 
 saveTime = now;
 Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
 Recording.Time = datestr(saveTime, 'HH:MM:SS');
 
-dirName = strcat(['spkr',rename(speaker), '_noise_', datestr(saveTime, 'yymmdd_HH-MM-SS'), '_mic', rename(Recording.Microphone), '_sigCond', rename(Recording.SignalConditioner)]);
+dirName = strcat(['spkr',rename(speaker), '_noise_', datestr(saveTime, 'yyyy-mm-dd_HH-MM-SS')]);
 mkdir(dirName);
 old = cd(dirName);
 save(dirName, 'Recording');
