@@ -353,8 +353,8 @@ Recording.Angle.val = angle;
 Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
-Recording.mFilePath = strcat(mfilename('fullpath'), '.m');
-Recording.mFileSHA1 = getSHA1(Recording.mFilePath);
+Recording.mFile.Path = strcat(mfilename('fullpath'), '.m');
+Recording.mFile.SHA1 = getSHA1(Recording.mFilePath);
 Recording.ArduinoSketch.SHA1 = getSHA1(Recording.ArduinoSketch.LocalPath);
 Recording.VI.SHA1 = getSHA1(Recording.VI.LocalPath);
 
