@@ -318,9 +318,9 @@ end
 %% Acquire analog data:
 %startTime = datestr(now, 'yymmdd_HH-MM-SS');
 %startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
-startNow = now;
-startTime = datestr(startNow, 'yymmdd_HH-MM-SS');
-startTimeTitle = datestr(startNow, 'yyyy-mm-dd HH:MM:SS');
+%startNow = now;
+%startTime = datestr(startNow, 'yymmdd_HH-MM-SS');
+%startTimeTitle = datestr(startNow, 'yyyy-mm-dd HH:MM:SS');
 
 % Issue stimulus start trigger to Arduino:
 disp('Starting data acquisition...');
@@ -396,7 +396,7 @@ save(dirName, 'Recording');
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
 Recording = rmfield(Recording, 'Data');
 
-% Write warnings to metadata file
+% Write warnings to metadata file:
 Warnings = Recording.Warnings;
 Recording = rmfield(Recording, 'Warnings'); 
 fid = fopen('test.txt', 'wt');
@@ -408,42 +408,4 @@ for i = 2:length(Warnings)-1
 end
 fprintf(fid, strcat([repmat(' ', 1, length(warningBaseStr)), Warnings{end}, '}\n']));
 fclose(fid);
-
-%{
-allFieldNames = fieldnames(Recording);
-metadataFieldNames = allFieldNames(cellfun(@(x) ~strcmp(x, 'Data') & ~strcmp(x, 'Warnings'), allFieldNames)); % exclude data from the fields to write, as well as warnings; this needs to be written in a special way
- 
-fileID = fopen(strcat(dirName, '_metadata.txt'), 'wt');
-%fprintf(fileID, strcat(['date:', startTime]));
-%fprintf(fildID, strcat(['duration:', ]));
-for i = 1:length(metadataFieldNames)
-    if isfield(Recording.(metadataFieldNames{i}), 'val')
-        fprintf(fileID, strcat([metadataFieldNames{i},'.val: ', num2str(Recording.(metadataFieldNames{i}).val), '\n']));
-        fprintf(fileID, strcat([metadataFieldNames{i},'.units: ', getfield(getfield(Recording, metadataFieldNames{i}), 'units'), '\n' ]));
-    else
-        val = getfield(Recording,metadataFieldNames{i});
-        if isnumeric(val)
-            val = num2str(val);
-        end
-        fprintf(fileID, strcat([metadataFieldNames{i},': ', val, '\n']));
-    end
-    %fprintf(fileID, strcat([metadata{i}{1},': ',metadata{i}{2}]));
-end
-
-% Write any hardware warnings:
-rwStr = 'Recording.Warnings: ';
-padding = repmat(' ', 1, length(rwStr));
-fprintf(fileID, rwStr);
-for w = 1:length(Recording.Warnings)
-    if w == 1
-        lead = [];
-    else 
-        lead = padding;
-    end
-    fprintf(fileID, strcat([lead, Recording.Warnings{w}, '\n']));
-end
-
-fclose(fileID);
-%}
-
 cd(old);
