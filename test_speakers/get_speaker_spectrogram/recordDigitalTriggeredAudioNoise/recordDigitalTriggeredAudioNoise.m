@@ -8,6 +8,7 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 % V. OUTPUTS
 % VI. INSTRUCTIONS
 
+
 %% I. SYNTAX:
 % recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
@@ -19,22 +20,22 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
 %% III. REQUIREMENTS:
 % A) Hardware
-    % 1) A host PC configured for use analog-to-digital data acquisition
-    % hardware compatible with MATLAB's data acquisition toolbox(e.g., a
-    % National Instruments PCI data acquisition card connected to a BNC
-    % Connector block). 
+%   1) A host PC configured for use analog-to-digital data acquisition
+%      hardware compatible with MATLAB's data acquisition toolbox(e.g., a
+%      National Instruments PCI data acquisition card connected to a BNC
+%      Connector block). 
 
-    % 2) Digital data acquisition hardware compatible for use with MATLAB's
-    % data acquisition toolbox (e.g., a National Instruments PCI data
-    % acquisition card connected to a BNC Connector block). 
+%   2) Digital data acquisition hardware compatible for use with MATLAB's
+%      data acquisition toolbox (e.g., a National Instruments PCI data
+%      acquisition card connected to a BNC Connector block). 
     
-    % 3) An Arduino microcontroller. 
+%   3) An Arduino microcontroller. 
     
-    % 4) Audio recording equipment compatible with the analog-to-digital
-    % data acquisition equipment specified in 1). This will most likely
-    % include a prepolarized microphone, a preamplifier, and preconditioner. 
-    % For more detailed hardware requirements, see the README available at
-    % https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
+%   4) Audio recording equipment compatible with the analog-to-digital
+%      data acquisition equipment specified in 1). This will most likely
+%      include a prepolarized microphone, a preamplifier, and preconditioner. 
+%      For more detailed hardware requirements, see the README available at
+%      https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
     
     
     
@@ -52,7 +53,7 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
         % b) States.h
         % c) States.cpp
       
-    % This files are available at https://github.com/danieldkato/ArduFSM/tree/soundcard/MultiSens
+    % These files are available at https://github.com/danieldkato/ArduFSM/tree/soundcard/MultiSens
     
     % In addition, these files make use of the following Arduino libraries: 
         % a) chat, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/chat
@@ -76,37 +77,37 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 % 1) speaker - string specifying the model number of the speaker.
 
 % 2) stimID - index of the auditory stimulus condition to play from
-% DigitalTriggeredAudio.vi. 0 means no stimulus; 1 mean stimulus condition
-% 1 in DigitalTriggeredAudio.vi; 2 means stimulus condition 2 in
-% DigitalTriggeredAudio.vi
+%    DigitalTriggeredAudio.vi. 0 means no stimulus; 1 mean stimulus condition
+%    1 in DigitalTriggeredAudio.vi; 2 means stimulus condition 2 in
+%    DigitalTriggeredAudio.vi
 
 % 3) portID - string specifying the port connected to the Arduino microcontroller
 
 % 4) configFile - path to a MATLAB-evaluable .txt file defining a structure
-% called `Recording`, which specifies various parameters necessary for
-% setting up data acquisition. While this function supplies default values
-% for all required fields, it is best practice to use a config file that
-% defines the following:
+%    called `Recording`, which specifies various parameters necessary for
+%    setting up data acquisition. While this function supplies default values
+%    for all required fields, it is best practice to use a config file that
+%    defines the following:
 %
-%   Recording.PreStimDuration.val % numeric value specifying duration of pre-stimulus period, in seconds
-%   Recording.PostStimDuration.val % numeric value specifying duration of post-stimulus period, in seconds
-%   Recording.Microphone % string specifying the model number of the microphone
-%   Recording.SignalConditioner % string specifying the model number of the signal conditioner
-%   Recording.DAQDeviceDriver % string specifying the data acquisition driver to use for the current recording session
-%   Recording.DAQDeviceID % string specifying the data acquisition device ID to use for the current recording session
-%   Recording.DAQChannel % integer value specifying the data acquisition channel to use for the current recording session
-%   Recording.DAQTgtSampleRate.val % numeric value specifying the desired data acquisition rate in samples per second
-%   Recording.SerialBaudRate % integer value specifying the baud rate of the host-PC-to-Arduino serial connection 
-%   Recording.InputRangeMin.val % minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
-%   Recording.InputRangeMax.val % minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
+%       Recording.PreStimDuration.val - numeric value specifying duration of pre-stimulus period, in seconds
+%       Recording.PostStimDuration.val - numeric value specifying duration of post-stimulus period, in seconds
+%       Recording.Microphone - string specifying the model number of the microphone
+%       Recording.SignalConditioner - string specifying the model number of the signal conditioner
+%       Recording.DAQDeviceDriver - string specifying the data acquisition driver to use for the current recording session
+%       Recording.DAQDeviceID - string specifying the data acquisition device ID to use for the current recording session
+%       Recording.DAQChannel - integer value specifying the data acquisition channel to use for the current recording session
+%       Recording.DAQTgtSampleRate.val - numeric value specifying the desired data acquisition rate in samples per second
+%       Recording.SerialBaudRate - integer value specifying the baud rate of the host-PC-to-Arduino serial connection 
+%       Recording.InputRangeMin.val - minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
+%       Recording.InputRangeMax.val - minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
 
-% For an example config file, see:
-% https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/config.txt
+%   For an example config file, see:
+%   https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/config.txt
 
-% Note that it is also possible to specify alternative units for pre- and
-% post-stim duration, sample rate, and input range min and max, but this is
-% not recommended as this function assumes inputs are specified in the
-% units stated above.
+%   Note that it is also possible to specify alternative units for pre- and
+%   post-stim duration, sample rate, and input range min and max, but this is
+%   not recommended as this function assumes inputs are specified in the
+%   units stated above.
 
 
 %% V. OUTPUTS
@@ -114,7 +115,7 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 % storage: 
 
 % 1) A .mat file containing a structure called `Recordings`, which includes
-% all analog input data as well as stimulus and data acquisition metadata
+%    all analog input data as well as stimulus and data acquisition metadata
 
 % 2) A .csv containing the analog input data (for any subsequent non-MATLAB analysis)
 
@@ -122,51 +123,57 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
 
 %% VI: INSTRUCTIONS: 
-% 1) Connect the Arduino microcontroller to a host PC serial port via USB
-% connector.
 
-% 2) Ensure that the baud rate specified in `MultiSens.ino` matches the
-% baud rate specified in the config file or the default value of 9600.
+% 1) Connect the appropriate output pins on the Arduino to the
+%    corresponding digital input pins on the digital data acquisition
+%    hardware. By default, this entails the following connections:
+%       
+%       Arduino digital output pin      BNC-2110 Digital input pin
+%       --------------------------      --------------------------
+%       4                               P0.1
+%       5                               P0.2
+%       13                              P0.0
 
-% 3) Upload the Arduino sketch `MultiSens.ino`, along with `States.h` and
-% `States.cpp`, to the Arduino microcontroller.
+%    For more general description, see below. 
 
-% 4) Connect the appropriate output pins on the Arduino to the
-% corresponding digital input pins on the digital data acquisition
-% hardware. By default, this entails connecting Arduino digital output pins
-% 4, 5, and 13 to digital input pins P0.1, P0.2, and P0.0, respectively.
-% For more general description, see below. 
+% 2) Ensure that the baud rate specified in `MultiSens.ino` matches either the
+%    baud rate specified in the config file or the default value of 9600.
 
-% 5) Open DigitalTriggeredAudio.vi in LabView and hit 'Run Continuously' in
-% the LabView GUI. 
+% 3) Connect the Arduino to the host PC via USB port.
 
-% 6) Connect the audio recording equipment to the host PC. This will
-% probably entail connecting a combined microphone/preamplifier to a signal
-% preconditioner, which in turn connects via BNC cable to a connector block, 
-% which in turn connects into a PCI data acquisition board. 
+% 4) Upload the Arduino sketch `MultiSens.ino`, along with `States.h` and
+%   `States.cpp`, to the Arduino microcontroller.
 
-% 7) Position the microphone appropriately in front of the speaker. In most
-% cases, this will mean positioning the long axis of the microphone
-% perpendicular to the speaker diaphragm and less than 5 mm away.
+% 5) Connect the audio recording equipment to the host PC. This will
+%    probably entail connecting a combined microphone/preamplifier to a signal
+%    preconditioner, which in turn connects via BNC cable to a connector block, 
+%    which in turn connects into a PCI data acquisition board. 
 
-% 8) Ensure that the DAQ board and channel number specified by
-% `DAQDeviceID` and `DAQChannel`, respectively, match the DAQ board and
-% channel connected to the recording equipment. 
+% 6) Position the microphone appropriately in front of the speaker. In most
+%    cases, this will mean positioning the long axis of the microphone
+%    perpendicular to the speaker diaphragm and less than 5 mm away.
 
-% 8) Call this function.
+% 7) Ensure that the DAQ board and channel number specified by
+%    `DAQDeviceID` and `DAQChannel`, respectively, match the DAQ board and
+%    channel connected to the recording equipment. 
 
-% 9) When prompted, enter the following numeric inputs in the command line:
+% 8) Open DigitalTriggeredAudio.vi in LabView and hit 'Run Continuously' in
+%    the LabView GUI. 
 
-%   - The product of all gains on any signal conditioners or amplifiers in
-%   line with the microphone. For example, if there is a signal conditioner
-%   with a gain of 10 in line with another amplifier with a gain of 50, set
-%   this to 500. If there is no signal conditioner, enter `1`. (we need this to recover the amplitude of the actual voltage signal put out by the microphone, which, along with the microphone spec sheet, can be used to infer the actual sound pressure level on the mic in Pa)
+% 9) Call this function from the MATLAB command window with the desired inputs.
 
-%   - The distance of the microphone from the speakers, in millimeters
+% 10) When prompted, enter the following numeric inputs in the command line:
 
-%   - Then angle of incidence of the sound on the microphone - i.e., the
-%   angle between the long axis of the microphone and the axis
-%   perpendicular to the speaker diaphragm - in degrees. 
+%   a) The product of all gains on any signal conditioners or amplifiers in
+%     line with the microphone. For example, if there is a signal conditioner
+%     with a gain of 10 in line with another amplifier with a gain of 50, set
+%     this to 500. If there is no signal conditioner, enter `1`. (we need this to recover the amplitude of the actual voltage signal put out by the microphone, which, along with the microphone spec sheet, can be used to infer the actual sound pressure level on the mic in Pa)
+
+%   b) The distance of the microphone from the speakers, in millimeters
+
+%   c) Then angle of incidence of the sound on the microphone - i.e., the
+%     angle between the long axis of the microphone and the axis
+%     perpendicular to the speaker diaphragm - in degrees. 
 
 
 %% DESCRIPTION
@@ -186,19 +193,19 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
 % TODO:
 % 1) Should ultimately update this to use session-based, rather than
-% legacy DAQ interface (when we update MATLAB on ephys computer)
+%    legacy DAQ interface (when we update MATLAB on ephys computer)
 
 % 2) Should ultimately update this so that figures are saved (when we
-% update to a version of MATLAB that has savefig)
+%    update to a version of MATLAB that has savefig)
 
 % 3) Should rename - this function doesn't generate spectrograms anymore,
-% it just records
+%    it just records
 
 % 4) Add support for single-ended vs. differential input
 
 % 5) Should add a log of all warnings to metadata
 
-% Last updated DDK 2017-06-01
+% Last updated DDK 2017-07-21
 
 
 %% Parse inputs into stimulus and DAQ parameters, and, where possible, validate hardware:
@@ -257,33 +264,9 @@ for i = 1:length(requiredFields)
     end
 end 
 
-% Validate hardware
-% Recording.Warnings = {};
-%{
-warnings = {validateSpeakers(speaker, stimMinFreq, stimMaxFreq),
-            validateMic(speaker, stimMinFreq, stimMaxFreq),
-            validateSignalConditioner(speaker, stimMinFreq, stimMaxFreq)
-}; 
-%}
-
-%{
-warnings = {spkrWarn, micWarn, sigCondWarn};
-disp(warnings);
-
-for w = 1:length(warnings)
-    if ~isempty(warnings{w})
-        for x = 1:length(warnings{w})
-            %disp(warnings);
-            Recording.Warnings = horzcat(Recording.Warnings, warnings{w}{x});
-        end
-    end
-end
-
-disp('Recording.Warnings');
-disp(Recording.Warnings);
-%}
 
 %% Configure analog input object:
+
 AI = analoginput(Recording.DAQDeviceDriver, Recording.DAQDeviceID);
 AI.InputType = 'SingleEnded';
 maxSampleRate = daqhwinfo(AI,'MaxSampleRate');
@@ -312,22 +295,20 @@ fprintf(arduino,'%s', instructions);
 disp(fscanf(arduino)); 
 pause(.5);    
 
+
 %% Acquire analog data:
+
 startTime = datestr(now, 'yymmdd_HH-MM-SS');
 startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
-%startTime = now;
-%startTime = datestr(startTime, 'yymmdd_HH-MM-SS');
-%startTimeTitle = datestr(startTime, 'yyyy-mm-dd HH:MM:SS');
-
 disp('Starting data acquisition...');
-
 
 % Begin data acquisition:
 start(AI);
 trigger(AI);
-
 pause(Recording.PreStimDuration.val);
-fprintf(arduino,'%s','RELEASE_TRL\n'); % Issue stimulus start trigger to Arduino:
+
+% Issue stimulus start trigger to Arduino:
+fprintf(arduino,'%s','RELEASE_TRL\n'); 
 
 %Wait for AI object to finish data acquisition:
 wait(AI, Recording.VI.StimDuration.val + Recording.PostStimDuration.val + .1);
@@ -338,6 +319,7 @@ fclose(arduino);
 
 
 %% Plot raw data from the analog input object:
+
 Recording.Data = getdata(AI); % create a session object that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
@@ -361,6 +343,7 @@ title(titleStr);
 
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
+
 Recording.StimID = stimID;
 Recording.Speaker = speaker;
 Recording.SignalConditionerGain = sigCondGain;
@@ -374,17 +357,17 @@ Recording.mFilePath = strcat(mfilename('fullpath'), '.m');
 Recording.mFileSHA1 = getSHA1(Recording.mFilePath);
 Recording.ArduinoSketch.SHA1 = getSHA1(Recording.ArduinoSketch.LocalPath);
 Recording.VI.SHA1 = getSHA1(Recording.VI.LocalPath);
-Recording.Date = startTimeTitle(1:10);
-Recording.Time = startTimeTitle(12:end);
 
-dirName = strcat(['spkr',rename(speaker), '_noise_', startTime, '_mic', rename(Recording.Microphone), '_sigCond', rename(Recording.SignalConditioner)]);
-disp(dirName);
+saveTime = now;
+dirName = strcat(['spkr',rename(speaker), '_noise_', datestr(saveTime, 'yymmdd_HH-MM-SS'), '_mic', rename(Recording.Microphone), '_sigCond', rename(Recording.SignalConditioner)]);
 mkdir(dirName);
 old = cd(dirName);
 save(dirName, 'Recording');
+Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
+Recording.Time = datestr(saveTime, 'HH:MM:SS');
 
 
-%% Write data as .csv metadata as .txt for non-MATLAB analysis?
+%% Write data as .csv and metadata as .txt for non-MATLAB analysis?
 
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
 
@@ -395,28 +378,4 @@ fid = fopen('test.txt', 'wt');
 struct2txt(Recording, fid);
 fclose(fid);
 
-%{
-allFieldNames = fieldnames(Recording);
-metadataFieldNames = allFieldNames(cellfun(@(x) ~strcmp(x, 'Data') & ~strcmp(x, 'Warnings'), allFieldNames)); % exclude data from the fields to write, as well as warnings; this needs to be written in a special way
- 
-fileID = fopen(strcat(dirName, '.txt'), 'wt');
-disp(fileID);
-%fprintf(fileID, strcat(['date:', startTime]));
-%fprintf(fildID, strcat(['duration:', ]));
-for i = 1:length(metadataFieldNames)
-    if isfield(Recording.(metadataFieldNames{i}), 'val')
-        fprintf(fileID, strcat([metadataFieldNames{i},'.val: ', num2str(Recording.(metadataFieldNames{i}).val), '\n']));
-        fprintf(fileID, strcat([metadataFieldNames{i},'.units: ', getfield(getfield(Recording, metadataFieldNames{i}), 'units'), '\n' ]));
-    else
-        val = getfield(Recording,metadataFieldNames{i});
-        if isnumeric(val)
-            val = num2str(val);
-        end
-        fprintf(fileID, strcat([metadataFieldNames{i},': ', val, '\n']));
-    end
-    %fprintf(fileID, strcat([metadata{i}{1},': ',metadata{i}{2}]));
-end
-%}
-
-%fclose(fileID);
 cd(old);
