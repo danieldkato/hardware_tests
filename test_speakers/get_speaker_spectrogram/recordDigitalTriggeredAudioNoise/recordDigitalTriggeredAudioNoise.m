@@ -358,6 +358,8 @@ Recording.mFile.SHA1 = getSHA1(Recording.mFile.Path);
 Recording.Arduino.Sketch.SHA1 = getSHA1(Recording.Arduino.Sketch.LocalPath);
 Recording.Arduino.Port = portID;
 Recording.VI.SHA1 = getSHA1(Recording.VI.LocalPath);
+[~, Recording.Hostname] = system('hostname');
+Recording.Hostname = Recording.Hostname(1:end-1); % get rid of superfluous newline character
 
 saveTime = now;
 Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
