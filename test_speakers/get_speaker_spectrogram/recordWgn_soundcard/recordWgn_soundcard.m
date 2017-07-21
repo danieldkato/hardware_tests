@@ -223,9 +223,9 @@ noise = wgn(ceil(stimDur * trueSampleRate), 1, scale, Recording.Impedance.val);
 %startTime = datestr(now, 'yymmdd_HH-MM-SS');
 %startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
 %start = datetime;
-started = now;
-startTime = datestr(started, 'yymmdd_HH-MM-SS');
-startTimeTitle = datestr(started, 'yyyy-mm-dd HH:MM:SS');
+%started = now;
+%startTime = datestr(started, 'yymmdd_HH-MM-SS');
+%startTimeTitle = datestr(started, 'yyyy-mm-dd HH:MM:SS');
 
 % Begin data acquisition:
 start(AI);
@@ -264,8 +264,8 @@ title(titleStr);
 %savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
 
 
-%% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
-p = mfilename('fullpath');
+%% Write metadata into the same struct containing the data and save to
+%% secondary storage as a .mat to allow for easy analysis later
 
 Recording.Speaker = speaker;
 Recording.StimDur.val = stimDur;
@@ -277,8 +277,8 @@ Recording.Angle.val = angle;
 Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
-Recording.mFilePath = strcat(mfilename('fullpath'), '.m');
-Recording.mFileSHA1 = getSHA1(Recording.mFilePath);
+Recording.mFile.Path = strcat(mfilename('fullpath'), '.m');
+Recording.mFile.SHA1 = getSHA1(Recording.mFilePath);
 Recording.dBwrtWatt = scale;
 %Recording.SoundFileName = p;
 
