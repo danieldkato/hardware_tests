@@ -106,6 +106,8 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 %       Recording.SerialBaudRate - integer value specifying the baud rate of the host-PC-to-Arduino serial connection 
 %       Recording.InputRangeMin.val - minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
 %       Recording.InputRangeMax.val - minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
+%       Recording.Arduino.Sketch.Path - string containing absolute path to the sketch to run on the Arduino controlling the speaker
+%       Recording.Arduino.Board - string specifying Arduino board used to generate sound in current recording; use format specified by Arduino command line interface, described at https://github.com/arduino/Arduino/blob/master/build/shared/manpage.adoc
 
 %   For an example config file, see:
 %   https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/config.txt
@@ -271,9 +273,9 @@ end
 
 %% Upload Arduino sketch
 
-disp(strcat(['Uploading ', Recording.ArduinoSketch.Path, ' to Arduino...']));
+disp(strcat(['Uploading ', Recording.Arduino.Sketch.Path, ' to Arduino...']));
 old = cd('C:\Program Files\Arduino\arduino-1.6.9-windows\arduino-1.6.9'); % need to cd here b/c Windows won't recognize arduino_debug as a command; not sure why, since I added it to Path environment variable
-[status, cmdout] = system(strcat(['arduino_debug --upload "', strrep(Recording.ArduinoSketch.Path, '\', '\\'), '"']));
+[status, cmdout] = system(strcat(['arduino_debug --board ', Recording.Arduino.Board,' --port ',  portID, ' --upload "', strrep(Recording.Arduino.Sketch.Path, '\', '\\'), '"']));
 disp('... upload complete.');
 disp(cmdout);
 cd(old);
@@ -352,7 +354,7 @@ xlim([0 max(seconds)]);
 rectangle('Position',[Recording.PreStimDuration.val yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
 set(gca,'children',flipud(get(gca,'children')));
 titleStr = {strcat(['Speaker ', speaker, ' delivering ',num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMaxFreq/1000)), ' kHz band-limited noise']);
-            strcat(['acquired ', startTimeTitle]);
+            %strcat(['acquired ', startTimeTitle]);
             %strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
             strcat(['Mic: ', Recording.Microphone]);
             strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
@@ -377,12 +379,15 @@ Recording.Angle.val = angle;
 Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
-Recording.ArduinoSketch.SHA1 = getSHA1(Recording.ArduinoSketch.Path);
+Recording.Arduino.Sketch.SHA1 = getSHA1(Recording.Arduino.Sketch.Path);
+Recording.Arduino.Port = portID;
 Recording.mFile.Path = strcat(mfilename('fullpath'), '.m');
 Recording.mFile.SHA1 = getSHA1(Recording.mFile.Path);
+[~, Recording.Hostname] = system('hostname');
+Recording.Hostname = Recording.Hostname(1:end-1); % get rid of superfluous newline character
 
 saveTime = now;
-Recording.Date = datestr(saveTime, 'YYYY-MM-DD');
+Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
 Recording.Time = datestr(saveTime, 'HH:MM:SS');
 
 dirName = strcat(['spkr',rename(speaker), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', datestr(saveTime, 'yyyy-mm-dd_HH-MM-SS')]);
