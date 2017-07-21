@@ -252,27 +252,12 @@ end
 
 % Validate hardware
 Recording.Warnings = {};
-%{
-warnings = {validateSpeakers(speaker, stimMinFreq, stimMaxFreq),
-            validateMic(speaker, stimMinFreq, stimMaxFreq),
-            validateSignalConditioner(speaker, stimMinFreq, stimMaxFreq)
-}; 
-%}
 
-spkrWarn = validateSpeakers(speaker, stimMinFreq, stimMaxFreq);
-micWarn = validateMic(Recording.Microphone, stimMinFreq, stimMaxFreq);
-disp('sigCond name:');
-disp(Recording.SignalConditioner);
-sigCondWarn = validateSignalConditioner(Recording.SignalConditioner, stimMinFreq, stimMaxFreq);
-disp('spkr validation');
-disp(spkrWarn);
-disp('mic validation');
-disp(micWarn);
-disp('sigCond validation');
-disp(sigCondWarn);
+spkrWarn = validateSpeakers(speaker, stimMinFreq, stimMaxFreq)
+micWarn = validateMic(Recording.Microphone, stimMinFreq, stimMaxFreq)
+sigCondWarn = validateSignalConditioner(Recording.SignalConditioner, stimMinFreq, stimMaxFreq)
 
 warnings = {spkrWarn, micWarn, sigCondWarn};
-disp(warnings);
 
 for w = 1:length(warnings)
     if ~isempty(warnings{w})
@@ -283,11 +268,9 @@ for w = 1:length(warnings)
     end
 end
 
-disp('Recording.Warnings');
-disp(Recording.Warnings);
-
 
 %% Upload Arduino sketch
+
 disp(strcat(['Uploading ', Recording.ArduinoSketch.Path, ' to Arduino...']));
 old = cd('C:\Program Files\Arduino\arduino-1.6.9-windows\arduino-1.6.9'); % need to cd here b/c Windows won't recognize arduino_debug as a command; not sure why, since I added it to Path environment variable
 [status, cmdout] = system(strcat(['arduino_debug --upload "', strrep(Recording.ArduinoSketch.Path, '\', '\\'), '"']));
@@ -297,6 +280,7 @@ cd(old);
 
 
 %% Configure analog input object:
+
 AI = analoginput(Recording.DAQDeviceDriver, Recording.DAQDeviceID);
 AI.InputType = 'SingleEnded';
 maxSampleRate = daqhwinfo(AI,'MaxSampleRate');
@@ -378,6 +362,7 @@ title(titleStr);
 
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
+
 Recording.Speaker = speaker;
 Recording.StimMinFreq.val = stimMinFreq;
 Recording.StimMinFreq.units = 'Hz';
@@ -395,10 +380,12 @@ Recording.TrueSampleRate.units = 'samples/second';
 Recording.ArduinoSketch.SHA1 = getSHA1(Recording.ArduinoSketch.Path);
 Recording.mFile.Path = strcat(mfilename('fullpath'), '.m');
 Recording.mFile.SHA1 = getSHA1(Recording.mFile.Path);
-Recording.Date = datestr(startNow, 'YYYY-MM-DD');
-Recording.Time = datestr(startNow, 'HH:MM:SS');
 
-dirName = strcat(['spkr',rename(speaker), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', startTime]);
+saveTime = now;
+Recording.Date = datestr(saveTime, 'YYYY-MM-DD');
+Recording.Time = datestr(saveTime, 'HH:MM:SS');
+
+dirName = strcat(['spkr',rename(speaker), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', datestr(saveTime, 'yyyy-mm-dd_HH-MM-SS')]);
 mkdir(dirName);
 old = cd(dirName);
 save(dirName, 'Recording');
@@ -409,7 +396,7 @@ save(dirName, 'Recording');
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
 Recording = rmfield(Recording, 'Data');
 
-% just for convenience for the time being; but should figure out a way to include warnings
+% Write warnings to metadata file
 Warnings = Recording.Warnings;
 Recording = rmfield(Recording, 'Warnings'); 
 fid = fopen('test.txt', 'wt');
