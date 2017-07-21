@@ -359,15 +359,16 @@ Recording.ArduinoSketch.SHA1 = getSHA1(Recording.ArduinoSketch.LocalPath);
 Recording.VI.SHA1 = getSHA1(Recording.VI.LocalPath);
 
 saveTime = now;
+Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
+Recording.Time = datestr(saveTime, 'HH:MM:SS');
+
 dirName = strcat(['spkr',rename(speaker), '_noise_', datestr(saveTime, 'yymmdd_HH-MM-SS'), '_mic', rename(Recording.Microphone), '_sigCond', rename(Recording.SignalConditioner)]);
 mkdir(dirName);
 old = cd(dirName);
 save(dirName, 'Recording');
-Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
-Recording.Time = datestr(saveTime, 'HH:MM:SS');
 
 
-%% Write data as .csv and metadata as .txt for non-MATLAB analysis?
+%% Write data as .csv and metadata as .txt for non-MATLAB analysis
 
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
 
