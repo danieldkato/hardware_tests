@@ -200,6 +200,13 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 
 % 3) Add support for single-ended vs. differential input
 
+% 4) Should write a generic function that *recursively* checks if structure
+%    defined in config file has all necessary fields defined in default 
+%    structure (this function currently does not check recursively; e.g.,
+%    if Recording has a field that is itself a structure, this function
+%    will not check if that subordinate structure has all of its own
+%    required fields)
+
 % Last updated DDK 2017-07-20
 
 
