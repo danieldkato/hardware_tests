@@ -295,6 +295,7 @@ disp(cmdout);
 cd(old);
 
 
+
 %% Configure analog input object:
 
 AI = analoginput(Recording.DAQDeviceDriver, Recording.DAQDeviceID);
@@ -356,7 +357,7 @@ fclose(arduino);
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
-Data = getdata(AI)
+Data = getdata(AI);
 Recording.Data = Data; % create a session object that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
