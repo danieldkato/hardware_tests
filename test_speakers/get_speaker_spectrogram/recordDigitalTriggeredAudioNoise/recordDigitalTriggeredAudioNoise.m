@@ -1,4 +1,4 @@
-function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portID, configFile)
+function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
 % DOCUMENTATION TABLE OF CONTENTS:
 % I. SYNTAX
@@ -10,15 +10,12 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 
 
 %% I. SYNTAX:
-% get_speaker_spectrogram(speaker, stimDur, stimMinFreq, stimMaxFeq, portID, configFile)
+% recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
 
 %% II. OVERVIEW: 
-% Use this function to record sound from a speaker generating band-limited
-% noise. This host-PC-side code instructs an Arduino to generate a
-% fixed-duration band-limited noise stimulus and records, saves, and plots
-% concurrent analog input from a microphone connected to a data acquisition
-% device. 
+% Use this function to record auditory stimuli delivered by the LabView
+% virtual instrument DigitalTriggeredAudioNoise.vi.
 
 
 %% III. REQUIREMENTS:
@@ -28,45 +25,47 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 %      National Instruments PCI data acquisition card connected to a BNC
 %      Connector block). 
 
-%   2) Audio recording equipment compatible with the analog-to-digital
+%   2) Digital data acquisition hardware compatible for use with MATLAB's
+%      data acquisition toolbox (e.g., a National Instruments PCI data
+%      acquisition card connected to a BNC Connector block). 
+    
+%   3) An Arduino microcontroller. 
+    
+%   4) Audio recording equipment compatible with the analog-to-digital
 %      data acquisition equipment specified in 1). This will most likely
 %      include a prepolarized microphone, a preamplifier, and preconditioner. 
 %      For more detailed hardware requirements, see the README available at
-%      https://github.com/danieldkato/hardware_tests/tree/master/test_speak
-%      ers/get_speaker_spectrogram.
-
-%   3) An Arduino microcontroller connected to a two-terminal analog speaker. 
+%      https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
+    
+    
     
 % B) Software
     % 1) MATLAB data acquisition toolbox. Must be a version
-    %    supporting MATLAB's legacy DAQ interface, (will have to be
-    %    updated in future versions to session-based interface).
+    % supporting MATLAB's legacy DAQ interface, (will have to be
+    % updated in future versions to session-based interface).
 
-    % 2) The Arduino sketch `get_speaker_spectrogram.ino`, available at 
-    %    https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/get_speaker_spectrogram.ino. 
-    %    THE BAUD RATE SPECIFIED IN THIS SKETCH MUST MATCH THE BAUD RATE
-    %    SPECIFIED IN THE CONFIG FILE PASSED AS INPUT TO THIS FUNCTION (see
-    %    inputs below).
-
-    % 3) Hardware class definitions, databases, and validation functions,
-    %    all available at:
-    %    https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram
-    %    These include:
-           % Speaker.m
-           % Microphone.m
-           % SignalConditioner.m
-        
-           % Speakers.mat
-           % Mics.mat
-           % SignalConditioners.mat
-        
-           % validateSpeakers.m
-           % validateMic.m
-           % validateSignalConditioner.m
-        
-    % 4) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
+    % 2) Arduino IDE 1.6.9 or later.
     
-    % 5) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
+    % 3) Arduino-side code for running the ArduFSM protocol MultiSens. This
+    % includes the following files:
+    
+        % a) MultiSens.ino
+        % b) States.h
+        % c) States.cpp
+      
+    % These files are available at https://github.com/danieldkato/ArduFSM/tree/soundcard/MultiSens
+    
+    % In addition, these files make use of the following Arduino libraries: 
+        % a) chat, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/chat
+        % b) TimedState, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/TimedState
+    
+    % 4) National Instruments LabView systems engineering software.
+    
+    % 5) The LabView virtual instrument DigitalTriggeredAudioNoise.vi
+    
+    % 6) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
+ 
+    % 7) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
     
 % *IMPORTANT WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
@@ -75,21 +74,16 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 
 
 %% IV. INPUTS:
-% 1) speaker - string specifying the model number of the speaker. If this
-%    matches the model number of one of the speakers defined in Speakers.mat,
-%    then get_speaker_spectrogram will perform validation on the speaker to
-%    ensure that the speaker's specifications support the requested stimulus.
-%    If they do not, the function will throw a warning.
+% 1) speaker - string specifying the model number of the speaker.
 
-% 2) stimDur - stimulus duration, in seconds
+% 2) stimID - index of the auditory stimulus condition to play from
+%    DigitalTriggeredAudio.vi. 0 means no stimulus; 1 mean stimulus condition
+%    1 in DigitalTriggeredAudio.vi; 2 means stimulus condition 2 in
+%    DigitalTriggeredAudio.vi
 
-% 3) stimMinFreq - lower bound of stimulus noise frequency band, in Hz 
+% 3) portID - string specifying the port connected to the Arduino microcontroller
 
-% 4) stimMaxFreq - upper bound of stimulus noise frequency band, in Hz 
-
-% 5) portID - string specifying the port connected to the Arduino microcontroller
-
-% 6) configFile - path to a MATLAB-evaluable .txt file defining a structure
+% 4) configFile - path to a MATLAB-evaluable .txt file defining a structure
 %    called `Recording`, which specifies various parameters necessary for
 %    setting up data acquisition. While this function supplies default values
 %    for all required fields, it is best practice to use a config file that
@@ -106,8 +100,6 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 %       Recording.SerialBaudRate - integer value specifying the baud rate of the host-PC-to-Arduino serial connection 
 %       Recording.InputRangeMin.val - minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
 %       Recording.InputRangeMax.val - minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
-%       Recording.Arduino.Sketch.Path - string containing absolute path to the sketch to run on the Arduino controlling the speaker
-%       Recording.Arduino.Board - string specifying Arduino board used to generate sound in current recording; use format specified by Arduino command line interface, described at https://github.com/arduino/Arduino/blob/master/build/shared/manpage.adoc
 
 %   For an example config file, see:
 %   https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/config.txt
@@ -123,7 +115,7 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 % storage: 
 
 % 1) A .mat file containing a structure called `Recordings`, which includes
-%    all analog input data as well as data acquisition and stimulus metadata
+%    all analog input data as well as stimulus and data acquisition metadata
 
 % 2) A .csv containing the analog input data (for any subsequent non-MATLAB analysis)
 
@@ -131,42 +123,57 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 
 
 %% VI: INSTRUCTIONS: 
-% 1) Connect the host PC to the Arduino microcontroller. Optionally, to 
-%    confirm that the Arduino, the speaker, and all connections are working,
-%    upload the sketch `test_speakers.ino` (available at https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/test_speakers)
-%    to the Arduino. The speaker should emit a short burst of white noise.
 
-% 2) Connect the audio recording equipment to the host PC. This will
+% 1) Connect the appropriate output pins on the Arduino to the
+%    corresponding digital input pins on the digital data acquisition
+%    hardware. By default, this entails the following connections:
+%       
+%       Arduino digital output pin      BNC-2110 Digital input pin
+%       --------------------------      --------------------------
+%       4                               P0.1
+%       5                               P0.2
+%       13                              P0.0
+
+%    For more general description, see below. 
+
+% 2) Ensure that the baud rate specified in `MultiSens.ino` matches either the
+%    baud rate specified in the config file or the default value of 9600.
+
+% 3) Connect the Arduino to the host PC via USB port.
+
+% 4) Upload the Arduino sketch `MultiSens.ino`, along with `States.h` and
+%   `States.cpp`, to the Arduino microcontroller.
+
+% 5) Connect the audio recording equipment to the host PC. This will
 %    probably entail connecting a combined microphone/preamplifier to a signal
 %    preconditioner, which in turn connects via BNC cable to a connector block, 
 %    which in turn connects into a PCI data acquisition board. 
 
-% 3) Position the microphone appropriately in front of the speaker. In most
+% 6) Position the microphone appropriately in front of the speaker. In most
 %    cases, this will mean positioning the long axis of the microphone
 %    perpendicular to the speaker diaphragm and less than 5 mm away.
 
-% 4) Ensure that the baud rate specified in `get_speaker_spectrogram.ino`
-%    matches the baud rate specified in the config file or the default value
-%    of 9600.
+% 7) Ensure that the DAQ board and channel number specified by
+%    `DAQDeviceID` and `DAQChannel`, respectively, match the DAQ board and
+%    channel connected to the recording equipment. 
 
-% 5) Ensure that the DAQ board and channel number specified by
-%    `currDAQ` and `chanID`, respectively, match the DAQ board and channel
-%    connected to the recording equipment. 
+% 8) Open DigitalTriggeredAudio.vi in LabView and hit 'Run Continuously' in
+%    the LabView GUI. 
 
-% 6) Call this function from the MATLAB command window with the desired inputs.
+% 9) Call this function from the MATLAB command window with the desired inputs.
 
-% 7) When prompted, enter the following numeric inputs in the command line:
+% 10) When prompted, enter the following numeric inputs in the command line:
 
 %   a) The product of all gains on any signal conditioners or amplifiers in
-%      line with the microphone. For example, if there is a signal conditioner
-%      with a gain of 10 in line with another amplifier with a gain of 50, set
-%      this to 500. If there is no signal conditioner, enter `1`. (we need this to recover the amplitude of the actual voltage signal put out by the microphone, which, along with the microphone spec sheet, can be used to infer the actual sound pressure level on the mic in Pa)
+%     line with the microphone. For example, if there is a signal conditioner
+%     with a gain of 10 in line with another amplifier with a gain of 50, set
+%     this to 500. If there is no signal conditioner, enter `1`. (we need this to recover the amplitude of the actual voltage signal put out by the microphone, which, along with the microphone spec sheet, can be used to infer the actual sound pressure level on the mic in Pa)
 
 %   b) The distance of the microphone from the speakers, in millimeters
 
 %   c) Then angle of incidence of the sound on the microphone - i.e., the
-%      angle between the long axis of the microphone and the axis
-%      perpendicular to the speaker diaphragm - in degrees. 
+%     angle between the long axis of the microphone and the axis
+%     perpendicular to the speaker diaphragm - in degrees. 
 
 
 %% DESCRIPTION
@@ -184,16 +191,21 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 % recording and generates a spectrogram of the recorded signal. 
 
 
-%% TODO:
+% TODO:
 % 1) Should ultimately update this to use session-based, rather than
 %    legacy DAQ interface (when we update MATLAB on ephys computer)
 
 % 2) Should ultimately update this so that figures are saved (when we
 %    update to a version of MATLAB that has savefig)
 
-% 3) Add support for single-ended vs. differential input
+% 3) Should rename - this function doesn't generate spectrograms anymore,
+%    it just records
 
-% Last updated DDK 2017-07-20
+% 4) Add support for single-ended vs. differential input
+
+% 5) Should add a log of all warnings to metadata
+
+% Last updated DDK 2017-07-21
 
 
 %% Parse inputs into stimulus and DAQ parameters, and, where possible, validate hardware:
@@ -213,7 +225,7 @@ Defaults.DAQDeviceDriver = 'nidaq';
 Defaults.DAQChannel = 10;
 Defaults.DAQTgtSampleRate.val = 150000;
 Defaults.DAQTgtSampleRate.units = 'samples per second';
-Defaults.SerialBaudRate = 9600;
+Defaults.BaudRate = 9600;
 Defaults.InputRangeMin.val = -10;
 Defaults.InputRangeMin.units = 'volts';
 Defaults.InputRangeMax.val = 10;
@@ -252,43 +264,12 @@ for i = 1:length(requiredFields)
     end
 end 
 
-% Validate hardware
-Recording.Warnings = {};
-
-spkrWarn = validateSpeakers(speaker, stimMinFreq, stimMaxFreq)
-micWarn = validateMic(Recording.Microphone, stimMinFreq, stimMaxFreq)
-sigCondWarn = validateSignalConditioner(Recording.SignalConditioner, stimMinFreq, stimMaxFreq)
-
-warnings = {spkrWarn, micWarn, sigCondWarn};
-
-for w = 1:length(warnings)
-    if ~isempty(warnings{w})
-        for x = 1:length(warnings{w})
-            %disp(warnings);
-            Recording.Warnings = horzcat(Recording.Warnings, warnings{w}{x});
-        end
-    end
-end
-
-
-%% Upload Arduino sketch
-
-disp(strcat(['Uploading ', Recording.Arduino.Sketch.Path, ' to Arduino...']));
-old = cd('C:\Program Files\Arduino\arduino-1.6.9-windows\arduino-1.6.9'); % need to cd here b/c Windows won't recognize arduino_debug as a command; not sure why, since I added it to Path environment variable
-[status, cmdout] = system(strcat(['arduino_debug --board ', Recording.Arduino.Board,' --port ',  portID, ' --upload "', strrep(Recording.Arduino.Sketch.Path, '\', '\\'), '"']));
-disp('... upload complete.');
-disp(cmdout);
-cd(old);
-
 
 %% Configure analog input object:
 
 AI = analoginput(Recording.DAQDeviceDriver, Recording.DAQDeviceID);
 AI.InputType = 'SingleEnded';
 maxSampleRate = daqhwinfo(AI,'MaxSampleRate');
-if maxSampleRate < stimMaxFreq/2
-    warning('DAQ board max sampling rate is less than Nyquist rate for desired stimulus.');
-end
 
 chan = addchannel(AI, Recording.DAQChannel);
 AI.Channel.InputRange = [Recording.InputRangeMin.val Recording.InputRangeMax.val];
@@ -296,44 +277,41 @@ disp(Recording.DAQTgtSampleRate);
 AI.SampleRate = Recording.DAQTgtSampleRate.val;
 trueSampleRate = double(AI.SampleRate); %MATLAB may not use the exact sample rate specified
 Fs = trueSampleRate;
-AI.SamplesPerTrigger = ceil((Recording.PreStimDuration.val + stimDur + Recording.PostStimDuration.val) * trueSampleRate);
+AI.SamplesPerTrigger = ceil((Recording.PreStimDuration.val + Recording.VI.StimDuration.val + Recording.PostStimDuration.val) * trueSampleRate);
 AI.TriggerType = 'Manual';
 
 
 %% Send stimulus parameters to Arduino 
 
 % Create and open serial connection with Arduino:
-arduino = serial(portID, 'BaudRate', Recording.SerialBaudRate);
+arduino = serial(portID, 'BaudRate', Recording.BaudRate);
 fopen(arduino);
 pause(2); %wait for handshake to complete; this actually takes quite a long time
-
-params = [Recording.PreStimDuration.val, stimDur, stimMinFreq, stimMaxFreq];
+disp(fscanf(arduino)); 
 
 % Send stimulus information to Arduino
-for p = 1:length(params)
-    fprintf(arduino,'%s',strcat(num2str(params(p)),'\n'));
-    disp(fscanf(arduino)); %Scan serial port for echo of pre-stim duration
-    pause(.1);    
-end
+instructions = strcat(['SET SPKRIDX ', num2str(stimID), '\n']);
+fprintf(arduino,'%s', instructions);
+disp(fscanf(arduino)); 
+pause(.5);    
 
 
 %% Acquire analog data:
-%startTime = datestr(now, 'yymmdd_HH-MM-SS');
-%startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
-%startNow = now;
-%startTime = datestr(startNow, 'yymmdd_HH-MM-SS');
-%startTimeTitle = datestr(startNow, 'yyyy-mm-dd HH:MM:SS');
 
-% Issue stimulus start trigger to Arduino:
+startTime = datestr(now, 'yymmdd_HH-MM-SS');
+startTimeTitle = datestr(now, 'yyyy-mm-dd HH:MM:SS');
 disp('Starting data acquisition...');
-fprintf(arduino,'%s','GO\n');
 
 % Begin data acquisition:
 start(AI);
 trigger(AI);
+pause(Recording.PreStimDuration.val);
+
+% Issue stimulus start trigger to Arduino:
+fprintf(arduino,'%s','RELEASE_TRL\n'); 
 
 %Wait for AI object to finish data acquisition:
-wait(AI, Recording.PreStimDuration.val + stimDur + Recording.PostStimDuration.val + .1);
+wait(AI, Recording.VI.StimDuration.val + Recording.PostStimDuration.val + .1);
 disp('... data acquisition complete.');
 
 %Close serial communication with Arduino:
@@ -341,6 +319,7 @@ fclose(arduino);
 
 
 %% Plot raw data from the analog input object:
+
 Recording.Data = getdata(AI); % create a session object that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
@@ -351,10 +330,10 @@ ylabel('Voltage (V)');
 xlabel('Time (s)');
 yl = ylim;
 xlim([0 max(seconds)]);
-rectangle('Position',[Recording.PreStimDuration.val yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
+rectangle('Position',[Recording.PreStimDuration.val yl(1) Recording.VI.StimDuration.val yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
 set(gca,'children',flipud(get(gca,'children')));
-titleStr = {strcat(['Speaker ', speaker, ' delivering ',num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMaxFreq/1000)), ' kHz band-limited noise']);
-            %strcat(['acquired ', startTimeTitle]);
+titleStr = {strcat(['Speaker ', speaker, ' delivering band-limited noise']);
+            strcat(['acquired ', startTimeTitle]);
             %strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
             strcat(['Mic: ', Recording.Microphone]);
             strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
@@ -365,13 +344,8 @@ title(titleStr);
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
+Recording.StimID = stimID;
 Recording.Speaker = speaker;
-Recording.StimMinFreq.val = stimMinFreq;
-Recording.StimMinFreq.units = 'Hz';
-Recording.StimMaxFreq.val = stimMaxFreq;
-Recording.StimMaxFreq.units = 'Hz';
-Recording.StimDur.val = stimDur;
-Recording.StimDur.units = 'seconds';
 Recording.SignalConditionerGain = sigCondGain;
 Recording.Distance.val = distance;
 Recording.Distance.units = 'millimeters';
@@ -379,10 +353,11 @@ Recording.Angle.val = angle;
 Recording.Angle.units = 'degrees';
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
-Recording.Arduino.Sketch.SHA1 = getSHA1(Recording.Arduino.Sketch.Path);
-Recording.Arduino.Port = portID;
 Recording.mFile.Path = strcat(mfilename('fullpath'), '.m');
 Recording.mFile.SHA1 = getSHA1(Recording.mFile.Path);
+Recording.Arduino.Sketch.SHA1 = getSHA1(Recording.Arduino.Sketch.LocalPath);
+Recording.Arduino.Port = portID;
+Recording.VI.SHA1 = getSHA1(Recording.VI.LocalPath);
 [~, Recording.Hostname] = system('hostname');
 Recording.Hostname = Recording.Hostname(1:end-1); % get rid of superfluous newline character
 
@@ -390,27 +365,21 @@ saveTime = now;
 Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
 Recording.Time = datestr(saveTime, 'HH:MM:SS');
 
-dirName = strcat(['spkr',rename(speaker), '_', num2str(floor(stimMinFreq/1000)),'-', num2str(floor(stimMaxFreq/1000)), 'kHz_noise_', datestr(saveTime, 'yyyy-mm-dd_HH-MM-SS')]);
+dirName = strcat(['spkr',rename(speaker), '_noise_', datestr(saveTime, 'yyyy-mm-dd_HH-MM-SS')]);
 mkdir(dirName);
 old = cd(dirName);
 save(dirName, 'Recording');
 
 
-%% Write data as .csv metadata as .txt for non-MATLAB analysis?
+%% Write data as .csv and metadata as .txt for non-MATLAB analysis
 
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
-Recording = rmfield(Recording, 'Data');
 
-% Write warnings to metadata file:
-Warnings = Recording.Warnings;
-Recording = rmfield(Recording, 'Warnings'); 
+% Now that Recording.Data has already been saved, we can remove Data from
+% Recording and pass it to struct2txt to save as a text file
+Recording = rmfield(Recording, 'Data');
 fid = fopen('test.txt', 'wt');
 struct2txt(Recording, fid);
-warningBaseStr = 'Recording.Warnings = {';
-fprintf(fid, strcat([warningBaseStr, Warnings{1}, '\n']));
-for i = 2:length(Warnings)-1
-    fprintf(fid, strcat([repmat(' ', 1, length(warningBaseStr)), Warnings{i}, '\n']));
-end
-fprintf(fid, strcat([repmat(' ', 1, length(warningBaseStr)), Warnings{end}, '}\n']));
 fclose(fid);
+
 cd(old);

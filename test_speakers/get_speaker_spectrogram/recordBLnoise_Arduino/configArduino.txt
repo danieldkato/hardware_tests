@@ -14,3 +14,5 @@ Recording.InputRangeMin.val = -0.2;
 Recording.InputRangeMin.units = 'volts';
 Recording.InputRangeMax.val = 0.2;
 Recording.InputRangeMax.units = 'volts';
+Recording.Arduino.Sketch.Path = 'C:\Documents and Settings\lab\My Documents\Arduino\dan\hardware_tests\test_speakers\get_speaker_spectrogram\recordBLnoise_Arduino\recordBLnoise_Arduino.ino';
+Recording.Arduino.Board = 'arduino:avr:uno';
