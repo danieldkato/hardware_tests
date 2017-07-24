@@ -217,11 +217,12 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
 % 5) Should add a log of all warnings to metadata
 
-% 6) Should write a generic function that recursively checks if structure
+% 6) Should write a generic function that *recursively* checks if structure
 %    defined in config file has all necessary fields defined in default 
-%    structure; this way, I can include default values for sketch path and 
-%    board model in Defaults structure (this function currently does not
-%    check recursively)
+%    structure (this function currently does not check recursively; e.g.,
+%    if Recording has a field that is itself a structure, this function
+%    will not check if that subordinate structure has all of its own
+%    required fields)
 
 % Last updated DDK 2017-07-21
 
@@ -379,6 +380,19 @@ old = cd(dirName);
 save(dirName, 'Recording');
 
 
+%% Write data as .csv and metadata as .txt for non-MATLAB analysis
+
+csvwrite(strcat([dirName, '.csv']), Recording.Data); 
+
+% Now that Recording.Data has already been saved, we can remove Data from
+% Recording and pass it to struct2txt to save as a text file
+Recording = rmfield(Recording, 'Data');
+fid = fopen('test.txt', 'wt');
+struct2txt(Recording, fid);
+fclose(fid);
+cd(old);
+
+
 %% Plot raw data from the analog input object:
 
 figure; hold on;
@@ -400,16 +414,3 @@ title(titleStr);
 %savefig(dirName); % save figure % this function doesn't work for MATLAB v
 %< 2013b
 
-
-%% Write data as .csv and metadata as .txt for non-MATLAB analysis
-
-csvwrite(strcat([dirName, '.csv']), Recording.Data); 
-
-% Now that Recording.Data has already been saved, we can remove Data from
-% Recording and pass it to struct2txt to save as a text file
-Recording = rmfield(Recording, 'Data');
-fid = fopen('test.txt', 'wt');
-struct2txt(Recording, fid);
-fclose(fid);
-
-cd(old);
