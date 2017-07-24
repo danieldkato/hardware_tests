@@ -17,30 +17,30 @@ function recordWgn_soundcard(speaker, stimDur, scale, configFile)
 
 %% II. REQUIREMENTS:
 % A) Hardware
-    % 1) A host PC configured for use analog-to-digital data
-    %    acquisition hardware compatible with MATLAB's data acquisition toolbox(e.g., a National Instruments PCI data
-    %    acquisition card connected to a BNC Connector block). 
+%    1) A host PC configured for use analog-to-digital data
+%       acquisition hardware compatible with MATLAB's data acquisition toolbox(e.g., a National Instruments PCI data
+%       acquisition card connected to a BNC Connector block). 
 
-    % 2) Audio recording equipment compatible with the analog-to-digital
-    %    data acquisition equipment specified in 1). This will most likely
-    %    include a prepolarized microphone, a preamplifier, and preconditioner. 
-    %    For more detailed hardware requirements, see the README available at 
-    %    https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
+%   2) Audio recording equipment compatible with the analog-to-digital
+%      data acquisition equipment specified in 1). This will most likely
+%      include a prepolarized microphone, a preamplifier, and preconditioner. 
+%      For more detailed hardware requirements, see the README available at 
+%      https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram.
 
-    % 3) A sound card compatible  with MATLAB's sound() function. 
+% 3) A sound card compatible  with MATLAB's sound() function. 
     
 % B) Software
-    % 1) MATLAB data acquisition toolbox. Must be a version
-    %    supporting MATLAB's legacy DAQ interface, (will have to be
-    %    updated in future versions to session-based interface).
+%    1) MATLAB data acquisition toolbox. Must be a version
+%       supporting MATLAB's legacy DAQ interface, (will have to be
+%       updated in future versions to session-based interface).
     
-    % 2) A configuration file. This should be a MATLAB-evaluable .txt file
-    % that defines a structure called `Recording`. See INPUTS below for
-    % details and link to an example config file. 
+%    2) A configuration file. This should be a MATLAB-evaluable .txt file
+%       that defines a structure called `Recording`. See INPUTS below for
+%       details and link to an example config file. 
     
-    % 3) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
+%    3) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
     
-    % 4) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
+%    4) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
     
 % *IMPORTANT WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
@@ -264,8 +264,7 @@ title(titleStr);
 %savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
 
 
-%% Write metadata into the same struct containing the data and save to
-%% secondary storage as a .mat to allow for easy analysis later
+%% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
 Recording.Speaker = speaker;
 Recording.StimDur.val = stimDur;
