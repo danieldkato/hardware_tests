@@ -40,32 +40,35 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
     
     
 % B) Software
-    % 1) MATLAB data acquisition toolbox. Must be a version
-    % supporting MATLAB's legacy DAQ interface, (will have to be
-    % updated in future versions to session-based interface).
+%    1) MATLAB data acquisition toolbox. Must be a version
+%       supporting MATLAB's legacy DAQ interface, (will have to be
+%       updated in future versions to session-based interface).
 
-    % 2) Arduino IDE 1.6.9 or later.
+%    2) Arduino IDE 1.6.9 or later.
     
-    % 3) Arduino-side code for running the ArduFSM protocol MultiSens. This
-    % includes the following files:
+%    3) Arduino-side code for running the ArduFSM protocol MultiSens. This
+%       includes the following files:
     
-        % a) MultiSens.ino
-        % b) States.h
-        % c) States.cpp
+%        a) MultiSens.ino
+%        b) States.h
+%        c) States.cpp
       
-    % These files are available at https://github.com/danieldkato/ArduFSM/tree/soundcard/MultiSens
+%        These files are available at https://github.com/danieldkato/ArduFSM/tree/soundcard/MultiSens
     
-    % In addition, these files make use of the following Arduino libraries: 
-        % a) chat, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/chat
-        % b) TimedState, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/TimedState
+%        In addition, these files make use of the following Arduino libraries: 
+
+%        a) chat, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/chat
+%        b) TimedState, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/TimedState
     
-    % 4) National Instruments LabView systems engineering software.
+%    4) National Instruments LabView systems engineering software.
     
-    % 5) The LabView virtual instrument DigitalTriggeredAudioNoise.vi
+%    5) The LabView virtual instrument DigitalTriggeredAudioNoise.vi,
+%       available at
+%       https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram/recordDigitalTriggeredAudioNoise
     
-    % 6) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
+%    6) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
  
-    % 7) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
+%    7) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
     
 % *IMPORTANT WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
@@ -263,6 +266,16 @@ for i = 1:length(requiredFields)
         warning(strcat(['Units not specified for ', requiredFields{i}, 'field. Units will be set to "unknown".']));
     end
 end 
+
+
+%% Upload Arduino sketch
+
+disp(strcat(['Uploading ', Recording.Arduino.Sketch.LocalPath, ' to Arduino...']));
+old = cd('C:\Program Files\Arduino\arduino-1.6.9-windows\arduino-1.6.9'); % need to cd here b/c Windows won't recognize arduino_debug as a command; not sure why, since I added it to Path environment variable
+[status, cmdout] = system(strcat(['arduino_debug --board ', Recording.Arduino.Board,' --port ',  portID, ' --upload "', strrep(Recording.Arduino.Sketch.LocalPath, '\', '\\'), '"']));
+disp('... upload complete.');
+disp(cmdout);
+cd(old);
 
 
 %% Configure analog input object:
