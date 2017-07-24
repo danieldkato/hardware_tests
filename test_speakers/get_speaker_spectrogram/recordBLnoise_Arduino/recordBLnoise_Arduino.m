@@ -356,7 +356,8 @@ fclose(arduino);
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
-Recording.Data = getdata(AI); % create a session object that will glue the recording data together with metadata critical for interpretation
+Data = getdata(AI)
+Recording.Data = Data; % create a session object that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
 
@@ -414,8 +415,8 @@ cd(old);
 %% Plot raw data from the analog input object:
 
 figure; hold on;
-seconds = [1:length(Recording.Data)]./trueSampleRate;
-plot(seconds, Recording.Data)
+seconds = [1:length(Data)]./trueSampleRate;
+plot(seconds, Data)
 ylabel('Voltage (V)');
 xlabel('Time (s)');
 yl = ylim;
@@ -423,8 +424,8 @@ xlim([0 max(seconds)]);
 rectangle('Position',[Recording.PreStimDuration.val yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
 set(gca,'children',flipud(get(gca,'children')));
 titleStr = {strcat(['Speaker ', speaker, ' delivering ',num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMaxFreq/1000)), ' kHz band-limited noise']);
-            %strcat(['acquired ', startTimeTitle]);
-            %strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
+            strcat(['acquired ', datestr(saveTime, 'yyyy-mm-dd HH:MM:SS')]);
+            strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
             strcat(['Mic: ', Recording.Microphone]);
             strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
             };
