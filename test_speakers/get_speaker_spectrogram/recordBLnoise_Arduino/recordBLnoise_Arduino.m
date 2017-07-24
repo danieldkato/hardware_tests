@@ -38,35 +38,35 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 %   3) An Arduino microcontroller connected to a two-terminal analog speaker. 
     
 % B) Software
-    % 1) MATLAB data acquisition toolbox. Must be a version
-    %    supporting MATLAB's legacy DAQ interface, (will have to be
-    %    updated in future versions to session-based interface).
+%   1) MATLAB data acquisition toolbox. Must be a version
+%      supporting MATLAB's legacy DAQ interface, (will have to be
+%      updated in future versions to session-based interface).
 
-    % 2) The Arduino sketch `get_speaker_spectrogram.ino`, available at 
-    %    https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/get_speaker_spectrogram.ino. 
-    %    THE BAUD RATE SPECIFIED IN THIS SKETCH MUST MATCH THE BAUD RATE
-    %    SPECIFIED IN THE CONFIG FILE PASSED AS INPUT TO THIS FUNCTION (see
-    %    inputs below).
+%    2) The Arduino sketch `get_speaker_spectrogram.ino`, available at 
+%       https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/get_speaker_spectrogram.ino. 
+%       THE BAUD RATE SPECIFIED IN THIS SKETCH MUST MATCH THE BAUD RATE
+%       SPECIFIED IN THE CONFIG FILE PASSED AS INPUT TO THIS FUNCTION (see
+%       inputs below).
 
-    % 3) Hardware class definitions, databases, and validation functions,
-    %    all available at:
-    %    https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram
-    %    These include:
-           % Speaker.m
-           % Microphone.m
-           % SignalConditioner.m
+%    3) Hardware class definitions, databases, and validation functions,
+%       all available at:
+%       https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram
+%       These include:
+%           Speaker.m
+%           Microphone.m
+%           SignalConditioner.m
         
-           % Speakers.mat
-           % Mics.mat
-           % SignalConditioners.mat
+%           Speakers.mat
+%           Mics.mat
+%           SignalConditioners.mat
+
+%           validateSpeakers.m
+%           validateMic.m
+%           validateSignalConditioner.m
         
-           % validateSpeakers.m
-           % validateMic.m
-           % validateSignalConditioner.m
-        
-    % 4) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
+%    4) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
     
-    % 5) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
+%    5) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
     
 % *IMPORTANT WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
