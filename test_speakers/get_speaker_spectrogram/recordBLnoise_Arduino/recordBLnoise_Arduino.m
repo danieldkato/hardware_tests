@@ -38,35 +38,35 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 %   3) An Arduino microcontroller connected to a two-terminal analog speaker. 
     
 % B) Software
-    % 1) MATLAB data acquisition toolbox. Must be a version
-    %    supporting MATLAB's legacy DAQ interface, (will have to be
-    %    updated in future versions to session-based interface).
+%   1) MATLAB data acquisition toolbox. Must be a version
+%      supporting MATLAB's legacy DAQ interface, (will have to be
+%      updated in future versions to session-based interface).
 
-    % 2) The Arduino sketch `get_speaker_spectrogram.ino`, available at 
-    %    https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/get_speaker_spectrogram.ino. 
-    %    THE BAUD RATE SPECIFIED IN THIS SKETCH MUST MATCH THE BAUD RATE
-    %    SPECIFIED IN THE CONFIG FILE PASSED AS INPUT TO THIS FUNCTION (see
-    %    inputs below).
+%    2) The Arduino sketch `get_speaker_spectrogram.ino`, available at 
+%       https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/get_speaker_spectrogram.ino. 
+%       THE BAUD RATE SPECIFIED IN THIS SKETCH MUST MATCH THE BAUD RATE
+%       SPECIFIED IN THE CONFIG FILE PASSED AS INPUT TO THIS FUNCTION (see
+%       inputs below).
 
-    % 3) Hardware class definitions, databases, and validation functions,
-    %    all available at:
-    %    https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram
-    %    These include:
-           % Speaker.m
-           % Microphone.m
-           % SignalConditioner.m
+%    3) Hardware class definitions, databases, and validation functions,
+%       all available at:
+%       https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram
+%       These include:
+%           Speaker.m
+%           Microphone.m
+%           SignalConditioner.m
         
-           % Speakers.mat
-           % Mics.mat
-           % SignalConditioners.mat
+%           Speakers.mat
+%           Mics.mat
+%           SignalConditioners.mat
+
+%           validateSpeakers.m
+%           validateMic.m
+%           validateSignalConditioner.m
         
-           % validateSpeakers.m
-           % validateMic.m
-           % validateSignalConditioner.m
-        
-    % 4) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
+%    4) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
     
-    % 5) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
+%    5) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
     
 % *IMPORTANT WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
@@ -91,9 +91,18 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 
 % 6) configFile - path to a MATLAB-evaluable .txt file defining a structure
 %    called `Recording`, which specifies various parameters necessary for
-%    setting up data acquisition. While this function supplies default values
-%    for all required fields, it is best practice to use a config file that
-%    defines the following:
+%    setting up data acquisition. This struct must supply the following
+%    fields: 
+
+%       Recording.Arduino.Sketch.LocalPath - char array specifying the path of the main sketch to be run on the Arduino 
+%       Recording.Arduino.Board - char array specifying the model of the board to which the sketch will be uploaded. This 
+%                                 should have the syntax used by the Arduino command line interface. E.g., for an Arduino 
+%                                 Uno, the value should be 'arduino:avr:uno'. For more detail, see the Arduino CLI documentation at 
+%                                 https://github.com/arduino/Arduino/blob/master/build/shared/manpage.adoc
+
+%    In addition, it is best practice to use a config file that defines the 
+%    following fields, although this function will provide defaults if
+%    needed:
 %
 %       Recording.PreStimDuration.val - numeric value specifying duration of pre-stimulus period, in seconds
 %       Recording.PostStimDuration.val - numeric value specifying duration of post-stimulus period, in seconds
@@ -106,8 +115,6 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 %       Recording.SerialBaudRate - integer value specifying the baud rate of the host-PC-to-Arduino serial connection 
 %       Recording.InputRangeMin.val - minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
 %       Recording.InputRangeMax.val - minimum of data acquisition analog input range, in volts. See your DAQ device's documentation for supported input ranges  
-%       Recording.Arduino.Sketch.Path - string containing absolute path to the sketch to run on the Arduino controlling the speaker
-%       Recording.Arduino.Board - string specifying Arduino board used to generate sound in current recording; use format specified by Arduino command line interface, described at https://github.com/arduino/Arduino/blob/master/build/shared/manpage.adoc
 
 %   For an example config file, see:
 %   https://github.com/danieldkato/hardware_tests/blob/master/test_speakers/get_speaker_spectrogram/config.txt
@@ -192,6 +199,13 @@ function recordBLnoise_Arduino(speaker, stimDur, stimMinFreq, stimMaxFreq, portI
 %    update to a version of MATLAB that has savefig)
 
 % 3) Add support for single-ended vs. differential input
+
+% 4) Should write a generic function that *recursively* checks if structure
+%    defined in config file has all necessary fields defined in default 
+%    structure (this function currently does not check recursively; e.g.,
+%    if Recording has a field that is itself a structure, this function
+%    will not check if that subordinate structure has all of its own
+%    required fields)
 
 % Last updated DDK 2017-07-20
 
@@ -340,30 +354,11 @@ disp('... data acquisition complete.');
 fclose(arduino);
 
 
-%% Plot raw data from the analog input object:
+%% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
+
 Recording.Data = getdata(AI); % create a session object that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
-figure; hold on;
-seconds = [1:length(Recording.Data)]./trueSampleRate;
-plot(seconds, Recording.Data)
-ylabel('Voltage (V)');
-xlabel('Time (s)');
-yl = ylim;
-xlim([0 max(seconds)]);
-rectangle('Position',[Recording.PreStimDuration.val yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
-set(gca,'children',flipud(get(gca,'children')));
-titleStr = {strcat(['Speaker ', speaker, ' delivering ',num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMaxFreq/1000)), ' kHz band-limited noise']);
-            %strcat(['acquired ', startTimeTitle]);
-            %strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
-            strcat(['Mic: ', Recording.Microphone]);
-            strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
-            };
-title(titleStr);
-%savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
-
-
-%% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
 Recording.Speaker = speaker;
 Recording.StimMinFreq.val = stimMinFreq;
@@ -396,7 +391,7 @@ old = cd(dirName);
 save(dirName, 'Recording');
 
 
-%% Write data as .csv metadata as .txt for non-MATLAB analysis?
+%% Write data as .csv and metadata as .txt for non-MATLAB analysis?
 
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
 Recording = rmfield(Recording, 'Data');
@@ -414,3 +409,24 @@ end
 fprintf(fid, strcat([repmat(' ', 1, length(warningBaseStr)), Warnings{end}, '}\n']));
 fclose(fid);
 cd(old);
+
+
+%% Plot raw data from the analog input object:
+
+figure; hold on;
+seconds = [1:length(Recording.Data)]./trueSampleRate;
+plot(seconds, Recording.Data)
+ylabel('Voltage (V)');
+xlabel('Time (s)');
+yl = ylim;
+xlim([0 max(seconds)]);
+rectangle('Position',[Recording.PreStimDuration.val yl(1) stimDur yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
+set(gca,'children',flipud(get(gca,'children')));
+titleStr = {strcat(['Speaker ', speaker, ' delivering ',num2str(floor(stimMinFreq/1000)), '-', num2str(floor(stimMaxFreq/1000)), ' kHz band-limited noise']);
+            %strcat(['acquired ', startTimeTitle]);
+            %strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
+            strcat(['Mic: ', Recording.Microphone]);
+            strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
+            };
+title(titleStr);
+%savefig(dirName); % save figure % this function doesn't work for MATLAB v< 2013b

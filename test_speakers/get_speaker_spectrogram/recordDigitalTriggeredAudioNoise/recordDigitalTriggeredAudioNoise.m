@@ -40,32 +40,34 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
     
     
 % B) Software
-    % 1) MATLAB data acquisition toolbox. Must be a version
-    % supporting MATLAB's legacy DAQ interface, (will have to be
-    % updated in future versions to session-based interface).
+%    1) MATLAB data acquisition toolbox. Must be a version
+%       supporting MATLAB's legacy DAQ interface, (will have to be
+%       updated in future versions to session-based interface).
 
-    % 2) Arduino IDE 1.6.9 or later.
+%    2) Arduino IDE 1.6.9 or later.
     
-    % 3) Arduino-side code for running the ArduFSM protocol MultiSens. This
-    % includes the following files:
+%    3) Arduino-side code for running the ArduFSM protocol MultiSens. This
+%       includes the following files:
     
-        % a) MultiSens.ino
-        % b) States.h
-        % c) States.cpp
+%        a) MultiSens.ino
+%        b) States.h
+%        c) States.cpp
       
-    % These files are available at https://github.com/danieldkato/ArduFSM/tree/soundcard/MultiSens
+%        These files are available at https://github.com/danieldkato/ArduFSM/tree/soundcard/MultiSens
     
-    % In addition, these files make use of the following Arduino libraries: 
-        % a) chat, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/chat
-        % b) TimedState, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/TimedState
+%        In addition, these files make use of the following Arduino libraries: 
+
+%        a) chat, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/chat
+%        b) TimedState, https://github.com/cxrodgers/ArduFSM/tree/master/libraries/TimedState
     
-    % 4) National Instruments LabView systems engineering software.
+%    4) National Instruments LabView systems engineering software.
     
-    % 5) The LabView virtual instrument DigitalTriggeredAudioNoise.vi
+%    5) The LabView virtual instrument DigitalTriggeredAudioNoise.vi, available at
+%       https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram/recordDigitalTriggeredAudioNoise
     
-    % 6) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
+%    6) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
  
-    % 7) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
+%    7) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
     
 % *IMPORTANT WARNING*: As of 7/20/16, when running on hs05bruno8 ('504 -
 % physiology'), this script often raises an out-of-memory error and crashes
@@ -85,9 +87,16 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
 % 4) configFile - path to a MATLAB-evaluable .txt file defining a structure
 %    called `Recording`, which specifies various parameters necessary for
-%    setting up data acquisition. While this function supplies default values
-%    for all required fields, it is best practice to use a config file that
-%    defines the following:
+%    setting up data acquisition. This structure must supply the following fields:
+
+%       Recording.Arduino.Sketch.LocalPath - char array specifying the path of the main sketch to be run on the Arduino 
+%       Recording.Arduino.Board - char array specifying the model of the board to which the sketch will be uploaded. This 
+%                                 should have the syntax used by the Arduino command line interface. E.g., for an Arduino 
+%                                 Uno, the value should be 'arduino:avr:uno'. For more detail, see the Arduino CLI documentation at 
+%                                 https://github.com/arduino/Arduino/blob/master/build/shared/manpage.adoc
+
+%    In addition, it is best practice to use a config file that defines the 
+%    following fields, although this function will provide defaults if needed:
 %
 %       Recording.PreStimDuration.val - numeric value specifying duration of pre-stimulus period, in seconds
 %       Recording.PostStimDuration.val - numeric value specifying duration of post-stimulus period, in seconds
@@ -167,7 +176,10 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 %   a) The product of all gains on any signal conditioners or amplifiers in
 %     line with the microphone. For example, if there is a signal conditioner
 %     with a gain of 10 in line with another amplifier with a gain of 50, set
-%     this to 500. If there is no signal conditioner, enter `1`. (we need this to recover the amplitude of the actual voltage signal put out by the microphone, which, along with the microphone spec sheet, can be used to infer the actual sound pressure level on the mic in Pa)
+%     this to 500. If there is no signal conditioner, enter `1`. (we need 
+%     this to recover the amplitude of the actual voltage signal put out by 
+%     the microphone, which, along with the microphone spec sheet, can be 
+%     used to infer the actual sound pressure level on the mic in Pa)
 
 %   b) The distance of the microphone from the speakers, in millimeters
 
@@ -191,7 +203,7 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 % recording and generates a spectrogram of the recorded signal. 
 
 
-% TODO:
+%% TODO:
 % 1) Should ultimately update this to use session-based, rather than
 %    legacy DAQ interface (when we update MATLAB on ephys computer)
 
@@ -204,6 +216,13 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 % 4) Add support for single-ended vs. differential input
 
 % 5) Should add a log of all warnings to metadata
+
+% 6) Should write a generic function that *recursively* checks if structure
+%    defined in config file has all necessary fields defined in default 
+%    structure (this function currently does not check recursively; e.g.,
+%    if Recording has a field that is itself a structure, this function
+%    will not check if that subordinate structure has all of its own
+%    required fields)
 
 % Last updated DDK 2017-07-21
 
@@ -239,7 +258,7 @@ eval(content);
 
 % Validate that config file includes required settings; if not, throw a warning and use defaults
 for i = 1:length(requiredFields)
-    if ~isfield(Recording, requiredFields{i}) % If a field is missing entirely from the loaded condig structure...
+    if ~isfield(Recording, requiredFields{i}) % If a field is missing entirely from the loaded config structure...
         if isfield(Defaults.(requiredFields{i}), 'val') % ... and if the missing field is supposed to have separate value and units sub-fields...
             Recording.(requiredFields{i}).val = Defaults.(requiredFields{i}).val;
             Recording.(requiredFields{i}).units = Defaults.(requiredFields{i}).units;
@@ -263,6 +282,16 @@ for i = 1:length(requiredFields)
         warning(strcat(['Units not specified for ', requiredFields{i}, 'field. Units will be set to "unknown".']));
     end
 end 
+
+
+%% Upload Arduino sketch
+
+disp(strcat(['Uploading ', Recording.Arduino.Sketch.LocalPath, ' to Arduino...']));
+old = cd('C:\Program Files\Arduino\arduino-1.6.9-windows\arduino-1.6.9'); % need to cd here b/c Windows won't recognize arduino_debug as a command; not sure why, since I added it to Path environment variable
+[status, cmdout] = system(strcat(['arduino_debug --board ', Recording.Arduino.Board,' --port ',  portID, ' --upload "', strrep(Recording.Arduino.Sketch.LocalPath, '\', '\\'), '"']));
+disp('... upload complete.');
+disp(cmdout);
+cd(old);
 
 
 %% Configure analog input object:
@@ -318,31 +347,11 @@ disp('... data acquisition complete.');
 fclose(arduino);
 
 
-%% Plot raw data from the analog input object:
+%% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
-Recording.Data = getdata(AI); % create a session object that will glue the recording data together with metadata critical for interpretation
+Recording.Data = getdata(AI); % create a `Recording` struct that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
-figure; hold on;
-seconds = [1:length(Recording.Data)]./trueSampleRate;
-plot(seconds, Recording.Data)
-ylabel('Voltage (V)');
-xlabel('Time (s)');
-yl = ylim;
-xlim([0 max(seconds)]);
-rectangle('Position',[Recording.PreStimDuration.val yl(1) Recording.VI.StimDuration.val yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
-set(gca,'children',flipud(get(gca,'children')));
-titleStr = {strcat(['Speaker ', speaker, ' delivering band-limited noise']);
-            strcat(['acquired ', startTimeTitle]);
-            %strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
-            strcat(['Mic: ', Recording.Microphone]);
-            strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
-            };
-title(titleStr);
-%savefig(dirName); % save figure % this function doesn't work for MATLAB v < 2013b
-
-
-%% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
 Recording.StimID = stimID;
 Recording.Speaker = speaker;
@@ -381,5 +390,27 @@ Recording = rmfield(Recording, 'Data');
 fid = fopen('test.txt', 'wt');
 struct2txt(Recording, fid);
 fclose(fid);
-
 cd(old);
+
+
+%% Plot raw data from the analog input object:
+
+figure; hold on;
+seconds = [1:length(Recording.Data)]./trueSampleRate;
+plot(seconds, Recording.Data)
+ylabel('Voltage (V)');
+xlabel('Time (s)');
+yl = ylim;
+xlim([0 max(seconds)]);
+rectangle('Position',[Recording.PreStimDuration.val yl(1) Recording.VI.StimDuration.val yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
+set(gca,'children',flipud(get(gca,'children')));
+titleStr = {strcat(['Speaker ', speaker, ' delivering band-limited noise']);
+            strcat(['acquired ', datestr(saveTime, 'yyyy-mm-dd HH:MM:SS')]);
+            strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
+            strcat(['Mic: ', Recording.Microphone]);
+            strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
+            };
+title(titleStr);
+%savefig(dirName); % save figure % this function doesn't work for MATLAB v
+%< 2013b
+
