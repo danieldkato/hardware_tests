@@ -17,7 +17,7 @@ function recordWgn_soundcard(speaker, stimDur, scale, configFile)
 
 %% II. REQUIREMENTS:
 % A) Hardware
-%    1) A host PC configured for use analog-to-digital data
+%    1) A host PC configured for use with analog-to-digital data
 %       acquisition hardware compatible with MATLAB's data acquisition toolbox(e.g., a National Instruments PCI data
 %       acquisition card connected to a BNC Connector block). 
 
@@ -242,12 +242,14 @@ disp('... data acquisition complete.');
 
 
 %% Plot raw data from the analog input object:
-Recording.Data = getdata(AI); % create a session object that will glue the recording data together with metadata critical for interpretation
+
+Data = getdata(AI);
+Recording.Data = Data; % create a session object that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
 figure; hold on;
-seconds = [1:length(Recording.Data)]./trueSampleRate;
-plot(seconds, Recording.Data)
+seconds = [1:length(Data)]./trueSampleRate;
+plot(seconds, Data)
 ylabel('Voltage (V)');
 xlabel('Time (s)');
 yl = ylim;

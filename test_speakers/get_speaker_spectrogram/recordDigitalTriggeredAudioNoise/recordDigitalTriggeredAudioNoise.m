@@ -20,7 +20,7 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
 %% III. REQUIREMENTS:
 % A) Hardware
-%   1) A host PC configured for use analog-to-digital data acquisition
+%   1) A host PC configured for use with analog-to-digital data acquisition
 %      hardware compatible with MATLAB's data acquisition toolbox(e.g., a
 %      National Instruments PCI data acquisition card connected to a BNC
 %      Connector block). 
@@ -288,9 +288,9 @@ end
 
 disp(strcat(['Uploading ', Recording.Arduino.Sketch.LocalPath, ' to Arduino...']));
 old = cd('C:\Program Files\Arduino\arduino-1.6.9-windows\arduino-1.6.9'); % need to cd here b/c Windows won't recognize arduino_debug as a command; not sure why, since I added it to Path environment variable
-[status, cmdout] = system(strcat(['arduino_debug --board ', Recording.Arduino.Board,' --port ',  portID, ' --upload "', strrep(Recording.Arduino.Sketch.LocalPath, '\', '\\'), '"']));
+[status, cmdout] = system(strcat(['arduino_debug --board ', Recording.Arduino.Board,' --port ',  portID, ' --upload "', strrep(Recording.Arduino.Sketch.LocalPath, '\', '\\'), '"']))
 disp('... upload complete.');
-disp(cmdout);
+%disp(cmdout);
 cd(old);
 
 
@@ -306,16 +306,17 @@ disp(Recording.DAQTgtSampleRate);
 AI.SampleRate = Recording.DAQTgtSampleRate.val;
 trueSampleRate = double(AI.SampleRate); %MATLAB may not use the exact sample rate specified
 Fs = trueSampleRate;
-AI.SamplesPerTrigger = ceil((Recording.PreStimDuration.val + Recording.VI.StimDuration.val + Recording.PostStimDuration.val) * trueSampleRate);
+AI.SamplesPerTrigger = ceil((Recording.PreStimDuration.val + Recording.VI.Stim.Duration.val + Recording.PostStimDuration.val) * trueSampleRate);
 AI.TriggerType = 'Manual';
 
 
 %% Send stimulus parameters to Arduino 
 
 % Create and open serial connection with Arduino:
+disp('Opening serial connection with Arduino...');
 arduino = serial(portID, 'BaudRate', Recording.BaudRate);
 fopen(arduino);
-pause(2); %wait for handshake to complete; this actually takes quite a long time
+pause(max([2, Recording.VI.Stim.Duration.val+2])); %wait for handshake to complete; this actually takes quite a long time. Also, opening the serial connection triggers the stimulus for some reason, so leave enough time for it to complete
 disp(fscanf(arduino)); 
 
 % Send stimulus information to Arduino
@@ -340,16 +341,17 @@ pause(Recording.PreStimDuration.val);
 fprintf(arduino,'%s','RELEASE_TRL\n'); 
 
 %Wait for AI object to finish data acquisition:
-wait(AI, Recording.VI.StimDuration.val + Recording.PostStimDuration.val + .1);
+wait(AI, Recording.VI.Stim.Duration.val + Recording.PostStimDuration.val + .1);
 disp('... data acquisition complete.');
 
 %Close serial communication with Arduino:
 fclose(arduino);
-
+disp('... serial connection closed.');
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
-Recording.Data = getdata(AI); % create a `Recording` struct that will glue the recording data together with metadata critical for interpretation
+Data = getdata(AI);
+Recording.Data = Data; % create a `Recording` struct that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
 
@@ -396,17 +398,17 @@ cd(old);
 %% Plot raw data from the analog input object:
 
 figure; hold on;
-seconds = [1:length(Recording.Data)]./trueSampleRate;
-plot(seconds, Recording.Data)
+seconds = [1:length(Data)]./trueSampleRate;
+plot(seconds, Data)
 ylabel('Voltage (V)');
 xlabel('Time (s)');
 yl = ylim;
 xlim([0 max(seconds)]);
-rectangle('Position',[Recording.PreStimDuration.val yl(1) Recording.VI.StimDuration.val yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
+rectangle('Position',[Recording.PreStimDuration.val yl(1) Recording.VI.Stim.Duration.val yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
 set(gca,'children',flipud(get(gca,'children')));
 titleStr = {strcat(['Speaker ', speaker, ' delivering band-limited noise']);
             strcat(['acquired ', datestr(saveTime, 'yyyy-mm-dd HH:MM:SS')]);
-            strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
+            strcat([num2str(distance), ' mm, ', num2str(angle), ' degrees from microphone']);
             strcat(['Mic: ', Recording.Microphone]);
             strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
             };
