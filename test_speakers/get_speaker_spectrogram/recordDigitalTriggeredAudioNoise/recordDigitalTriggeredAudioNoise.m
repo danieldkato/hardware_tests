@@ -349,7 +349,8 @@ fclose(arduino);
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
-Recording.Data = getdata(AI); % create a `Recording` struct that will glue the recording data together with metadata critical for interpretation
+Data = getdata(AI);
+Recording.Data = Data; % create a `Recording` struct that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
 
@@ -396,8 +397,8 @@ cd(old);
 %% Plot raw data from the analog input object:
 
 figure; hold on;
-seconds = [1:length(Recording.Data)]./trueSampleRate;
-plot(seconds, Recording.Data)
+seconds = [1:length(Data)]./trueSampleRate;
+plot(seconds, Data)
 ylabel('Voltage (V)');
 xlabel('Time (s)');
 yl = ylim;
@@ -406,7 +407,7 @@ rectangle('Position',[Recording.PreStimDuration.val yl(1) Recording.VI.StimDurat
 set(gca,'children',flipud(get(gca,'children')));
 titleStr = {strcat(['Speaker ', speaker, ' delivering band-limited noise']);
             strcat(['acquired ', datestr(saveTime, 'yyyy-mm-dd HH:MM:SS')]);
-            strcat([num2str(distance), ' mm,', num2str(angle), ' degrees from microphone']);
+            strcat([num2str(distance), ' mm, ', num2str(angle), ' degrees from microphone']);
             strcat(['Mic: ', Recording.Microphone]);
             strcat(['Signal Conditioner: ', Recording.SignalConditioner, ', Gain: x', num2str(sigCondGain)]);
             };
