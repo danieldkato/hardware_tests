@@ -306,7 +306,7 @@ disp(Recording.DAQTgtSampleRate);
 AI.SampleRate = Recording.DAQTgtSampleRate.val;
 trueSampleRate = double(AI.SampleRate); %MATLAB may not use the exact sample rate specified
 Fs = trueSampleRate;
-AI.SamplesPerTrigger = ceil((Recording.PreStimDuration.val + Recording.VI.StimDuration.val + Recording.PostStimDuration.val) * trueSampleRate);
+AI.SamplesPerTrigger = ceil((Recording.PreStimDuration.val + Recording.VI.Stim.Duration.val + Recording.PostStimDuration.val) * trueSampleRate);
 AI.TriggerType = 'Manual';
 
 
@@ -316,7 +316,7 @@ AI.TriggerType = 'Manual';
 disp('Opening serial connection with Arduino...');
 arduino = serial(portID, 'BaudRate', Recording.BaudRate);
 fopen(arduino);
-pause(max([2, Recording.VI.StimDuration.val+2])); %wait for handshake to complete; this actually takes quite a long time. Also, opening the serial connection triggers the stimulus for some reason, so leave enough time for it to complete
+pause(max([2, Recording.VI.Stim.Duration.val+2])); %wait for handshake to complete; this actually takes quite a long time. Also, opening the serial connection triggers the stimulus for some reason, so leave enough time for it to complete
 disp(fscanf(arduino)); 
 
 % Send stimulus information to Arduino
@@ -341,7 +341,7 @@ pause(Recording.PreStimDuration.val);
 fprintf(arduino,'%s','RELEASE_TRL\n'); 
 
 %Wait for AI object to finish data acquisition:
-wait(AI, Recording.VI.StimDuration.val + Recording.PostStimDuration.val + .1);
+wait(AI, Recording.VI.Stim.Duration.val + Recording.PostStimDuration.val + .1);
 disp('... data acquisition complete.');
 
 %Close serial communication with Arduino:
@@ -404,7 +404,7 @@ ylabel('Voltage (V)');
 xlabel('Time (s)');
 yl = ylim;
 xlim([0 max(seconds)]);
-rectangle('Position',[Recording.PreStimDuration.val yl(1) Recording.VI.StimDuration.val yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
+rectangle('Position',[Recording.PreStimDuration.val yl(1) Recording.VI.Stim.Duration.val yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
 set(gca,'children',flipud(get(gca,'children')));
 titleStr = {strcat(['Speaker ', speaker, ' delivering band-limited noise']);
             strcat(['acquired ', datestr(saveTime, 'yyyy-mm-dd HH:MM:SS')]);
