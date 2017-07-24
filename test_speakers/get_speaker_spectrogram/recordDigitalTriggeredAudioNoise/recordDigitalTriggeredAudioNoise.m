@@ -288,9 +288,9 @@ end
 
 disp(strcat(['Uploading ', Recording.Arduino.Sketch.LocalPath, ' to Arduino...']));
 old = cd('C:\Program Files\Arduino\arduino-1.6.9-windows\arduino-1.6.9'); % need to cd here b/c Windows won't recognize arduino_debug as a command; not sure why, since I added it to Path environment variable
-[status, cmdout] = system(strcat(['arduino_debug --board ', Recording.Arduino.Board,' --port ',  portID, ' --upload "', strrep(Recording.Arduino.Sketch.LocalPath, '\', '\\'), '"']));
+[status, cmdout] = system(strcat(['arduino_debug --board ', Recording.Arduino.Board,' --port ',  portID, ' --upload "', strrep(Recording.Arduino.Sketch.LocalPath, '\', '\\'), '"']))
 disp('... upload complete.');
-disp(cmdout);
+%disp(cmdout);
 cd(old);
 
 
@@ -313,9 +313,10 @@ AI.TriggerType = 'Manual';
 %% Send stimulus parameters to Arduino 
 
 % Create and open serial connection with Arduino:
+disp('Opening serial connection with Arduino...');
 arduino = serial(portID, 'BaudRate', Recording.BaudRate);
 fopen(arduino);
-pause(2); %wait for handshake to complete; this actually takes quite a long time
+pause(max([2, Recording.VI.StimDuration.val+2])); %wait for handshake to complete; this actually takes quite a long time. Also, opening the serial connection triggers the stimulus for some reason, so leave enough time for it to complete
 disp(fscanf(arduino)); 
 
 % Send stimulus information to Arduino
@@ -345,7 +346,7 @@ disp('... data acquisition complete.');
 
 %Close serial communication with Arduino:
 fclose(arduino);
-
+disp('... serial connection closed.');
 
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
