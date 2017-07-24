@@ -20,7 +20,7 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
 %% III. REQUIREMENTS:
 % A) Hardware
-%   1) A host PC configured for use analog-to-digital data acquisition
+%   1) A host PC configured for use with analog-to-digital data acquisition
 %      hardware compatible with MATLAB's data acquisition toolbox(e.g., a
 %      National Instruments PCI data acquisition card connected to a BNC
 %      Connector block). 
