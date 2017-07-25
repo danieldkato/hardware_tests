@@ -22,7 +22,6 @@ for c = 1:length(conditions)
     
     cd(conditions{c});
     recordingDirs = dir;
-    disp('recordingDirs');
     disp(recordingDirs);
     
     % Compute the DFT for each recording within the current stimulus condition:
@@ -35,19 +34,28 @@ for c = 1:length(conditions)
         out2 = cellfun(@(c) isempty(c), out);
         matFileName = files(~out2).name;
         load(matFileName); % this loads a struct called `Recording` into the workspace
-        disp(Recording);
+        
+        % Get the DFT of the recording in pascals RMS:
+        Comparison.Condtn(c).Recording(r-2).DFT = dftRMS(Recording); 
+        disp('DFT');
+        disp(Comparison.Condtn(c).Recording(r-2).DFT);
+
         cd(old);
-        
-        
-        % Get the Fourier transform of the recording in pascals RMS:
-        Comparison.Condtn(c).Recording(r).DFT = dftRMS(Recording); 
-        disp('size DFT');
-        disp(size(Comparison.Condtn(c).Recording(r).DFT));
-      
     end
     
-    %Comparison.Condtn(c).MeanDFT = mean();
     
+    allDFT = [];
+    disp(length(Comparison.Condtn(c).Recording));
+    for rr = 1:length(Comparison.Condtn(c).Recording)
+        allDFT = [allDFT Comparison.Condtn(c).Recording(rr).DFT.AmplitudesPaRMS];
+    end
+    
+    disp(size(allDFT));
+    Comparison.Condtn(c).MeanDFT = mean(allDFT, 2);
+    disp(size(Comparison.Condtn(c).MeanDFT));
+    
+    figure
+    plot(Comparison.Condtn(c).MeanDFT);
 end    
     
 
