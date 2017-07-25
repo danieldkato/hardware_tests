@@ -41,6 +41,13 @@ for c = 1:length(conditions)
         load(matFileName); % this loads a struct called `Recording` into the workspace
         Comparison.Condtn(c).Recordings(r-2).Path = [cd filesep matFileName];
         
+        % Get the volume of the stimulus in dB SPL:
+        dataPa = volts2pascals(Recording);
+        stimDataPa = dataPa(floor(Recording.PreStimDuration.val * Recording.TrueSampleRate.val): length(Recording.Data)-ceil(Recording.PostStimDuration.val * Recording.TrueSampleRate.val));
+        plot(stimDataPa);
+        stimDataPaRMS = rms(stimDataPa);
+        Comparison.Condtn(c).Recordings(r-2).VolumeDBSPL = pa2db(stimDataPaRMS);
+        
         % Get lower and upper frequency bounds for current stimulus condition:
         Comparison.Condtn(c).LowF = (Recording.VI.Stim.StartFreqs.val(Recording.StimID))/1000; % remember to convert to kHz;
         Comparison.Condtn(c).HighF = Comparison.Condtn(c).LowF + (Recording.VI.Stim.FreqRange.val)/1000; % remember to convert to kHz
@@ -70,7 +77,7 @@ Audiogram.InterpolatedThreshDB = interp1(Audiogram.FreqKHz, Audiogram.ThreshDBSP
 Audiogram.InterpolatedThreshPa = db2pa(Audiogram.InterpolatedThreshDB); 
 
 % Compute frequency step: 
-frequencyStep = max(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz)/length(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz); % frequency step size, in KHz per step; TODO: include way of confirming that FrequenciesKHz is identical for all recordings?
+frequencyStep = max(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz) / length(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz); % frequency step size, in KHz per step; TODO: include way of confirming that FrequenciesKHz is identical for all recordings?
 
 % For each condition, take the integral of P(c,f)/A(f), where P(c,f) is the periodogram for condition c and A(f) is the audiogram:
 for d = 1:length(conditions)
