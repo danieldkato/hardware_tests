@@ -1,5 +1,4 @@
 function Comparison = noiseScaleFactor2(cond1path, cond2path, varargin);
-
 %% Load inputs, settings, etc:
 
 % Set defaults:
@@ -15,10 +14,6 @@ load(audiogramPath);
 
 % Place paths to condition directories in an iterable cell array:
 conditions = {cond1path, cond2path};
-
-% Prepare figure:
-f = figure;
-hold on;
 
 % Define some colors that will be useful for plotting later on:
 blue = [0 0 1];
@@ -62,11 +57,7 @@ for c = 1:length(conditions)
         allDFTPaRMS = [allDFTPaRMS Comparison.Condtn(c).Recordings(rr).DFT.AmplitudesPaRMS];
     end
     Comparison.Condtn(c).MeanDFTPaRMS = mean(allDFTPaRMS, 2); % for computing the scale factor, we will need in the mean DFT in RMS pascals
-    Comparison.Condtn(c).MeanDFTdBSPL = pa2db(Comparison.Condtn(c).MeanDFTPaRMS); % for plotting purposes, it will be convenient to also have the mean DFT in dB SPL
-    
-    % Plot the mean DFT for the current sitmulus condition in dB SPL
-    figure(f);
-    Figures(c).plot = plot(Comparison.Condtn(c).Recordings(1).DFT.FrequenciesKHz, Comparison.Condtn(c).MeanDFTdBSPL, 'Color', Colors(c,:));
+
 end
 
 
@@ -76,27 +67,40 @@ end
 Audiogram.InterpolatedThreshDB = interp1(Audiogram.FreqKHz, Audiogram.ThreshDBSPL, Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz)'; % Interpolate audiogram:
 Audiogram.InterpolatedThreshPa = db2pa(Audiogram.InterpolatedThreshDB); 
 
-% Plot audiogram:
-audiogramPlot = plot(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz, Audiogram.InterpolatedThreshDB, 'LineWidth', 1.5, 'Color', [1, 0, 0]);
-
 % Compute frequency step: 
 frequencyStep = max(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz)/length(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz); % frequency step size, in KHz per step; TODO: include way of confirming that FrequenciesKHz is identical for all recordings?
 
 % For each condition, take the integral of P(c,f)/A(f), where P(c,f) is the periodogram for condition c and A(f) is the audiogram:
 for d = 1:length(conditions)
-    
-    % Take the integral of P(c,f)/A(f) for the current stimulus condition:
     Ratio = Comparison.Condtn(d).MeanDFTPaRMS./Audiogram.InterpolatedThreshPa; % want to take this ratio in pascals, not decibels
     indices = floor([Comparison.Condtn(d).LowF, Comparison.Condtn(d).HighF]./frequencyStep);    
     Comparison.Condtn(d).Integral = sum(Ratio(indices(1):indices(2)));
-    
-    % Plot rectangles corresponding to frequency band of each stimulus condition:
-    yl = ylim;
-    recY = [yl fliplr(yl)];    
-    p1 = patch([Comparison.Condtn(d).LowF Comparison.Condtn(d).LowF Comparison.Condtn(d).HighF Comparison.Condtn(d).HighF], recY, [0.5, 0.5, 0.95], 'FaceAlpha', 0.4, 'EdgeColor', 'none');    
 end
 
-% Label figure:
+Comparison.ScaleFactor = Comparison.Condtn(1).Integral/Comparison.Condtn(2).Integral;
+
+
+%% Plot:
+
+f = figure;
+hold on;
+
+% Plot the mean DFT for each sitmulus condition in dB SPL
+for e = 1:length(conditions)    
+    Comparison.Condtn(e).MeanDFTdBSPL = pa2db(Comparison.Condtn(e).MeanDFTPaRMS); % for plotting purposes, it will be convenient to also have the mean DFT in dB SPL
+    Figures(e).plot = plot(Comparison.Condtn(e).Recordings(1).DFT.FrequenciesKHz, Comparison.Condtn(e).MeanDFTdBSPL, 'Color', Colors(e,:));
+end
+
+% Plot audiogram:
+audiogramPlot = plot(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz, Audiogram.InterpolatedThreshDB, 'LineWidth', 1.5, 'Color', [1, 0, 0]);
+
+% Plot rectangles corresponding to frequency band of each stimulus:
+for f = 1:length(conditions)
+    yl = ylim;
+    recY = [yl fliplr(yl)];    
+    p1 = patch([Comparison.Condtn(f).LowF Comparison.Condtn(f).LowF Comparison.Condtn(f).HighF Comparison.Condtn(f).HighF], recY, [0.5, 0.5, 0.95], 'FaceAlpha', 0.4, 'EdgeColor', 'none');    
+end
+
 titleStr = {strcat(['Stimulus periodograms & murine audiogram']);
             strcat(['played from speaker ', Recording.Speaker]);
             strcat(['acquired ', Recording.Date]);
@@ -112,6 +116,9 @@ legend([Figures(1).plot Figures(2).plot audiogramPlot],...
        ['Stim #1 (' num2str(Comparison.Condtn(1).LowF) '-' num2str(Comparison.Condtn(1).HighF) ' KHz)' ],...
        ['Stim #2 (' num2str(Comparison.Condtn(2).LowF) '-' num2str(Comparison.Condtn(2).HighF) ' KHz)' ],...
        strcat(['Murine audiogram (', agName, ')']));
+
+   
+%% Include some metadata:
 
 
    
