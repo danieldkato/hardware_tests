@@ -37,6 +37,7 @@ for c = 1:length(conditions)
         
         % Get the DFT of the recording in pascals RMS:
         Comparison.Condtn(c).Recording(r-2).DFT = dftRMS(Recording); 
+        Comparison.Condtn(c).Recording(r-2).DFT.FrequenciesKHz = Comparison.Condtn(c).Recording(r-2).DFT.FrequenciesHz/1000; 
         disp('DFT');
         disp(Comparison.Condtn(c).Recording(r-2).DFT);
 
