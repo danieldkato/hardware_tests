@@ -50,37 +50,37 @@ for c = 1:length(conditions)
         Comparison.Condtn(c).HighF = Comparison.Condtn(c).LowF + (Recording.VI.Stim.FreqRange.val)/1000; % remember to convert to kHz
         
         % Get the DFT of the recording in pascals RMS:
-        Comparison.Condtn(c).Recording(r-2).DFT = dftRMS(Recording); 
-        Comparison.Condtn(c).Recording(r-2).DFT.FrequenciesKHz = Comparison.Condtn(c).Recording(r-2).DFT.FrequenciesHz/1000; 
+        Comparison.Condtn(c).Recordings(r-2).DFT = dftRMS(Recording); 
+        Comparison.Condtn(c).Recordings(r-2).DFT.FrequenciesKHz = Comparison.Condtn(c).Recordings(r-2).DFT.FrequenciesHz/1000; 
 
         cd(old);
     end
     
     % Once DFTs for all recordings in the current stimulus condition have been computed, take the mean DFT for the current stimulus condition:
     allDFTPaRMS = [];
-    for rr = 1:length(Comparison.Condtn(c).Recording)
-        allDFTPaRMS = [allDFTPaRMS Comparison.Condtn(c).Recording(rr).DFT.AmplitudesPaRMS];
+    for rr = 1:length(Comparison.Condtn(c).Recordings)
+        allDFTPaRMS = [allDFTPaRMS Comparison.Condtn(c).Recordings(rr).DFT.AmplitudesPaRMS];
     end
     Comparison.Condtn(c).MeanDFTPaRMS = mean(allDFTPaRMS, 2); % for computing the scale factor, we will need in the mean DFT in RMS pascals
     Comparison.Condtn(c).MeanDFTdBSPL = pa2db(Comparison.Condtn(c).MeanDFTPaRMS); % for plotting purposes, it will be convenient to also have the mean DFT in dB SPL
     
     % Plot the mean DFT for the current sitmulus condition in dB SPL
     figure(f);
-    Figures(c).plot = plot(Comparison.Condtn(c).Recording(1).DFT.FrequenciesKHz, Comparison.Condtn(c).MeanDFTdBSPL, 'Color', Colors(c,:));
+    Figures(c).plot = plot(Comparison.Condtn(c).Recordings(1).DFT.FrequenciesKHz, Comparison.Condtn(c).MeanDFTdBSPL, 'Color', Colors(c,:));
 end
 
 
 %% Compute the scale factor:
 
 % Interpolate audiogram and convert from dB SPL to RMS pascals:
-Audiogram.InterpolatedThreshDB = interp1(Audiogram.FreqKHz, Audiogram.ThreshDBSPL, Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz)'; % Interpolate audiogram:
+Audiogram.InterpolatedThreshDB = interp1(Audiogram.FreqKHz, Audiogram.ThreshDBSPL, Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz)'; % Interpolate audiogram:
 Audiogram.InterpolatedThreshPa = db2pa(Audiogram.InterpolatedThreshDB); 
 
 % Plot audiogram:
-audiogramPlot = plot(Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz, Audiogram.InterpolatedThreshDB, 'LineWidth', 1.5, 'Color', [1, 0, 0]);
+audiogramPlot = plot(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz, Audiogram.InterpolatedThreshDB, 'LineWidth', 1.5, 'Color', [1, 0, 0]);
 
 % Compute frequency step: 
-frequencyStep = max(Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz)/length(Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz); % frequency step size, in KHz per step; TODO: include way of confirming that FrequenciesKHz is identical for all recordings?
+frequencyStep = max(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz)/length(Comparison.Condtn(1).Recordings(1).DFT.FrequenciesKHz); % frequency step size, in KHz per step; TODO: include way of confirming that FrequenciesKHz is identical for all recordings?
 
 % For each condition, take the integral of P(c,f)/A(f), where P(c,f) is the periodogram for condition c and A(f) is the audiogram:
 for d = 1:length(conditions)
@@ -99,7 +99,7 @@ end
 % Label figure:
 titleStr = {strcat(['Stimulus periodograms & murine audiogram']);
             strcat(['played from speaker ', Recording.Speaker]);
-            strcat(['acquired ', Recording.Date, ' ', Recording.Time]);
+            strcat(['acquired ', Recording.Date]);
 };
 
 title(titleStr);
