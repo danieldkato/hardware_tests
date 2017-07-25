@@ -59,6 +59,7 @@ for c = 1:length(conditions)
     end
     Comparison.Condtn(c).MeanDFTPaRMS = mean(allDFTPaRMS, 2); % for computing the scale factor, we will need in the mean DFT in RMS pascals
 
+    cd(tld);
 end
 
 
