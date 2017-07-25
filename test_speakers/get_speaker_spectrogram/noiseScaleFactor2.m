@@ -20,12 +20,13 @@ blue = [0 0 1];
 purple = [0.5 0 0.5];
 Colors = [blue; purple];
 
+tld = cd;
 
 %% For each stimulus condition, compute the mean DFT:
 
 for c = 1:length(conditions)
     
-    tld = cd(conditions{c});
+    cd(conditions{c});
     recordingDirs = dir;
     
     % Compute the DFT for each recording within the current stimulus condition:
