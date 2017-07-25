@@ -376,7 +376,7 @@ saveTime = now;
 Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
 Recording.Time = datestr(saveTime, 'HH:MM:SS');
 
-dirName = strcat(['spkr',rename(speaker), '_noise_', datestr(saveTime, 'yyyy-mm-dd_HH-MM-SS')]);
+dirName = strcat(['spkr',rename(speaker), '_DigitalTriggeredNoiseStim', num2str(stimID), '_', datestr(saveTime, 'yyyy-mm-dd_HH-MM-SS')]);
 mkdir(dirName);
 old = cd(dirName);
 save(dirName, 'Recording');
