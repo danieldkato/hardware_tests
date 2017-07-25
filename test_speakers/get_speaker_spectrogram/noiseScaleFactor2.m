@@ -72,12 +72,12 @@ end
 
 %% Compute the scale factor:
 
-Audiogram.ThreshPa.Raw = db2pa(Audiogram.ThreshDBSPL); % convert audiogram from dB SPL to pascals
-Audiogram.ThreshPa.Interpolated = interp1(Audiogram.FreqKHz, Audiogram.ThreshPa.Raw, Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz)'; % Interpolate audiogram:
+% Interpolate audiogram and convert from dB SPL to RMS pascals:
+Audiogram.InterpolatedThreshDB = interp1(Audiogram.FreqKHz, Audiogram.ThreshDBSPL, Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz)'; % Interpolate audiogram:
+Audiogram.InterpolatedThreshPa = db2pa(Audiogram.InterpolatedThreshDB); 
 
 % Plot audiogram:
-Audiogram.ThreshDB.Interpolated = pa2db(Audiogram.ThreshPa.Interpolated); % for plotting purposes only
-audiogramPlot = plot(Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz, Audiogram.ThreshDB.Interpolated, 'LineWidth', 1.5, 'Color', [1, 0, 0]);
+audiogramPlot = plot(Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz, Audiogram.InterpolatedThreshDB, 'LineWidth', 1.5, 'Color', [1, 0, 0]);
 
 % Compute frequency step: 
 frequencyStep = max(Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz)/length(Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz); % frequency step size, in KHz per step; TODO: include way of confirming that FrequenciesKHz is identical for all recordings?
@@ -86,7 +86,7 @@ frequencyStep = max(Comparison.Condtn(1).Recording(1).DFT.FrequenciesKHz)/length
 for d = 1:length(conditions)
     
     % Take the integral of P(c,f)/A(f) for the current stimulus condition:
-    Ratio = Comparison.Condtn(d).MeanDFTPaRMS./Audiogram.ThreshPa.Interpolated; % want to take this ratio in pascals, not decibels
+    Ratio = Comparison.Condtn(d).MeanDFTPaRMS./Audiogram.InterpolatedThreshPa; % want to take this ratio in pascals, not decibels
     indices = floor([Comparison.Condtn(d).LowF, Comparison.Condtn(d).HighF]./frequencyStep);    
     Comparison.Condtn(d).Integral = sum(Ratio(indices(1):indices(2)));
     
@@ -101,6 +101,10 @@ titleStr = {strcat(['Stimulus periodograms & murine audiogram']);
             strcat(['played from speaker ', Recording.Speaker]);
             strcat(['acquired ', Recording.Date, ' ', Recording.Time]);
 };
+
+title(titleStr);
+xlabel('Frequency (kHz)');
+ylabel('Volume (dB SPL)');
 
 agName = strcat([Audiogram.Authors{1}{1}, ' et al ', num2str(Audiogram.Year)]);
 
@@ -156,9 +160,7 @@ legend([Figures(1).plot Figures(2).plot audiogramPlot],...
     % Label figure
 
 
-    title(titleStr);
-    xlabel('Frequency (kHz)');
-    ylabel('Volume (dB SPL)');
+
 
 
     
