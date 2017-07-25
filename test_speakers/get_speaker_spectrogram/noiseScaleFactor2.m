@@ -1,4 +1,4 @@
-function Comparison = noiseScaleFactor2(recordingPath1, recordingPath2, varargin);
+function Comparison = noiseScaleFactor2(cond1path, cond2path, varargin);
 %% Check if audiogram was defined, and if not, use default audiogram
 
 audiogramPath = 'audiogram_Heffner2002';
@@ -13,49 +13,86 @@ Comparison.Speaker = 'unknown';
 load(audiogramPath); 
 Audiogram.ThreshPa.Raw = db2pa(Audiogram.ThreshDBSPL); % convert from dB SPL to pascals
 
-%%
-recordings = {recordingPath1, recordingPath2};
+conditions = {cond1path, cond2path};
 
-for i = 1:length(recordings)
+
+%% For each stimulus condition, compute the mean DFT:
+
+for c = 1:length(conditions)
     
+    cd(conditions{c});
+    recordingDirs = dir;
+    disp('recordingDirs');
+    disp(recordingDirs);
+    
+    % Compute the DFT for each recording within the current stimulus condition:
+    for r = 3:length(recordingDirs)
+        old = cd(recordingDirs(r).name);
+        files = dir;
+        
+        % In the directory for the current recording, find and load the file that ends in .mat:
+        out = cellfun(@(a) strfind(a, '.mat'), {files.name}, 'UniformOutput', 0);
+        out2 = cellfun(@(c) isempty(c), out);
+        matFileName = files(~out2).name;
+        load(matFileName); % this loads a struct called `Recording` into the workspace
+        disp(Recording);
+        cd(old);
+        
+        
+        % Get the Fourier transform of the recording in pascals RMS:
+        Comparison.Condtn(c).Recording(r).DFT = dftRMS(Recording); 
+        disp('size DFT');
+        disp(size(Comparison.Condtn(c).Recording(r).DFT));
+      
+    end
+    
+    %Comparison.Condtn(c).MeanDFT = mean();
+    
+end    
+    
+
+  
+
+%%
+    
+%{    
     % Load Recording, get metadata
-    load(recordings{i});
-    Comparison.Stimulus(i).Path = recordings{i};
-    Comparison.Stimulus(i).Recording = Recording;
+    load(conditions{c});
+    Comparison.Stimulus(c).Path = conditions{c};
+    Comparison.Stimulus(c).Recording = Recording;
     
     Comparison.Speaker = Recording.Speaker;
     
     % Compute integral of ratio of periodogram to audiogram
-    Comparison.Stimulus(i).DFT = dftRMS(Recording); % get the Fourier transform of the recording in pascals RMS
-    Comparison.Stimulus(i).FrequenciesKHz = Comparison.Stimulus(i).DFT.FrequenciesHz/1000; % convert frequencies associated with the DFT from Hz to KHz
-    Audiogram.ThreshPa.Interpolated = interp1(Audiogram.FreqKHz, Audiogram.ThreshPa.Raw, Comparison.Stimulus(i).FrequenciesKHz)';
-    Rat = Comparison.Stimulus(i).DFT.AmplitudesPaRMS./Audiogram.ThreshPa.Interpolated; % want to take this ratio in pascals, not decibels
-    frequencyStep = max(Comparison.Stimulus(i).FrequenciesKHz)/length(Comparison.Stimulus(i).FrequenciesKHz); % frequency step size, in KHz per step
+    Comparison.Condtn(c).Recording(r).FrequenciesKHz = Comparison.Stimulus(c).DFT.FrequenciesHz/1000; % convert frequencies associated with the DFT from Hz to KHz
+    Audiogram.ThreshPa.Interpolated = interp1(Audiogram.FreqKHz, Audiogram.ThreshPa.Raw, Comparison.Stimulus(c).FrequenciesKHz)';
+    Rat = Comparison.Stimulus(c).DFT.AmplitudesPaRMS./Audiogram.ThreshPa.Interpolated; % want to take this ratio in pascals, not decibels
+    frequencyStep = max(Comparison.Stimulus(c).FrequenciesKHz)/length(Comparison.Stimulus(c).FrequenciesKHz); % frequency step size, in KHz per step
     lowF = (Recording.VI.Stim.StartFreqs.val(Recording.StimID))/1000; % remember to convert to kHz
     highF = lowF + (Recording.VI.Stim.FreqRange.val)/1000; % remember to convert to kHz
     indices = floor([lowF, highF]./frequencyStep);
-    Comparison.Stimulus(i).Integral = sum(Rat(indices));
+    Comparison.Stimulus(c).Integral = sum(Rat(indices));
     
     % Plot...
-    Comparison.Stimulus(i).DFT.AmplitudesDBSPL = pa2db(Comparison.Stimulus(i).DFT.AmplitudesPaRMS); % convert amplitudes associated with the DFT from pascals RMS into decibels; PLOTTING PURPOSES ONLY
+    Comparison.Stimulus(c).DFT.AmplitudesDBSPL = pa2db(Comparison.Stimulus(c).DFT.AmplitudesPaRMS); % convert amplitudes associated with the DFT from pascals RMS into decibels; PLOTTING PURPOSES ONLY
     Audiogram.ThreshDB.Interpolated = pa2db(Audiogram.ThreshPa.Interpolated); % for plotting purposes only
     
     % ... raw periodogram...
-    Figures(i).fig = figure;
+    Figures(c).fig = figure;
     hold on;
-    rawPeriodogram = plot(Comparison.Stimulus(i).FrequenciesKHz, Comparison.Stimulus(i).DFT.AmplitudesDBSPL);
+    rawPeriodogram = plot(Comparison.Stimulus(c).FrequenciesKHz, Comparison.Stimulus(c).DFT.AmplitudesDBSPL);
     
     % ... smoothed periodogram...
     boxWidth = 100;
-    smoothIndices = (boxWidth/2:1:length(Comparison.Stimulus(i).DFT.AmplitudesDBSPL)-boxWidth/2);
-    dbSmooth = arrayfun(@(a) mean(Comparison.Stimulus(i).DFT.AmplitudesDBSPL(a-boxWidth/2+1:a+boxWidth/2)), smoothIndices);
-    smoothPeriodogram = plot(Comparison.Stimulus(i).FrequenciesKHz(smoothIndices), dbSmooth, 'Color', [0, 0, 0.5]);
+    smoothIndices = (boxWidth/2:1:length(Comparison.Stimulus(c).DFT.AmplitudesDBSPL)-boxWidth/2);
+    dbSmooth = arrayfun(@(a) mean(Comparison.Stimulus(c).DFT.AmplitudesDBSPL(a-boxWidth/2+1:a+boxWidth/2)), smoothIndices);
+    smoothPeriodogram = plot(Comparison.Stimulus(c).FrequenciesKHz(smoothIndices), dbSmooth, 'Color', [0, 0, 0.5]);
     
     % ... audiogram...
-    audiogramPlot = plot(Comparison.Stimulus(i).FrequenciesKHz, Audiogram.ThreshDB.Interpolated, 'LineWidth', 1.5, 'Color', [1, 0, 0]);
+    audiogramPlot = plot(Comparison.Stimulus(c).FrequenciesKHz, Audiogram.ThreshDB.Interpolated, 'LineWidth', 1.5, 'Color', [1, 0, 0]);
     
     % ... rectangle corresponding to frequency range
-    Figures(i).yl = ylim;
+    Figures(c).yl = ylim;
     
     % Label figure
     titleStr = {strcat(['Stim #', num2str(Recording.StimID), ' (', num2str(lowF), '-',  num2str(highF), ' kHz) periodogram & murine audiogram']);
@@ -71,8 +108,8 @@ for i = 1:length(recordings)
             strcat(['Murine audiogram (', agName, ')'])
     });
     
-    Comparison.Stimulus(i).LowF = lowF;
-    Comparison.Stimulus(i).HighF = highF;
+    Comparison.Stimulus(c).LowF = lowF;
+    Comparison.Stimulus(c).HighF = highF;
     
 end
 
@@ -91,5 +128,6 @@ end
 
 Comparison.ScaleFactor = Comparison.Stimulus(1).Integral/Comparison.Stimulus(2).Integral;
 save('Stim1vsStim2.mat', 'Comparison');
+%}
 
 end
