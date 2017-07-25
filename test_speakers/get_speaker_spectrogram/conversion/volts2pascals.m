@@ -70,7 +70,7 @@ for m = 1:length(Mics)
         end
 end
 
-if found == 1
+if found == 0
     error('Specified microphone model number not found in Mics.mat; mic sensitivity unknown, cannot convert from Volts to pascals.');
 end
 
