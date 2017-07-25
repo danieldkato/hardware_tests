@@ -25,7 +25,7 @@ Colors = [blue; purple];
 
 for c = 1:length(conditions)
     
-    cd(conditions{c});
+    tld = cd(conditions{c});
     recordingDirs = dir;
     
     % Compute the DFT for each recording within the current stimulus condition:
@@ -38,7 +38,7 @@ for c = 1:length(conditions)
         out2 = cellfun(@(c) isempty(c), out);
         matFileName = files(~out2).name;
         load(matFileName); % this loads a struct called `Recording` into the workspace
-        %Comparison.Condtn(c).Recording(r-2).Path = strcat[cd filesep ]
+        Comparison.Condtn(c).Recordings(r-2).Path = [cd filesep matFileName];
         
         % Get lower and upper frequency bounds for current stimulus condition:
         Comparison.Condtn(c).LowF = (Recording.VI.Stim.StartFreqs.val(Recording.StimID))/1000; % remember to convert to kHz;
@@ -120,10 +120,15 @@ legend([Figures(1).plot Figures(2).plot audiogramPlot],...
    
 %% Include some metadata:
 
+Comparison.Speaker = Recording.Speaker; % should check that speaker for all recordings is the same?
+Comparison.mFile.Path = [mfilename('fullpath') '.m'];
+Comparison.mFile.SHA1 = getSHA1(Comparison.mFile.Path);   
+   
+cd(tld);
+save('Stim1vsStim2.mat', 'Comparison');
+savefig('Stim1vsStim2');
+   
 
-   
-   
-   
 %% Plot the audiogram
 
 %{    
