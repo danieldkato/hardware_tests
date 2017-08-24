@@ -1,9 +1,12 @@
 /*  test_stepper_HES.ino
+ *   
  * /////////////////////////////////////////////////////// 
  * Documentation table of contents:
  * I. OVERVIEW
  * II. REQUIREMENTS
  * III. INSTRUCTIONS
+ *  
+ * Last updated DDK 2017-08-24
  *  
  *  
  * /////////////////////////////////////////////////////// 
@@ -15,30 +18,31 @@
  * by feedback from a hall effect sensor. Use this sketch to 
  * test that the stepper, the stepper motor driver, the hall 
  * effect sensor, the corresponding input and output pins and 
- * the connections between are working.
+ * the connections between are working. 
  * 
  * 
  * //////////////////////////////////////////////////////
  * II. REQUIREMENTS:
  * 
- * 1) Stepper motor connected to Arduino microcontroller in 2-pin configuration. 
+ * 1) Stepper motor connected to stepper motor driver, e.g. Pololu A4988. 
  * 
- * 2) Stepper motor driver, e.g. Pololu A4988. The driver must be configured
- *    for the microstep resolution specified in this sketch. Note that if there  
- *    is an OM2 shield conneced to the Arduino, this can be accomplished in 
- *    hardware; the motor driver pins M1-M3 can be pulled HIGH by connecting 
- *    them via jumper cable to a 5V rail. See https://www.pololu.com/product/1182
- *    for how to configure stepper motor driver for different microstep resolutions.
+ * 2) Arduino microcontroller configured to supply TTL input, logic power,  
+ *    and ground to stepper motor driver. This will typically be through
+ *    a Arduino shield custom-designed for a stepper motor dirver (e.g., an OM2).
  * 
- * 3) Hall effect sensor connected to Arduino microcontroller power, ground 
+ * 3) The driver must be configured for the microstep resolution specified 
+ *    in this sketch. If the diver is connected to the Arduino through an OM2 
+ *    shield, this can be accomplished in hardware; the motor driver pins 
+ *    M1-M3 can be pulled HIGH by connecting them via jumper cable to the 
+ *    5V rail. See https://www.pololu.com/product/1182 for M1-M3
+ *    logic levels corresponding to each microstep resolution.
+ * 
+ * 4) Hall effect sensor connected to Arduino microcontroller power, ground 
  *    and analog in lines. 
  * 
- * 4) Magnet mounted to stepper motor. The magnet should be close enough 
- *    to the hall effect sensor to exploit the sensor's dynamic range
- *    as the motor completes the specified number of steps in either 
- *    direction. 
+ * 5) Magnet mounted to stepper motor. 
  * 
- * 5) The Arduino MUST be powered by ~5V; the stepper will 
+ * 6) The Arduino MUST be powered by ~5V; the stepper will 
  *    otherwise draw too much current and the Arduino will
  *    not be detected. 
  *  
@@ -55,7 +59,6 @@
  * 3) Upload the sketch to the Arduino microcontroller. 
  * 
  * 
- * Last updated DDK 2017-08-24
  */
 
 #include <Arduino.h>
