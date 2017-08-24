@@ -1,31 +1,61 @@
-/* Last updated DDK 6/7/16
+/*  test_stepper_HES.ino
+ * /////////////////////////////////////////////////////// 
+ * Documentation table of contents:
+ * I. OVERVIEW
+ * II. REQUIREMENTS
+ * III. INSTRUCTIONS
  *  
- * OVERVIEW:
+ *  
+ * /////////////////////////////////////////////////////// 
+ * I. OVERVIEW:
+ * 
  * Simple sketch to make a stepper motor repeatedly rotate 
  * back and forth some number of steps. The number of steps 
  * after which the stepper reverses direction is determined 
  * by feedback from a hall effect sensor. Use this sketch to 
- * test that the stepper, the hall effect sensor, the 
- * corresponding input and output pins and the connections 
- * between are working.
+ * test that the stepper, the stepper motor driver, the hall 
+ * effect sensor, the corresponding input and output pins and 
+ * the connections between are working.
  * 
  * 
- * REQUIREMENTS:
+ * //////////////////////////////////////////////////////
+ * II. REQUIREMENTS:
+ * 
  * 1) Stepper motor connected to Arduino microcontroller in 2-pin configuration. 
- * 2) Hall effect sensor connected to Arduino microcontroller power, ground and analog in lines. 
- * 3) Magnet mounted to stepper motor. The magnet should be close enough 
+ * 
+ * 2) Stepper motor driver, e.g. Pololu A4988. The driver must be configured
+ *    for the microstep resolution specified in this sketch. Note that if there  
+ *    is an OM2 shield conneced to the Arduino, this can be accomplished in 
+ *    hardware; the motor driver pins M1-M3 can be pulled HIGH by connecting 
+ *    them via jumper cable to a 5V rail. See https://www.pololu.com/product/1182
+ *    for how to configure stepper motor driver for different microstep resolutions.
+ * 
+ * 3) Hall effect sensor connected to Arduino microcontroller power, ground 
+ *    and analog in lines. 
+ * 
+ * 4) Magnet mounted to stepper motor. The magnet should be close enough 
  *    to the hall effect sensor to exploit the sensor's dynamic range
  *    as the motor completes the specified number of steps in either 
  *    direction. 
- * 4) The Arduino MUST be powered by ~5V; the stepper will 
+ * 
+ * 5) The Arduino MUST be powered by ~5V; the stepper will 
  *    otherwise draw too much current and the Arduino will
  *    not be detected. 
  *  
  * 
- * INSTRUCTIONS:
- * Ensure that the pins specified in this sketch match the
- * pins connected to the stepper motor and hall effect sensor. 
- * Upload the sketch to the Arduino microcontroller. 
+ * /////////////////////////////////////////////////////
+ * III. INSTRUCTIONS:
+ * 
+ * 1) Ensure that the pins specified in this sketch match the
+ *    pins connected to the stepper motor and hall effect sensor. 
+ * 
+ * 2) Ensure that the stepper motor driver is configured for 
+ *    he microstep resolution specified in this sketch.
+ * 
+ * 3) Upload the sketch to the Arduino microcontroller. 
+ * 
+ * 
+ * Last updated DDK 2017-08-24
  */
 
 #include <Arduino.h>
