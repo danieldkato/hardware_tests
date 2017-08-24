@@ -69,7 +69,7 @@ void rotate_one_step()
 }
 
 void fwd(){
-  digitalWrite(DIR_PIN, HIGH);
+  digitalWrite(DIR_PIN, LOW);
   hall_val = analogRead(HALL_PIN);
   while(hall_val>hall_thresh){
     rotate_one_step(); //how to deal with direction??
@@ -80,7 +80,7 @@ void fwd(){
 }
 
 void back(){
-  digitalWrite(DIR_PIN, LOW);
+  digitalWrite(DIR_PIN, HIGH);
   //delay(1);
   for(int i = 0; i < numSteps; i++){rotate_one_step();}
   Serial.println("stepper retracted");
