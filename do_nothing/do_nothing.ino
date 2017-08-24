@@ -7,7 +7,7 @@ const int numPins = 14;
 
 void setup() {
   // put your setup code here, to run once:
-  for (i = 1; i < numPins + 1; i++){
+  for (int i = 1; i < numPins + 1; i++){
     pinMode(i, OUTPUT);
     digitalWrite(i, LOW);
   }
