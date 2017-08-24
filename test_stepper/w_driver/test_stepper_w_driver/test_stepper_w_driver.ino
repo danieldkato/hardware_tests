@@ -36,7 +36,7 @@
  *    5V rail. See https://www.pololu.com/product/1182 for M1-M3
  *    logic levels corresponding to each microstep resolution.
  * 
- * 4) The Arduino MUST be powered by ~5V; the stepper will 
+ * 4) The Arduino shield MUST be powered by ~5V; the stepper will 
  *    otherwise draw too much current and the Arduino will
  *    not be detected. 
  *  

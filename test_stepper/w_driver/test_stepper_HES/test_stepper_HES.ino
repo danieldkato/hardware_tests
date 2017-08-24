@@ -8,7 +8,6 @@
  *  
  * Last updated DDK 2017-08-24
  *  
- *  
  * /////////////////////////////////////////////////////// 
  * I. OVERVIEW:
  * 
@@ -42,7 +41,7 @@
  * 
  * 5) Magnet mounted to stepper motor. 
  * 
- * 6) The Arduino MUST be powered by ~5V; the stepper will 
+ * 6) The Arduino shield MUST be powered by ~5V; the stepper will 
  *    otherwise draw too much current and the Arduino will
  *    not be detected. 
  *  
@@ -57,7 +56,6 @@
  *    he microstep resolution specified in this sketch.
  * 
  * 3) Upload the sketch to the Arduino microcontroller. 
- * 
  * 
  */
 
