@@ -23,25 +23,29 @@
  * //////////////////////////////////////////////////////
  * II. REQUIREMENTS:
  * 
- * 1) Stepper motor connected to stepper motor driver, e.g. Pololu A4988. 
+ * 1) A bipolar stepper motor connected to stepper motor driver (e.g. Pololu A4988). 
  * 
- * 2) Arduino microcontroller configured to supply TTL input, logic power,  
- *    and ground to stepper motor driver. This will typically be through
- *    a Arduino shield custom-designed for a stepper motor dirver (e.g., an OM2).
+ * 2) A custom Arduino shield (e.g., an OM2) designed to accommodate a stepper
+ *    motor driver.
  * 
- * 3) The driver must be configured for the microstep resolution specified 
- *    in this sketch. If the diver is connected to the Arduino through an OM2 
- *    shield, this can be accomplished in hardware; the motor driver pins 
- *    M1-M3 can be pulled HIGH by connecting them via jumper cable to the 
- *    5V rail. See https://www.pololu.com/product/1182 for M1-M3
- *    logic levels corresponding to each microstep resolution.
+ * 3) An Arduino microcontroller configured to supply TTL input, logic power,  
+ *    and ground to stepper motor driver. See https://www.pololu.com/product/1182 
+ *    for stepper motor driver wiring diagram. 
  * 
- * 4) Hall effect sensor connected to Arduino microcontroller power, ground 
+ * 4) The stepper motor driver must be configured for the microstep resolution 
+ *    specified in this sketch. This must be accomplished in hardware, as this
+ *    code does not make any provisions for controlling the microstep resolution
+ *    programatically. This can be accomplished by pulling any combination of 
+ *    the stepper motor driver pins M1-M3 HIGH by connecting them via jumper 
+ *    cable to a 5V rail. See link above for M1-M3 logic levels corresponding
+ *    to each microstep resolution.
+ * 
+ * 5) Hall effect sensor connected to Arduino microcontroller power, ground 
  *    and analog in lines. 
  * 
- * 5) Magnet mounted to stepper motor. 
+ * 6) Magnet mounted to stepper motor. 
  * 
- * 6) The Arduino shield MUST be powered by ~5V; the stepper will 
+ * 7) The Arduino shield MUST be powered by ~5V; the stepper will 
  *    otherwise draw too much current and the Arduino will
  *    not be detected. 
  *  
