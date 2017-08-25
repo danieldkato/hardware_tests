@@ -23,31 +23,46 @@
  * //////////////////////////////////////////////////////
  * II. REQUIREMENTS:
  * 
- * 1) A bipolar stepper motor connected to stepper motor driver (e.g. Pololu A4988). 
+ * 1) A stepper motor driver (e.g. Pololu A4988) connected to 
+ *    a custom OM2 Arduino shield. The stepper motor driver should
+ *    plug into the pins inscribed in the large rectangle printed
+ *    on top surface of the OM2. Note that the orientation of the 
+ *    stepper driver DOES matter; the driver's VMOT pin should go 
+ *    into the pin connected to the OM2 decoupling capacitor. To find 
+ *    the VMOT pin on the stepper motor driver, see the stepper motor 
+ *    driver wiring diagram at:
+ *    
+ *    https://www.pololu.com/product/1182
+ *    
+ *    If necessary, assemble a new OM2 using the wiring diagram at: 
+ *    
+ *    https://www.dropbox.com/home/Bruno%20Lab%20Share/openmaze_shields?preview=OM2_160703.png
+ *    
+ * 2) A bipolar stepper motor connected to the OM2 shield. Wires 
+ *    from stepper motor should plug into the four OM2 pins adjacent
+ *    to the label 'STEPPER'. For details on which wires should go        
+ *    to which pins, see the stepper motor driver wiring diagram (link above)
+ *    and stepper motor wiring diagram at https://www.pololu.com/product/1205.
+ *    
+ * 3) An Arduino microcontroller. The OM2 shield should only fit into   
+ *    Ardunio one way. 
  * 
- * 2) A custom Arduino shield (e.g., an OM2) designed to accommodate a stepper
- *    motor driver.
- * 
- * 3) An Arduino microcontroller configured to supply TTL input, logic power,  
- *    and ground to stepper motor driver. See https://www.pololu.com/product/1182 
- *    for stepper motor driver wiring diagram. 
- * 
- * 4) The stepper motor driver must be configured for the microstep resolution 
- *    specified in this sketch. This must be accomplished in hardware, as this
- *    code does not make any provisions for controlling the microstep resolution
- *    programatically. This can be accomplished by pulling any combination of 
- *    the stepper motor driver pins M1-M3 HIGH by connecting them via jumper 
- *    cable to a 5V rail. See link above for M1-M3 logic levels corresponding
- *    to each microstep resolution.
- * 
- * 5) Hall effect sensor connected to Arduino microcontroller power, ground 
- *    and analog in lines. 
- * 
- * 6) Magnet mounted to stepper motor. 
- * 
- * 7) The Arduino shield MUST be powered by ~5V; the stepper will 
+ * 4) The Arduino shield MUST be powered by ~5V; the stepper will 
  *    otherwise draw too much current and the Arduino will
  *    not be detected. 
+ * 
+ * 5) The stepper motor driver must be configured for the microstep resolution 
+ *    specified in this sketch. This must be accomplished in hardware, as this
+ *    code does not make any provisions for controlling the microstep resolution
+ *    programatically. To accomplish this, pull the appropriate combination of 
+ *    stepper motor driver pins M1-M3 HIGH by connecting them via jumper 
+ *    cable to 5V. See link above for M1-M3 logic levels corresponding
+ *    to each microstep resolution.
+ * 
+ * 6) Hall effect sensor connected to Arduino microcontroller power, ground 
+ *    and analog in lines. 
+ * 
+ * 7) Magnet mounted to stepper motor. 
  *  
  * 
  * /////////////////////////////////////////////////////
