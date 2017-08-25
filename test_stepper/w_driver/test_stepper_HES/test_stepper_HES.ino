@@ -6,7 +6,7 @@
  * II. REQUIREMENTS
  * III. INSTRUCTIONS
  *  
- * Last updated DDK 2017-08-24
+ * Last updated DDK 2017-08-25
  *  
  * /////////////////////////////////////////////////////// 
  * I. OVERVIEW:
@@ -73,25 +73,32 @@
  * 
  * 2) Ensure that the stepper motor driver is configured for 
  *    he microstep resolution specified in this sketch.
+ *    
+ * 3) Specify user variables rotDeg (number of degrees to rotate),    
+ *    microstep (number of microsteps per default step size), and 
+ *    stepHalfDelay (controls speed).
  * 
- * 3) Upload the sketch to the Arduino microcontroller. 
+ * 4) Upload the sketch to the Arduino microcontroller. 
  * 
  */
 
 #include <Arduino.h>
 #include <Stepper.h>
 
+
+// User variables:
+int rotDeg = 50; // number of degrees to rotate
+int microstep = 8; // microstep resolution
+int stepHalfDelay = 1500; // controls speed; expressed in microseconds
+
 //Declare stepper constants and variables
 const int FULLSTP_PER_ROTATION = 200;
 const int STP_PIN = 6;
 const int DIR_PIN = 8;
 const int HALL_PIN = 0;
-int stepHalfDelay = 1500; // microseconds
-int microstep = 8;
 int hall_thresh = 50;
 int hall_val = 500;
 long period = 2000;
-int rotDeg = 50;
 int numSteps = floor((rotDeg/360.0) * FULLSTP_PER_ROTATION) * microstep;
 
 void setup() {
