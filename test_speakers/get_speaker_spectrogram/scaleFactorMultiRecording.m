@@ -191,6 +191,17 @@ function Comparison = noiseScaleFactor2(cond1path, cond2path, varargin);
 % used as the periodogram functions R1(f) and R2(f) described above. 
 
 
+% TODO:
+% I've been assuming that the scale factor for both stimuli in
+% DigitalTriggeredAudioNoise.vi is 1 in the original recording, but this
+% function should really record this information explicity. I think this
+% means that this information needs to be included in the inputs to
+% recordDigitalTriggeredAudioNoise.m and passed to the output metadata
+% file; the scale factors can be recorded explicitly in the configuration
+% file, and the SHA1 digest of the latest git commit of
+% DigitalTriggeredAudioNoise.vi can also be saved.
+
+
 %% Load inputs, settings, etc:
 
 % Set defaults:

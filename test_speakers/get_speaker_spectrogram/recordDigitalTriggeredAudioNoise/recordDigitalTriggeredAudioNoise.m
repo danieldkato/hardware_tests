@@ -210,21 +210,25 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 % 2) Should ultimately update this so that figures are saved (when we
 %    update to a version of MATLAB that has savefig)
 
-% 3) Should rename - this function doesn't generate spectrograms anymore,
-%    it just records
+% 3) Add support for single-ended vs. differential input
 
-% 4) Add support for single-ended vs. differential input
-
-% 5) Should add a log of all warnings to metadata
-
-% 6) Should write a generic function that *recursively* checks if structure
+% 4) Should write a generic function that *recursively* checks if structure
 %    defined in config file has all necessary fields defined in default 
 %    structure (this function currently does not check recursively; e.g.,
 %    if Recording has a field that is itself a structure, this function
 %    will not check if that subordinate structure has all of its own
 %    required fields)
 
-% Last updated DDK 2017-07-21
+% 5) I've been assuming that the scale factor for both stimuli in
+%    DigitalTriggeredAudioNoise.vi is 1 in the original recording, but this
+%    function should really record this information explicity. I think this
+%    means that this information needs to be included in the inputs to
+%    recordDigitalTriggeredAudioNoise.m and passed to the output metadata
+%    file; the scale factors can be recorded explicitly in the configuration
+%    file, and the SHA1 digest of the latest git commit of
+%    DigitalTriggeredAudioNoise.vi can also be saved.
+
+% Last updated DDK 2017-09-26
 
 
 %% Parse inputs into stimulus and DAQ parameters, and, where possible, validate hardware:
@@ -348,6 +352,7 @@ disp('... data acquisition complete.');
 fclose(arduino);
 disp('... serial connection closed.');
 
+
 %% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
 
 Data = getdata(AI);
@@ -382,7 +387,7 @@ old = cd(dirName);
 save(dirName, 'Recording');
 
 
-%% Write data as .csv and metadata as .txt for non-MATLAB analysis
+%% Write data as .csv and metadata as .txt for non-MATLAB analysis:
 
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
 
