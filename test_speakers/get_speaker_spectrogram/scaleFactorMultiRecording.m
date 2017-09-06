@@ -10,9 +10,9 @@ function Comparison = noiseScaleFactor2(cond1path, cond2path, varargin);
 
 
 %% I. OVERVIEW
-% This function computes the factor by which noise played in one frequency
-% band must be scaled to match the perceived loudness (to a mouse) of noise
-% played in another frequency band.
+% This function computes the factor by which the amplitude of noise played
+% in one frequency band must be scaled to match the perceived loudness (to
+% a mouse) of noise played in another frequency band.
 
 % It also creates a plot that overlays the speaker's response chart, a
 % murine audiogram, and rectangular patches highlighting the requested
