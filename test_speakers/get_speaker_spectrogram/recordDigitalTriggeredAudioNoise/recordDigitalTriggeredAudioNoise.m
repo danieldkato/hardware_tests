@@ -129,7 +129,7 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 
 % 2) A .csv containing the analog input data (for any subsequent non-MATLAB analysis)
 
-% 3) A .txt containing stimulus and data acquisition metadata (for any subsequent non-MATLAB analysis)
+% 3) A JSON file containing stimulus and data acquisition metadata (for any subsequent non-MATLAB analysis)
 
 
 %% VI: INSTRUCTIONS: 
@@ -409,18 +409,19 @@ saveTime = now;
 Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
 Recording.Time = datestr(saveTime, 'HH:MM:SS');
 
+
+%% Save data and metadata to secondary storage:
+
+% Write struct Recording, including both data and metadata, as .mat file:
 dirName = strcat(['spkr',rename(speaker), '_DigitalTriggeredNoiseStim', num2str(stimID), '_', datestr(saveTime, 'yyyy-mm-dd_HH-MM-SS')]);
 mkdir(dirName);
 old = cd(dirName);
 save(dirName, 'Recording');
 
-
-%% Write data as .csv and metadata as .txt for non-MATLAB analysis:
-
+% Save data as a .csv file for possible subsequent non-MATLAB analysis:
 csvwrite(strcat([dirName, '.csv']), Recording.Data); 
 
-% Now that Recording.Data has already been saved, we can remove Data from
-% Recording and pass it to struct2txt to save as a text file
+% Save metadata as a JSON file for possible sbsequent non-MATLAB analysis:
 Recording = rmfield(Recording, 'Data');
 savejson('', Recording, 'metadata.json');
 cd(old);
