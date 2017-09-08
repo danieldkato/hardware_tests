@@ -256,7 +256,7 @@ Defaults.InputRangeMax.val = 10;
 Defaults.InputRangeMax.units = 'volts';
 requiredFields = fieldnames(Defaults);
 
-% Load settings specified in config file:
+% Load settings specified in struct Recording defined in config file:
 fid = fopen(configFile);
 content = fscanf(fid, '%c');
 eval(content);
@@ -288,7 +288,30 @@ for i = 1:length(requiredFields)
     end
 end 
 
+% Add CLI-defined parameters to metadata:
+Recording.StimID = stimID;
+Recording.Speaker = speaker;
+Recording.SignalConditionerGain = sigCondGain;
+Recording.Distance.val = distance;
+Recording.Distance.units = 'millimeters';
+Recording.Angle.val = angle;
+Recording.Angle.units = 'degrees';
+Recording.Arduino.Port = portID;
+Recording.mFile.Path = strcat(mfilename('fullpath'), '.m');
+
+% Add some addition parameters to metadata:
+[~, Recording.Hostname] = system('hostname');
+Recording.Hostname = Recording.Hostname(1:end-1); % get rid of superfluous newline character
+
 % Get software version information:
+warnMsgs = [];
+
+Recording.mFile.SHA1 = getSHA1(Recording.mFile.Path);
+Recording.Arduino.Sketch.SHA1 = getSHA1(Recording.Arduino.Sketch.LocalPath);
+Recording.VI.SHA1 = getSHA1(Recording.VI.LocalPath);
+
+
+
 
 % Check if software is under git control
 %   if not, give user opporunity to abort
@@ -371,29 +394,16 @@ fclose(arduino);
 disp('... serial connection closed.');
 
 
-%% Write metadata into the same struct containing the data and save to secondary storage as a .mat to allow for easy analysis later
-
+%% Write data into the Recording struct
 Data = getdata(AI);
 Recording.Data = Data; % create a `Recording` struct that will glue the recording data together with metadata critical for interpretation
 hwinfo = daqhwinfo(AI);
 delete(AI); clear AI;
 
-Recording.StimID = stimID;
-Recording.Speaker = speaker;
-Recording.SignalConditionerGain = sigCondGain;
-Recording.Distance.val = distance;
-Recording.Distance.units = 'millimeters';
-Recording.Angle.val = angle;
-Recording.Angle.units = 'degrees';
+
+%% Add a few remaining metadata parameters that are only defined after data acquision:
 Recording.TrueSampleRate.val = trueSampleRate;
 Recording.TrueSampleRate.units = 'samples/second';
-Recording.mFile.Path = strcat(mfilename('fullpath'), '.m');
-Recording.mFile.SHA1 = getSHA1(Recording.mFile.Path);
-Recording.Arduino.Sketch.SHA1 = getSHA1(Recording.Arduino.Sketch.LocalPath);
-Recording.Arduino.Port = portID;
-Recording.VI.SHA1 = getSHA1(Recording.VI.LocalPath);
-[~, Recording.Hostname] = system('hostname');
-Recording.Hostname = Recording.Hostname(1:end-1); % get rid of superfluous newline character
 
 saveTime = now;
 Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
