@@ -65,7 +65,8 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 %    5) The LabView virtual instrument DigitalTriggeredAudioNoise.vi, available at
 %       https://github.com/danieldkato/hardware_tests/tree/master/test_speakers/get_speaker_spectrogram/recordDigitalTriggeredAudioNoise
     
-%    6) struct2txt.m, available at https://github.com/danieldkato/utilities/blob/master/struct2txt.m
+%    6) The JSONlab toolbox, available at
+%    https://www.mathworks.com/matlabcentral/fileexchange/33381-jsonlab--a-toolbox-to-encode-decode-json-files
  
 %    7) getSHA1.m, available at https://github.com/danieldkato/utilities/blob/master/getSHA1.m
     
@@ -231,7 +232,7 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 % Last updated DDK 2017-09-26
 
 
-%% Parse inputs into stimulus and DAQ parameters, and, where possible, validate hardware:
+%% Define settings, and, where possible, validate hardware:
 
 sigCondGain = input('Please enter the gain on any signal conditioners being used in the current setup. If no signal conditioners are being used, please enter "1".'); % requiring user input for this because it's easy to forget to update
 distance = input('Please enter the distance between the microphone cap and the speaker in millimeters.'); % requiring user input for this because it's easy to forget to update
@@ -287,6 +288,23 @@ for i = 1:length(requiredFields)
     end
 end 
 
+% Get software version information:
+
+% Check if software is under git control
+%   if not, give user opporunity to abort
+%       if user does not abort, throw and save warning
+
+% Check if software has uncommitted changes
+%   if so, give user opportunity to abort
+%       if user does not abort, throw and save warning
+
+% If software is under git control and does not have uncommitted changes,
+% get and save SHA1 digest
+
+% Maybe checking the git status, throwing any warnings and getting the SHA1
+% digest should be the responsibility of another function like getSHA1.m;
+% giving the user the opportunity to abort should be this program's
+% responsibility
 
 %% Upload Arduino sketch
 
@@ -394,9 +412,7 @@ csvwrite(strcat([dirName, '.csv']), Recording.Data);
 % Now that Recording.Data has already been saved, we can remove Data from
 % Recording and pass it to struct2txt to save as a text file
 Recording = rmfield(Recording, 'Data');
-fid = fopen('test.txt', 'wt');
-struct2txt(Recording, fid);
-fclose(fid);
+savejson('', Recording, 'metadata.json');
 cd(old);
 
 
