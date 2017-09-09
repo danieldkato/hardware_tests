@@ -229,7 +229,7 @@ function recordDigitalTriggeredAudioNoise(speaker, stimID, portID, configFile)
 %    file, and the SHA1 digest of the latest git commit of
 %    DigitalTriggeredAudioNoise.vi can also be saved.
 
-% Last updated DDK 2017-09-26
+% Last updated DDK 2017-09-08
 
 
 %% Define settings, and, where possible, validate hardware:
@@ -297,19 +297,36 @@ Recording.Distance.units = 'millimeters';
 Recording.Angle.val = angle;
 Recording.Angle.units = 'degrees';
 Recording.Arduino.Port = portID;
-Recording.mFile.Path = strcat(mfilename('fullpath'), '.m');
+Recording.mFile.LocalPath = strcat(mfilename('fullpath'), '.m');
 
 % Add some addition parameters to metadata:
 [~, Recording.Hostname] = system('hostname');
 Recording.Hostname = Recording.Hostname(1:end-1); % get rid of superfluous newline character
 
 % Get software version information:
-warnMsgs = [];
+warnMsgs = {};
+files = {Recording.mFile, Recording.Arduino.Sketch, Recording.VI}; % 
 
-Recording.mFile.SHA1 = getSHA1(Recording.mFile.Path);
+for i = 1:length(files)
+    [warnOut, files{i}.SHA1] = getSHA1(files{i}.LocalPath); 
+    if ~isempty(warnOut)
+        warnMsgs{end+1} = warnOut; 
+        checkContinue();
+    end
+end
+
+% need to re-assign b/c the elements of 'files' were deep copies
+Recording.mFile = files{1};
+Recording.Arduino.Sketch = files{2};
+Recording.VI = files{3};
+
+Recording.Warnings = warnMsgs;
+
+%{
+Recording.mFile.SHA1 = getSHA1(Recording.mFile.LocalPath);
 Recording.Arduino.Sketch.SHA1 = getSHA1(Recording.Arduino.Sketch.LocalPath);
 Recording.VI.SHA1 = getSHA1(Recording.VI.LocalPath);
-
+%}
 
 
 
@@ -412,7 +429,7 @@ Recording.Time = datestr(saveTime, 'HH:MM:SS');
 
 %% Save data and metadata to secondary storage:
 
-% Write struct Recording, including both data and metadata, as .mat file:
+% Save struct Recording, including both data and metadata, as .mat file:
 dirName = strcat(['spkr',rename(speaker), '_DigitalTriggeredNoiseStim', num2str(stimID), '_', datestr(saveTime, 'yyyy-mm-dd_HH-MM-SS')]);
 mkdir(dirName);
 old = cd(dirName);
@@ -428,7 +445,6 @@ cd(old);
 
 
 %% Plot raw data from the analog input object:
-
 figure; hold on;
 seconds = [1:length(Data)]./trueSampleRate;
 plot(seconds, Data)
@@ -447,4 +463,16 @@ titleStr = {strcat(['Speaker ', speaker, ' delivering band-limited noise']);
 title(titleStr);
 %savefig(dirName); % save figure % this function doesn't work for MATLAB v
 %< 2013b
+end
 
+
+%% Function for validating user input:
+function checkContinue()
+    in = input('Proceed anyway? (y/n)', 's');
+    if strcmp(in, 'n')
+        error('Execution terminated by user.');
+    elseif ~strcmp(in, 'y')
+        disp('Please enter "y" or "n".');
+        checkContinue()
+    end
+end
