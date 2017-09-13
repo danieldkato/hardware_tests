@@ -1,28 +1,28 @@
-Recording.PreStimDuration.val = 1; 
-Recording.PreStimDuration.units = 'seconds';
-Recording.PostStimDuration.val = 1; 
-Recording.PostStimDuration.units = 'seconds'; 
-Recording.Microphone = '378C01';
-Recording.SignalConditioner = '480E09';
-Recording.DAQDeviceDriver = 'nidaq';
-Recording.DAQDeviceID = 'Dev1';
-Recording.DAQChannel = 10;
-Recording.DAQTgtSampleRate.val = 150000;
-Recording.DAQTgtSampleRate.units = 'samples per second';
-Recording.InputRangeMin.val = -0.2;
-Recording.InputRangeMin.units = 'volts';
-Recording.InputRangeMax.val = 0.2;
-Recording.InputRangeMax.units = 'volts';
-Recording.Soundcard = 'Dell T3400 default SoundMAX Integrated Digital HD Audio';
-Recording.Impedance.val = 1;
-Recording.Impedance.units = 'ohms';
-Recording.Arduino.Sketch.LocalPath = 'C:\Documents and Settings\lab\My Documents\Arduino\ArduFSM\MultiSens\MultiSens.ino';
-Recording.Arduino.Board = 'arduino:avr:uno';
-Recording.VI.LocalPath = 'C:\Documents and Settings\lab\My Documents\Arduino\dan\hardware_tests\test_speakers\get_speaker_spectrogram\recordDigitalTriggeredAudioNoise\DigitalTriggeredAudioNoise.vi';
-Recording.VI.Stim.Duration.val = 2;
-Recording.VI.Stim.Duration.units = 'seconds';
-Recording.VI.Stim.StartFreqs.val = [7000, 15000];
-Recording.VI.Stim.StartFreqs.units = 'Hz';
-Recording.VI.Stim.FreqRange.val = 2000;
-Recording.VI.Stim.FreqRange.units = 'Hz';
-Recording.BaudRate = 115200;
+{
+"PreStimDuration_s": 1,
+"PostStimDuration_s": 1,
+"Microphone": "378C01",
+"SignalConditioner":"480E09",
+"DAQDeviceDriver":"nidaq",
+"DAQDeviceID":"Dev1",
+"DAQChannel":10,
+"DAQTgtSampleRate":150000,
+"InputRangeMin_V":-0.2,
+"InputRangeMax_V": 0.2,
+"Soundcard": "Dell T3400 default SoundMAX Integrated Digital HD Audio",
+"BaudRate": 115200,
+"Arudino": {
+	"Board":"arduino:avr:uno",
+	"Sketch":{
+		"LocalPath":"C:\Documents and Settings\lab\My Documents\Arduino\ArduFSM\MultiSens\MultiSens.ino"
+		}
+	},
+"VI":{
+	"LocalPath":"C:\Documents and Settings\lab\My Documents\Arduino\dan\hardware_tests\test_speakers\get_speaker_spectrogram\recordDigitalTriggeredAudioNoise\DigitalTriggeredAudioNoise.vi",
+	"Stim":{
+		"Duration_s":2,
+		"StartFreqs_Hz":[7000, 15000],
+		"FreqRange_Hz":2000 
+		}
+	}
+}
