@@ -239,52 +239,31 @@ distance = input('Please enter the distance between the microphone cap and the s
 angle = input('Please enter the angle between the long axis of the microphone and axis normal to the speaker diaphragm in degrees.'); % requiring user input for this because it's easy to forget to update
 
 % Define default settings:
-Defaults.PreStimDuration.val = 1;
-Defaults.PreStimDuration.units = 'seconds';
-Defaults.PostStimDuration.val = 1;
-Defaults.PostStimDuration.units = 'seconds';
+Defaults.PreStimDuration_V = 1;
+Defaults.PostStimDuration_V = 1;
 Defaults.Microphone = 'unknown';
 Defaults.SignalConditioner = 'unknown';
 Defaults.DAQDeviceDriver = 'nidaq';
 Defaults.DAQChannel = 10;
-Defaults.DAQTgtSampleRate.val = 150000;
-Defaults.DAQTgtSampleRate.units = 'samples per second';
+Defaults.DAQTgtSampleRate = 150000;
 Defaults.BaudRate = 9600;
-Defaults.InputRangeMin.val = -10;
-Defaults.InputRangeMin.units = 'volts';
-Defaults.InputRangeMax.val = 10;
-Defaults.InputRangeMax.units = 'volts';
+Defaults.InputRangeMin_V = -10;
+Defaults.InputRangeMax_V = 10;
 requiredFields = fieldnames(Defaults);
 
 % Load settings specified in struct Recording defined in config file:
-fid = fopen(configFile);
-content = fscanf(fid, '%c');
-eval(content);
+Recording = loadjson('configRecording.json');
 
 % Validate that config file includes required settings; if not, throw a warning and use defaults
 for i = 1:length(requiredFields)
-    if ~isfield(Recording, requiredFields{i}) % If a field is missing entirely from the loaded config structure...
-        if isfield(Defaults.(requiredFields{i}), 'val') % ... and if the missing field is supposed to have separate value and units sub-fields...
-            Recording.(requiredFields{i}).val = Defaults.(requiredFields{i}).val;
-            Recording.(requiredFields{i}).units = Defaults.(requiredFields{i}).units;
-            defaultStr = strcat([num2str(Defaults.(requiredFields{i}).val), ' ', Defaults.(requiredFields{i}).units]);
-        else % ... if the missing field doesn't have spearate value and unit sub-fields...
-            Recording.(requiredFields{i}) = Defaults.(requiredFields{i});
-            if ~ischar(Defaults.(requiredFields{i}))
-                defaultStr = num2str(Defaults.(requiredFields{i}));
-            else
-                defaultStr = Defaults.(requiredFields{i});
-            end
+    if ~isfield(Recording, requiredFields{i}) % If a required field is missing from the loaded config structure...
+        Recording.(requiredFields{i}) = Defaults.(requiredFields{i});
+        if ~ischar(Defaults.(requiredFields{i}))
+            defaultStr = num2str(Defaults.(requiredFields{i}));
+        else
+            defaultStr = Defaults.(requiredFields{i});
         end
         warning(strcat([requiredFields{i}, ' not specified in config file. Using default value of ', defaultStr]));     
-    elseif isfield(Defaults.(requiredFields{i}), 'val') &&  ~isfield(Recording.(requiredFields{i}), 'val') % If a field consists of value and units sub-fields and is missing the value sub-field...
-        Recording.(requiredFields{i}).val = Defaults.(requiredFields{i}).val;
-        Recording.(requiredFields{i}).units = Defaults.(requiredFields{i}).units;
-        defaultStr = strcat([num2str(Defaults(requiredFields{i}).val), ' ', Defaults(requiredFields{i}).units]);
-        warning(strcat([requiredFields{i}, 'not specified in config file. Using default value of ', defaultStr]));
-    elseif isfield(Defaults.(requiredFields{i}), 'units') && ~isfield(Recording.(requiredFields{i}), 'units') % If a field consists of value and units sub-fields and is missing the units sub-field... 
-        Recording.(requiredFields{i}).units = 'unknown';
-        warning(strcat(['Units not specified for ', requiredFields{i}, 'field. Units will be set to "unknown".']));
     end
 end 
 
@@ -292,10 +271,8 @@ end
 Recording.StimID = stimID;
 Recording.Speaker = speaker;
 Recording.SignalConditionerGain = sigCondGain;
-Recording.Distance.val = distance;
-Recording.Distance.units = 'millimeters';
-Recording.Angle.val = angle;
-Recording.Angle.units = 'degrees';
+Recording.Distance_mm = distance;
+Recording.Angle_deg = angle;
 Recording.Arduino.Port = portID;
 Recording.mFile.LocalPath = strcat(mfilename('fullpath'), '.m');
 
@@ -363,12 +340,12 @@ AI.InputType = 'SingleEnded';
 maxSampleRate = daqhwinfo(AI,'MaxSampleRate');
 
 chan = addchannel(AI, Recording.DAQChannel);
-AI.Channel.InputRange = [Recording.InputRangeMin.val Recording.InputRangeMax.val];
+AI.Channel.InputRange = [Recording.InputRangeMin_V Recording.InputRangeMax_V];
 disp(Recording.DAQTgtSampleRate);
-AI.SampleRate = Recording.DAQTgtSampleRate.val;
+AI.SampleRate = Recording.DAQTgtSampleRate;
 trueSampleRate = double(AI.SampleRate); %MATLAB may not use the exact sample rate specified
 Fs = trueSampleRate;
-AI.SamplesPerTrigger = ceil((Recording.PreStimDuration.val + Recording.VI.Stim.Duration.val + Recording.PostStimDuration.val) * trueSampleRate);
+AI.SamplesPerTrigger = ceil((Recording.PreStimDuration_s + Recording.VI.Stim.Duration_s + Recording.PostStimDuration_s) * trueSampleRate);
 AI.TriggerType = 'Manual';
 
 
@@ -378,7 +355,7 @@ AI.TriggerType = 'Manual';
 disp('Opening serial connection with Arduino...');
 arduino = serial(portID, 'BaudRate', Recording.BaudRate);
 fopen(arduino);
-pause(max([2, Recording.VI.Stim.Duration.val+2])); %wait for handshake to complete; this actually takes quite a long time. Also, opening the serial connection triggers the stimulus for some reason, so leave enough time for it to complete
+pause(max([2, Recording.VI.Stim.Duration_s+2])); %wait for handshake to complete; this actually takes quite a long time. Also, opening the serial connection triggers the stimulus for some reason, so leave enough time for it to complete
 disp(fscanf(arduino)); 
 
 % Send stimulus information to Arduino
@@ -397,13 +374,13 @@ disp('Starting data acquisition...');
 % Begin data acquisition:
 start(AI);
 trigger(AI);
-pause(Recording.PreStimDuration.val);
+pause(Recording.PreStimDuration_s);
 
 % Issue stimulus start trigger to Arduino:
 fprintf(arduino,'%s','RELEASE_TRL\n'); 
 
 %Wait for AI object to finish data acquisition:
-wait(AI, Recording.VI.Stim.Duration.val + Recording.PostStimDuration.val + .1);
+wait(AI, Recording.VI.Stim.Duration_s + Recording.PostStimDuration_s + .1);
 disp('... data acquisition complete.');
 
 %Close serial communication with Arduino:
@@ -419,8 +396,7 @@ delete(AI); clear AI;
 
 
 %% Add a few remaining metadata parameters that are only defined after data acquision:
-Recording.TrueSampleRate.val = trueSampleRate;
-Recording.TrueSampleRate.units = 'samples/second';
+Recording.TrueSampleRate = trueSampleRate;
 
 saveTime = now;
 Recording.Date = datestr(saveTime, 'yyyy-mm-dd');
@@ -452,7 +428,7 @@ ylabel('Voltage (V)');
 xlabel('Time (s)');
 yl = ylim;
 xlim([0 max(seconds)]);
-rectangle('Position',[Recording.PreStimDuration.val yl(1) Recording.VI.Stim.Duration.val yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
+rectangle('Position',[Recording.PreStimDuration_s yl(1) Recording.VI.Stim.Duration_s yl(2)-yl(1)], 'FaceColor', [.9 .9 1], 'EdgeColor', 'none');
 set(gca,'children',flipud(get(gca,'children')));
 titleStr = {strcat(['Speaker ', speaker, ' delivering band-limited noise']);
             strcat(['acquired ', datestr(saveTime, 'yyyy-mm-dd HH:MM:SS')]);
