@@ -2,27 +2,50 @@
 "PreStimDuration_s": 1,
 "PostStimDuration_s": 1,
 "Microphone": "378C01",
-"SignalConditioner":"480E09",
-"DAQDeviceDriver":"nidaq",
-"DAQDeviceID":"Dev1",
-"DAQChannel":10,
-"DAQTgtSampleRate":150000,
-"InputRangeMin_V":-0.2,
+"SignalConditioner": "480E09",
+"DAQDeviceDriver": "nidaq",
+"DAQDeviceID": "Dev1",
+"DAQChannel": 10,
+"DAQTgtSampleRate": 150000,
+"InputRangeMin_V": -0.2,
 "InputRangeMax_V": 0.2,
-"Soundcard": "Dell T3400 default SoundMAX Integrated Digital HD Audio",
 "BaudRate": 115200,
 "Arduino": {
-	"Board":"arduino:avr:uno",
-	"Sketch":{
+	"Board": "arduino:avr:uno",
+	"Sketch": {
 		"LocalPath":"C:\\Documents and Settings\\lab\\My Documents\\Arduino\\ArduFSM\\MultiSens\\MultiSens.ino"
 		}
 	},
 "VI":{
-	"LocalPath":"C:\\Documents and Settings\\lab\\My Documents\\Arduino\\dan\\hardware_tests\\test_speakers\\get_speaker_spectrogram\\recordDigitalTriggeredAudioNoise\\DigitalTriggeredAudioNoise.vi",
+	"LocalPath": "C:\\Documents and Settings\\lab\\My Documents\\Arduino\\dan\\hardware_tests\\test_speakers\\get_speaker_spectrogram\\recordDigitalTriggeredAudioNoise\\DigitalTriggeredAudioNoise.vi",
 	"Stim":{
-		"Duration_s":2,
-		"StartFreqs_Hz":[7000, 15000],
-		"FreqRange_Hz":2000 
+		"Duration_s": 2,
+		"StartFreqs_Hz": [7000, 15000],
+		"FreqRange_Hz": 2000 
 		}
-	}
+	},
+"AudioSettings":{
+	"Soundcard": "Dell T3400 default SoundMAX Integrated Digital HD Audio",
+	"Mfile":{
+		"LocalPath":"C:\\Documents and Settings\\lab\\My Documents\\Arduino\\dan\\hardware_tests\\test_speakers\\get_speaker_spectrogram\\recordDigitalTriggeredAudioNoise\\digitalTriggeredAudioNoise.m"
+		}, 
+	"DAQDeviceDriver": "nidaq",
+	"DAQDeviceID": "Dev2",
+	"TriggerChannel": 0, 
+	"StopAttn_dBFS": 60,
+	"PassAttn_dBFS": 0.5,
+	"Stimuli": [
+			{
+				"DIOchannel": 1,
+				"StartFreq_Hz": 7000,
+				"FreqRange_Hz": 2000,
+				"ScaleFactor": 1
+			},
+			{
+				"DIOchannel": 2,
+				"StartFreq_Hz": 15000,
+				"FreqRange_Hz": 2000,
+				"ScaleFactor": 1
+			}
+		]
 }
