@@ -1,4 +1,4 @@
-const int LEDpin = 9;
+const int LEDpin = 6;
 const int timerPin = 11; // useful for syncing LED to other stuff
 
 void setup() {
