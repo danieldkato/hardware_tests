@@ -95,8 +95,9 @@ int stepHalfDelay = 1500; // controls speed; expressed in microseconds
 const int FULLSTP_PER_ROTATION = 200;
 const int STP_PIN = 6;
 const int DIR_PIN = 8;
+const int SLP_PIN = 9; 
 const int HALL_PIN = 0;
-int hall_thresh = 50;
+int hall_thresh = 1000;
 int hall_val = 500;
 long period = 2000;
 int numSteps = floor((rotDeg/360.0) * FULLSTP_PER_ROTATION) * microstep;
@@ -105,6 +106,9 @@ void setup() {
   // put your setup code here, to run once:
   pinMode(STP_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
+  pinMode(SLP_PIN, OUTPUT);
+
+  digitalWrite(SLP_PIN, HIGH);
 }
 
 void loop() {
@@ -128,7 +132,7 @@ void rotate_one_step()
 void fwd(){
   digitalWrite(DIR_PIN, LOW);
   hall_val = analogRead(HALL_PIN);
-  while(hall_val>hall_thresh){
+  while(hall_val<hall_thresh){
     rotate_one_step(); //how to deal with direction??
     //delay(1);
     hall_val = analogRead(HALL_PIN);
