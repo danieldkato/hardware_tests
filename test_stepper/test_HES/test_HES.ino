@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-const int HALL_PIN = 0;
+const int HALL_PIN = A0;
 
 void setup() {
   // put your setup code here, to run once:
