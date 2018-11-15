@@ -1,5 +1,7 @@
-const int LEDpin = 6;
+const int LEDpin = 7;
 const int timerPin = 11; // useful for syncing LED to other stuff
+const int on_time = 2000;
+const int off_time = 2000;
 
 void setup() {
   // put your setup code here, to run once:
@@ -20,8 +22,8 @@ void loop() {
   // put your main code here, to run repeatedly:
   digitalWrite(LEDpin, HIGH);
   digitalWrite(timerPin, HIGH);
-  delay(1000);
+  delay(on_time);
   digitalWrite(LEDpin, LOW);
   digitalWrite(timerPin, LOW);
-  delay(1000);
+  delay(off_time);
 }
