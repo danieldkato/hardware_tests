@@ -76,6 +76,7 @@
 const int FULLSTP_PER_ROTATION = 200;
 const int STP_PIN = 6;
 const int DIR_PIN = 8;
+const int SLP_PIN = 9;
 int stepHalfDelay = 1000;
 int microstep = 8;
 int period = 2000;
@@ -90,8 +91,10 @@ void setup() {
   
   pinMode(STP_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
+  pinMode(SLP_PIN, OUTPUT);
 
   digitalWrite(DIR_PIN, LOW);
+  digitalWrite(SLP_PIN, HIGH);
 }
 
 void loop() {
