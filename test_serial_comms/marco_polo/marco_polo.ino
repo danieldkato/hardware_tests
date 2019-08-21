@@ -39,7 +39,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.println(readLine());
+  Serial.print(readLine());
 }
 
 String readLine(){
@@ -54,6 +54,7 @@ String readLine(){
       }
       else {
         inputString+=acknowledgeString;
+        inputString+="\n DBG\n"; 
         stringComplete=true;
       }
     }
