@@ -1,6 +1,6 @@
 import serial
 
-port = 'COM3'
+port = 'COM13'
 baud_rate = 115200
 run = True
 
