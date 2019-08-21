@@ -1,4 +1,4 @@
-#define SOLENOID_PIN 3
+#define SOLENOID_PIN 4
 
 const int closed_time = 50; // in milliseconds
 const int open_time = 1000; // in milliseconds
