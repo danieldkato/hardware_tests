@@ -1,18 +1,19 @@
 #define STPR_PIN 6
-#define ENBL_PIN 7
+#define SLP_PIN 9
 #define DIR_PIN 8
 #define HALL_PIN A0
+#define LED_PIN 5
 
 #define NUM_STEPS 200
 #define STEP_HALFDELAY_US 1500
 #define MICROSTEP 8
 #define REVERSE_ROTATION_DEGREES 50
-#define HALL_THRESH 50
+#define HALL_THRESH 1000
 
 char input;
 int numSteps = floor((REVERSE_ROTATION_DEGREES/360.0) * NUM_STEPS) * MICROSTEP;
 int stpr_powerup_time = 150;
-int stpr_powerdown_time = 200;
+int stpr_powerdown_time = 300;
 String stepper_state = "RETRACTED";
 
 void setup() {
@@ -23,14 +24,18 @@ void setup() {
   
   // Enable output pins:
   pinMode(STPR_PIN, OUTPUT);
-  pinMode(ENBL_PIN, OUTPUT);
+  pinMode(SLP_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
   pinMode(HALL_PIN, INPUT);
 
   // Initialize stepper in disabled state:
-  digitalWrite(ENBL_PIN, LOW);
+  digitalWrite(SLP_PIN, HIGH);
   delay(200);
-  digitalWrite(ENBL_PIN, HIGH);
+  digitalWrite(SLP_PIN, LOW);
+
+  // Turn on IR LED:
+  digitalWrite(LED_PIN, HIGH);
 }
 
 void loop() {
@@ -54,12 +59,12 @@ void loop() {
 
 
 void rotate_to_sensor(){
-  digitalWrite(ENBL_PIN, LOW);
+  digitalWrite(SLP_PIN, HIGH);
   delay(stpr_powerup_time);
     
   digitalWrite(DIR_PIN, LOW);
   //int hall_val = analogRead(HALL_PIN);
-  while(analogRead(HALL_PIN)>HALL_THRESH){
+  while(analogRead(HALL_PIN)<HALL_THRESH){
       rotate_one_step(); //how to deal with direction??
       //delay(1);
       //hall_val = analogRead(HALL_PIN);
@@ -68,7 +73,7 @@ void rotate_to_sensor(){
   stepper_state  = "EXTENDED";
   
   delay(stpr_powerdown_time);
-  digitalWrite(ENBL_PIN, HIGH);
+  digitalWrite(SLP_PIN, LOW);
 }
 
 void rotate_one_step()
@@ -80,7 +85,7 @@ void rotate_one_step()
 }
 
 void rotate_back(){
-  digitalWrite(ENBL_PIN, LOW);
+  digitalWrite(SLP_PIN, HIGH);
   delay(stpr_powerup_time);
   
   digitalWrite(DIR_PIN, HIGH);
@@ -90,6 +95,6 @@ void rotate_back(){
   stepper_state = "RETRACTED";
 
   delay(stpr_powerup_time);
-  digitalWrite(ENBL_PIN, HIGH);
+  digitalWrite(SLP_PIN, LOW);
 }
 
