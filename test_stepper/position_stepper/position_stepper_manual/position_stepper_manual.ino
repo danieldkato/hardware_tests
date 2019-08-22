@@ -101,7 +101,10 @@ void loop() {
       
       // Rotate the requested number of steps: 
       if(num_steps>0){
-        for (int n = 0; n < num_steps; n++){rotate_one_step();}
+        for (int n = 0; n < num_steps; n++){
+          rotate_one_step();
+          delay(1); // increases accuracy
+          }
         };
         
       dbg_msg = input;      
