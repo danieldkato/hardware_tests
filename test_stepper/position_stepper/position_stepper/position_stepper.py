@@ -30,3 +30,19 @@ while run:
 
 print("Qutting program.")
 ser.close()
+
+
+def get_valid_input():
+	txt = raw_input("Emter input: ")
+	txt_decoded = txt.decode('utf-8', 'ignore')
+	
+	try: 
+		input_as_num = float(txt_decoded)
+	except:
+		input_as_num = False
+	
+	if not input_as_num and txt is not '\n' and txt is not '\q':
+		print("\nInvalid input. Please enter an integer number of steps to move, press enter to move stepper to hall effect sensor, or q to quit.\n")
+		get_valid_input()
+		
+	return txt
