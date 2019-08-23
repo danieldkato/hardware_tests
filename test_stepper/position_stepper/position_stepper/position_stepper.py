@@ -41,7 +41,7 @@ def get_valid_input():
 	except:
 		input_as_num = False
 	
-	if not input_as_num and txt is not '\n' and txt is not '\q':
+	if not input_as_num and txt is not '\n' and txt is not 'q\n':
 		print("\nInvalid input. Please enter an integer number of steps to move, press enter to move stepper to hall effect sensor, or q to quit.\n")
 		get_valid_input()
 		
