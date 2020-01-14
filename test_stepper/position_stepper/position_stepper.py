@@ -1,7 +1,7 @@
 import serial
 import time
 
-port = 'COM13'
+port = 'COM7'
 baud_rate = 115200
 run = True
 
@@ -13,7 +13,7 @@ while not connected:
     serin = ser.readline()
     connected = True
 
-print("\nEnter an integer number of steps to move, press enter to move stepper to hall effect sensor, or q to quit.\n")
+print("\nEnter an integer number of steps to move, press enter to move stepper to hall effect sensor, press b to retract the stepper by the same number of steps it moved forward, or press q to quit.\n")
 
 while run:
     txt = raw_input("Enter input: ")
@@ -42,7 +42,7 @@ def get_valid_input():
 		input_as_num = False
 	
 	if not input_as_num and txt is not '\n' and txt is not 'q\n':
-		print("\nInvalid input. Please enter an integer number of steps to move, press enter to move stepper to hall effect sensor, or q to quit.\n")
+		print("\nInvalid input. Please enter an integer number of steps to move, press enter to move stepper to hall effect sensor, press b to retract the stepper by the same number of steps it moved forward, or press q to quit.\n")
 		get_valid_input()
 		
 	return txt
