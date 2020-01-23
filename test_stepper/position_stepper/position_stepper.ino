@@ -28,7 +28,7 @@
 #define ENBL_PIN 7 // not actually used with current board as of 2020-01-13
 
 #define NUM_STEPS 200
-#define STEP_HALFDELAY_US 1500
+#define STEP_HALFDELAY_US 1100
 #define MICROSTEP 8
 #define REVERSE_ROTATION_DEGREES 50
 #define HALL_THRESH 1000
@@ -57,7 +57,7 @@ void setup() {
   pinMode(HALL_PIN, INPUT);
 
   // Initialize stepper in disabled state:
-  digitalWrite(SLP_PIN, LOW);
+  digitalWrite(SLP_PIN, HIGH);
   delay(200);
 
   // Turn on IR LED:
@@ -98,10 +98,10 @@ void loop() {
 
       // Set the direction of the stepper:
       if(num_steps>0){
-        digitalWrite(DIR_PIN, LOW); // positive -> towards the mouse
+        digitalWrite(DIR_PIN, HIGH); // positive -> towards the mouse // changed
         }
       else{
-        digitalWrite(DIR_PIN, HIGH); // negative -> away from the mouse      
+        digitalWrite(DIR_PIN, LOW); // negative -> away from the mouse // changed     
       }
 
       //Rectify: 
@@ -129,11 +129,11 @@ void loop() {
 
 // Analagous to StimPeriod::s_setup() in MultiSens/States.cpp
 void s_setup(){
-  digitalWrite(SLP_PIN, HIGH);
-  delay(stpr_powerup_time);
+  //digitalWrite(SLP_PIN, HIGH);
+  //delay(stpr_powerup_time);
   trigger_stepper();
-  delay(stpr_powerdown_time);
-  digitalWrite(SLP_PIN, LOW);
+  //delay(stpr_powerdown_time);
+  //digitalWrite(SLP_PIN, LOW);
   }
 
 // Analagous to trigger_stepper() in MultiSens/States.cpp
@@ -153,10 +153,10 @@ void rotate_one_step(){
 void rotate_to_sensor(){
 
     last_extension_num_steps = 0;
-    digitalWrite(ENBL_PIN, LOW);
-    delay(stpr_powerup_time);
+    //digitalWrite(ENBL_PIN, LOW);
+    //delay(stpr_powerup_time);
     
-    digitalWrite(DIR_PIN, LOW);
+    digitalWrite(DIR_PIN, HIGH); // changed
     //int hall_val = analogRead(HALL_PIN);
     while(analogRead(HALL_PIN)<HALL_THRESH){
         rotate_one_step(); //how to deal with direction??
@@ -167,33 +167,33 @@ void rotate_to_sensor(){
   //Serial.println("stepper extended");
   //stprState  = "EXTENDED";
 
-  delay(stpr_powerdown_time);
-  digitalWrite(ENBL_PIN, HIGH);
+  //delay(stpr_powerdown_time);
+  //digitalWrite(ENBL_PIN, HIGH);
 }
 
 
 // Analogous to Stim_period::s_finish() in States.cpp
 void s_finish(){
-  digitalWrite(SLP_PIN, HIGH);
-  delay(stpr_powerup_time);
+  //digitalWrite(SLP_PIN, HIGH);
+  //delay(stpr_powerup_time);
   rotate_back();
-  delay(stpr_powerdown_time);
-  digitalWrite(SLP_PIN, LOW);
+  //delay(stpr_powerdown_time);
+  //digitalWrite(SLP_PIN, LOW);
 }
 
 
 void rotate_back(){
-  digitalWrite(ENBL_PIN, LOW);
-  delay(stpr_powerup_time);
+  //digitalWrite(ENBL_PIN, LOW);
+  //delay(stpr_powerup_time);
   
-  digitalWrite(DIR_PIN, HIGH);
+  digitalWrite(DIR_PIN, LOW); // changed
   //delay(1);
   for(int i = 0; i < last_extension_num_steps; i++){rotate_one_step();}
   //Serial.println("stepper retracted");
   //stprState = "RETRACTED";
 
-  delay(stpr_powerdown_time);
-  digitalWrite(ENBL_PIN, HIGH);
+  //delay(stpr_powerdown_time);
+  //digitalWrite(ENBL_PIN, HIGH);
 }
 /*
 void rotate_back(){
