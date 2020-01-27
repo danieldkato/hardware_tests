@@ -17,7 +17,7 @@
  * Note that it is up to the host PC program to do all input
  * validation.
  * 
- * last upadted DDK 2019-08-22
+ * last upadted DDK 2020-01-27
  */
  
 #define STPR_PIN 6
@@ -66,6 +66,8 @@ void setup() {
   digitalWrite(LED_PIN, HIGH);
 }
 
+
+// Main loop:
 void loop() {
   // put your main code here, to run repeatedly:
   if(Serial.available()){
@@ -133,12 +135,9 @@ void loop() {
 
 // Analagous to StimPeriod::s_setup() in MultiSens/States.cpp
 void s_setup(){
-  //digitalWrite(SLP_PIN, HIGH);
-  //delay(stpr_powerup_time);
   trigger_stepper();
-  //delay(stpr_powerdown_time);
-  //digitalWrite(SLP_PIN, LOW);
   }
+
 
 // Analagous to trigger_stepper() in MultiSens/States.cpp
 void trigger_stepper(){
@@ -146,6 +145,7 @@ void trigger_stepper(){
   }
 
 
+// Rotate stepper forward one step:
 void rotate_one_step(){
   digitalWrite(STPR_PIN, HIGH);
   delayMicroseconds( STEP_HALFDELAY_US / MICROSTEP );
@@ -154,6 +154,7 @@ void rotate_one_step(){
 }
 
 
+// Rotate stepper forward to Hall effect sensor:
 void rotate_to_sensor(){
     // if steps haven't been counted yet, count the number of steps to HES
     if(~steps_to_sensor_counted){
@@ -161,11 +162,8 @@ void rotate_to_sensor(){
         while(analogRead(HALL_PIN)<HALL_THRESH){
           rotate_one_step(); //how to deal with direction??
           steps_to_sensor = steps_to_sensor + 1;
-          //delay(1);
-          //hall_val = analogRead(HALL_PIN);
         }
         steps_to_sensor_counted = 1;
-
     // if steps to HES have already been counted, don't count again; this will make stepper go faster
     } else{
           while(analogRead(HALL_PIN)<HALL_THRESH){
@@ -178,27 +176,15 @@ void rotate_to_sensor(){
 
 // Analogous to Stim_period::s_finish() in States.cpp
 void s_finish(){
-  //digitalWrite(SLP_PIN, HIGH);
-  //delay(stpr_powerup_time);
   rotate_back();
-  //delay(stpr_powerdown_time);
-  //digitalWrite(SLP_PIN, LOW);
 }
 
 
+// Rotate stepper back as many steps as it previously rotated forward:
 void rotate_back(){
-  //digitalWrite(ENBL_PIN, LOW);
-  //delay(stpr_powerup_time);
-  
-
-  //delay(1);
   for(int i = 0; i < last_extension_num_steps; i++){rotate_one_step();}
-  //Serial.println("stepper retracted");
-  //stprState = "RETRACTED";
-
-  //delay(stpr_powerdown_time);
-  //digitalWrite(ENBL_PIN, HIGH);
 }
+
 /*
 void rotate_back(){
   digitalWrite(SLP_PIN, HIGH);
