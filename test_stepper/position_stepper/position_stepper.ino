@@ -35,13 +35,15 @@
 
 String input;
 String dbg_msg;
-int num_steps;
 bool is_num;
+int num_steps;
 //int numSteps = floor((REVERSE_ROTATION_DEGREES/360.0) * NUM_STEPS) * MICROSTEP;
 int last_extension_num_steps;
 int stpr_powerup_time = 150;
 int stpr_powerdown_time = 150;
 String stepper_state = "RETRACTED";
+bool steps_to_sensor_counted = 0;
+int steps_to_sensor;
 
 void setup() {
   // put your setup code here, to run once:
@@ -73,12 +75,14 @@ void loop() {
 
     // If user has just pressed 'Enter', rotate to sensor:
     if(input=="\n"){
+       digitalWrite(DIR_PIN, HIGH);
        s_setup();
        dbg_msg = "rotating stepper motor to hall effect sensor.\n";
        }
 
     // If user has just pressed 'b', retract stepper by same number of steps it advanced:
     else if(input=="b\n"){
+      digitalWrite(DIR_PIN, LOW); // changed
       s_finish();
       dbg_msg = "rotating stepper motor back same number of steps as it moved forward.\n";
       }
@@ -151,24 +155,24 @@ void rotate_one_step(){
 
 
 void rotate_to_sensor(){
+    // if steps haven't been counted yet, count the number of steps to HES
+    if(~steps_to_sensor_counted){
+        steps_to_sensor = 0;
+        while(analogRead(HALL_PIN)<HALL_THRESH){
+          rotate_one_step(); //how to deal with direction??
+          steps_to_sensor = steps_to_sensor + 1;
+          //delay(1);
+          //hall_val = analogRead(HALL_PIN);
+        }
+        steps_to_sensor_counted = 1;
 
-    last_extension_num_steps = 0;
-    //digitalWrite(ENBL_PIN, LOW);
-    //delay(stpr_powerup_time);
-    
-    digitalWrite(DIR_PIN, HIGH); // changed
-    //int hall_val = analogRead(HALL_PIN);
-    while(analogRead(HALL_PIN)<HALL_THRESH){
-        rotate_one_step(); //how to deal with direction??
-        last_extension_num_steps = last_extension_num_steps + 1;
-        //delay(1);
-        //hall_val = analogRead(HALL_PIN);
-  }
-  //Serial.println("stepper extended");
-  //stprState  = "EXTENDED";
-
-  //delay(stpr_powerdown_time);
-  //digitalWrite(ENBL_PIN, HIGH);
+    // if steps to HES have already been counted, don't count again; this will make stepper go faster
+    } else{
+          while(analogRead(HALL_PIN)<HALL_THRESH){
+          rotate_one_step(); 
+        }
+    }
+    last_extension_num_steps = steps_to_sensor;
 }
 
 
@@ -186,7 +190,7 @@ void rotate_back(){
   //digitalWrite(ENBL_PIN, LOW);
   //delay(stpr_powerup_time);
   
-  digitalWrite(DIR_PIN, LOW); // changed
+
   //delay(1);
   for(int i = 0; i < last_extension_num_steps; i++){rotate_one_step();}
   //Serial.println("stepper retracted");
