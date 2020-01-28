@@ -86,7 +86,7 @@ void loop() {
     else if(input=="b\n"){
       digitalWrite(DIR_PIN, LOW); // changed
       s_finish();
-      dbg_msg = "rotating stepper motor back same number of steps as it moved forward.\n";
+      dbg_msg = "rotating stepper motor back same number of steps as it moved forward, " + String(steps_to_sensor) + " steps.\n";
       }
           
     // If user quits host PC program, power down stepper coils to avoid overheating:
@@ -114,16 +114,12 @@ void loop() {
       num_steps = abs(num_steps);
       
       // Rotate the requested number of steps: 
-      if(num_steps>0){
-        digitalWrite(SLP_PIN, HIGH);
-        delay(stpr_powerup_time);        
+      if(num_steps>0){        
         for (int n = 0; n < num_steps; n++){
           rotate_one_step();
           delay(1); // increases accuracy
           }
         };
-        delay(stpr_powerdown_time);
-        digitalWrite(SLP_PIN, LOW);        
       dbg_msg = input;      
       last_extension_num_steps = num_steps;
       }
