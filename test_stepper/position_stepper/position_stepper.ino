@@ -44,6 +44,7 @@ int stpr_powerdown_time = 150;
 String stepper_state = "RETRACTED";
 bool steps_to_sensor_counted = 0;
 int steps_to_sensor;
+bool step_complete;
 
 void setup() {
   // put your setup code here, to run once:
@@ -179,7 +180,18 @@ void s_finish(){
 
 // Rotate stepper back as many steps as it previously rotated forward:
 void rotate_back(){
-  for(int i = 0; i < last_extension_num_steps + 1; i++){rotate_one_step();}
+  for(int i = 0; i < last_extension_num_steps + 1; i++){
+    int x = analogRead(A1); 
+    // Above line is only included to ensure 
+    // that the stepper rotates backwards with 
+    // approx. the same speed with which it rotates 
+    // forward; without the above line, the stepper 
+    // rotates forwards slower because it has to read
+    // from the Hall effect sensor between each step 
+    // check whether it's reached the HES yet. 
+
+    rotate_one_step();
+    }
 }
 
 /*
