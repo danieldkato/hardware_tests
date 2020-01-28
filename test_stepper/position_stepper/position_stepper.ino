@@ -86,7 +86,7 @@ void loop() {
     else if(input=="b\n"){
       digitalWrite(DIR_PIN, LOW); // changed
       s_finish();
-      dbg_msg = "rotating stepper motor back same number of steps as it moved forward, " + String(steps_to_sensor) + " steps.\n";
+      dbg_msg = "rotating stepper motor back same number of steps as it moved forward, " + String(last_extension_num_steps) + " steps.\n";
       }
           
     // If user quits host PC program, power down stepper coils to avoid overheating:
@@ -153,8 +153,9 @@ void rotate_one_step(){
 // Rotate stepper forward to Hall effect sensor:
 void rotate_to_sensor(){
     // if steps haven't been counted yet, count the number of steps to HES
-    if(~steps_to_sensor_counted){
+    if(steps_to_sensor_counted == 0){
         steps_to_sensor = 0;
+        Serial.print("steps being counted");
         while(analogRead(HALL_PIN)<HALL_THRESH){
           rotate_one_step(); //how to deal with direction??
           steps_to_sensor = steps_to_sensor + 1;
@@ -163,7 +164,7 @@ void rotate_to_sensor(){
     // if steps to HES have already been counted, don't count again; this will make stepper go faster
     } else{
           while(analogRead(HALL_PIN)<HALL_THRESH){
-          rotate_one_step(); 
+            rotate_one_step(); 
         }
     }
     last_extension_num_steps = steps_to_sensor;
@@ -178,7 +179,7 @@ void s_finish(){
 
 // Rotate stepper back as many steps as it previously rotated forward:
 void rotate_back(){
-  for(int i = 0; i < last_extension_num_steps; i++){rotate_one_step();}
+  for(int i = 0; i < last_extension_num_steps + 1; i++){rotate_one_step();}
 }
 
 /*
