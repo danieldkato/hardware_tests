@@ -41,8 +41,8 @@ def get_valid_input():
 	except:
 		input_as_num = False
 	
-	if not input_as_num and txt is not '\n' and txt is not 'q\n':
-		print("\nInvalid input. Please enter an integer number of steps to move, press enter to move stepper to hall effect sensor, press b to retract the stepper by the same number of steps it moved forward, or press q to quit.\n")
+	if not input_as_num and txt is not '\n' and txt is not 'q\n' and txt is not 'b\n' and txt is not 'f\n' and txt is not 'u\n':
+		print("\nInvalid input. Please enter an integer number of steps to move, press enter to move stepper to hall effect sensor, press u to retract the stepper by the same number of steps it moved forward, press f to do a full rotation forwards, press b to do a full rotation backwards, or press q to quit.\n")
 		get_valid_input()
 		
 	return txt
