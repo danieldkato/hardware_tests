@@ -28,7 +28,7 @@
 #define ENBL_PIN 7 // not actually used with current board as of 2020-01-13
 
 #define NUM_STEPS 200
-#define STEP_HALFDELAY_US 1100
+#define STEP_HALFDELAY_US 1200
 #define MICROSTEP 16
 #define REVERSE_ROTATION_DEGREES 50
 #define HALL_THRESH 1000
