@@ -1,6 +1,7 @@
-# define LICK_DETECTOR_PIN A1
+# define LICK_DETECTOR_PIN A2
 
 const int lickThresh = 900;
+//const int lickThresh = 150;
 boolean licking;
 int aIn;
 
