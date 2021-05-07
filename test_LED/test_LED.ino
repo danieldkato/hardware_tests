@@ -1,4 +1,4 @@
-const int LEDpin = 7;
+const int LEDpin = 10;
 const int timerPin = 11; // useful for syncing LED to other stuff
 const int on_time = 2000;
 const int off_time = 2000;
