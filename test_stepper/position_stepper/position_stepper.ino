@@ -45,6 +45,7 @@ String stepper_state = "RETRACTED";
 bool steps_to_sensor_counted = 0;
 int steps_to_sensor;
 bool step_complete;
+int total_steps = NUM_STEPS * MICROSTEP;
 
 void setup() {
   // put your setup code here, to run once:
@@ -83,11 +84,25 @@ void loop() {
        dbg_msg = "rotating stepper motor to hall effect sensor.\n";
        }
 
-    // If user has just pressed 'b', retract stepper by same number of steps it advanced:
-    else if(input=="b\n"){
+    // If user has just pressed 'u', retract stepper by same number of steps it advanced:
+    else if(input=="u\n"){
       digitalWrite(DIR_PIN, LOW); // changed
       s_finish();
       dbg_msg = "rotating stepper motor back same number of steps as it moved forward, " + String(last_extension_num_steps) + " steps.\n";
+      }
+
+    // If user has just pressed 'f', do a full turn forwards:
+    if(input=="f\n"){
+       digitalWrite(DIR_PIN, HIGH);
+       full_turn();
+       dbg_msg = "rotating stepper motor forward.\n";
+       }
+
+    // If user has just pressed 'b', do a full turn backwards:
+    else if(input=="b\n"){
+      digitalWrite(DIR_PIN, LOW); // changed
+      full_turn();
+      dbg_msg = "rotating stepper motor backward.\n";
       }
           
     // If user quits host PC program, power down stepper coils to avoid overheating:
@@ -192,6 +207,12 @@ void rotate_back(){
 
     rotate_one_step();
     }
+}
+
+void full_turn(){
+  for(int i = 0; i < total_steps + 1; i++){
+    rotate_one_step();
+  }
 }
 
 /*
