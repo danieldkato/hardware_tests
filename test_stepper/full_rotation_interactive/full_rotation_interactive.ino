@@ -71,14 +71,14 @@ void loop(){
     // Get input from host PC:
     input = Serial.readString(); 
 
-    // If user has just pressed 'Enter', rotate to sensor:
+    // If user has just pressed 'f', do a full turn forwards:
     if(input=="f\n"){
        digitalWrite(DIR_PIN, HIGH);
        full_turn();
        dbg_msg = "rotating stepper motor forward.\n";
        }
 
-    // If user has just pressed 'b', retract stepper by same number of steps it advanced:
+    // If user has just pressed 'b', do a full turn backwards:
     else if(input=="b\n"){
       digitalWrite(DIR_PIN, LOW); // changed
       full_turn();
