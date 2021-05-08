@@ -92,7 +92,7 @@ void loop() {
       }
 
     // If user has just pressed 'f', do a full turn forwards:
-    if(input=="f\n"){
+    else if(input=="f\n"){
        digitalWrite(DIR_PIN, HIGH);
        full_turn();
        dbg_msg = "rotating stepper motor forward.\n";
