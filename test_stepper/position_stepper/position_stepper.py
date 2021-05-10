@@ -13,7 +13,7 @@ while not connected:
     serin = ser.readline()
     connected = True
 
-print("\nEnter an integer number of steps to move, press enter to move stepper to hall effect sensor, press b to retract the stepper by the same number of steps it moved forward, or press q to quit.\n")
+print("\nEnter an integer number of steps to move, press enter to move stepper to hall effect sensor, press u to retract the stepper by the same number of steps it moved forward, press f to do a full rotation forwards, press b to do a full rotation backwards, or press q to quit.\n")
 
 while run:
     txt = raw_input("Enter input: ")
@@ -33,7 +33,7 @@ ser.close()
 
 
 def get_valid_input():
-	txt = raw_input("Emter input: ")
+	txt = raw_input("Enter input: ")
 	txt_decoded = txt.decode('utf-8', 'ignore')
 	
 	try: 
